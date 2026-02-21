@@ -51,3 +51,32 @@ yarn-error.*
 .rork
 rork-eslint.config.js
 core
+
+# Xcode / Swift
+HomelabSwift/**/xcuserdata/
+HomelabSwift/**/DerivedData/
+HomelabSwift/**/*.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+HomelabSwift/**/*.xcodeproj/xcuserdata/
+HomelabSwift/**/*.xcodeproj/project.xcworkspace/xcuserdata/
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.swp
+*~.nib
+
+# Swift Package Manager
+HomelabSwift/.build/
+HomelabSwift/Packages/
+HomelabSwift/**/*.resolved
+
+# Secrets / credentials (safety net)
+*.env
+.env.*
+!.env.example
+credentials.json
+secrets.json
+**/GoogleService-Info.plist
+.claude/
+*.log
+changelog.txt

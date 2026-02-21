@@ -1,0 +1,778 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 63;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		001FA6007779556F8CF2BDC5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B518BC3D0A31F29612A69B75 /* Assets.xcassets */; };
+		0E5566DAE01FB0E9F10E98C8 /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B6FAE42892F4BEB3097FD /* StatusBadge.swift */; };
+		0F634D9389BDB5467A64C25E /* GlassStatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735477DB04233B4FDA23469D /* GlassStatCard.swift */; };
+		1694BCD702C988AAF0F99127 /* BeszelModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88B51084F8D0D0D7C999B8C3 /* BeszelModels.swift */; };
+		1C4457681E0F071045A8132C /* PiHoleDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE7A7BFF374B6DE9CE7384EE /* PiHoleDashboard.swift */; };
+		21BAB7FCB0AECC7133D55F6F /* ServiceConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 334BAFC4A25FD83F52E9CDD0 /* ServiceConnection.swift */; };
+		253B46BF21904B59477F2E8E /* GiteaDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3491FAD0D71DDB3C25D9D90 /* GiteaDashboard.swift */; };
+		2BCD4D6ACDA7D4CEA00AFEBA /* BeszelAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E8A717351D5E42B2696F1 /* BeszelAPIClient.swift */; };
+		2DEE79E0C15D816F7170E110 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1D644D530DE462BB79AA2 /* AppTheme.swift */; };
+		366228A5C9000FF822E289FB /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF6E7AF1CDC6676B7421A7B /* HapticManager.swift */; };
+		45563EB6F51F8EF1867CF1DC /* BeszelSystemDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141E9B530530A0BF0D52A289 /* BeszelSystemDetail.swift */; };
+		60845D39E8A2BD7753B767BB /* PortainerDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569655DA5311D77756775472 /* PortainerDashboard.swift */; };
+		63A39B89AC9B8F48B3BC3147 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF389260911EADF7079A97B /* APIClient.swift */; };
+		6B883FF0F9673181B59F8C83 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D0D2A2905370C31F3A8ADE /* KeychainService.swift */; };
+		703D6379BB37D3F83B0C21D5 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1604CF631BC4DC369A42A5 /* HomeView.swift */; };
+		7E78EE55701AD004992579EF /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1EBFFF57A15B47F78E81D04 /* Formatters.swift */; };
+		7E861F79CA67DDAD2078A333 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DB66F8274714A001051F1BE /* SettingsView.swift */; };
+		7EBB5603EC5B23E166D98E33 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151F3E3C716170F5B65A688F /* SettingsStore.swift */; };
+		7EF18D092660634150160E03 /* Translations+English.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F7AE0005466E2FF260B000 /* Translations+English.swift */; };
+		81457E8BF989BFB2851CDC66 /* Translations+OtherLanguages.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CB48124608D3A220C3A444 /* Translations+OtherLanguages.swift */; };
+		826BA16B6B4D4F31C3CC2B5C /* HomelabApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19F58DFAF2218D934F936D17 /* HomelabApp.swift */; };
+		8BE00328A6AC68DF3E40F05B /* Translations+Italian.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D8F0162AE327AA60600505 /* Translations+Italian.swift */; };
+		8EADC34444DEB43F553D0513 /* SkeletonLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC9947203975F8072646659 /* SkeletonLoader.swift */; };
+		8FC5C2BF6FC7CBC21BFF6696 /* ServiceDashboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7432B8C8ACBE47BDF26570DC /* ServiceDashboardLayout.swift */; };
+		991F9F57CF5DAD5FA3AD929B /* DashboardSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1776C03666E80A17285732D /* DashboardSummary.swift */; };
+		9F77F33FFB5F27A3D1A8109E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0A64E52150CEEA94E249D7 /* ContentView.swift */; };
+		A283181CEA487B0C8346D967 /* PiHoleAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EC8434642BB311F3E1A8 /* PiHoleAPIClient.swift */; };
+		A3E3BAB096611E807728CA89 /* ContainerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3116D5544353B573C4C2B0B /* ContainerListView.swift */; };
+		AAA9BC382610A55D8E374C95 /* Translations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7692F78990DA606D426BA429 /* Translations.swift */; };
+		AD2F16BDA6D33B25BA1DD4B7 /* GiteaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F6D851F1B957C876FD6F0B /* GiteaModels.swift */; };
+		B51871199ACBFB2987E2C165 /* PortainerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24ACF7FA86699161F1FFB10E /* PortainerModels.swift */; };
+		B52CC2ACDDD34ADB9ECCF77B /* GiteaRepoDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA3D966E73220F618CD9038 /* GiteaRepoDetail.swift */; };
+		B75BA3C1B775D95298E0933B /* SyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD5A40912505AFD774ED713 /* SyntaxHighlighter.swift */; };
+		BAA4219103CC83A339C434BD /* ServicesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258507E3A00D686FDEF7E9CE /* ServicesStore.swift */; };
+		C18B23568F81455E4164835D /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E817863BA2B5DA5318488 /* GlassCard.swift */; };
+		C86FF5E6A543278A18B16E9B /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB95F4E19C7D3082B4D6484C /* APIError.swift */; };
+		CF0124025064FF55FAD14233 /* BeszelDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408F0E514FDE46F6A78D0A58 /* BeszelDashboard.swift */; };
+		CFFCFA6F071D0F46DECAB36B /* ContainerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC89D463559422B61BC300AF /* ContainerDetailView.swift */; };
+		D76DF8769FE2AE2032847D05 /* FormattersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB311F83CBAAC39C90D50E6D /* FormattersTests.swift */; };
+		D84F9D353E2953087A1E5F7D /* ModelDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D7A0C04FD3A10D46F836A9 /* ModelDecodingTests.swift */; };
+		D99466C32D977BCE5D9A029E /* GiteaAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D7F6591D7ABB7E8CB96944 /* GiteaAPIClient.swift */; };
+		E5242DCA4ACD2835153FBB96 /* ServiceLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F1F09E5D4D69F8311840E4F /* ServiceLoginView.swift */; };
+		E6E04DD8242F5252CD32CCAB /* ServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E6FEE939313E58D34CE4BDB /* ServiceType.swift */; };
+		E75752B2EF79FC31623F21A3 /* ServicesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57CF72E451CED741576C2F4D /* ServicesStoreTests.swift */; };
+		EAD085672E3D6DD29C4F51D1 /* OfflineBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7A6237B741BF62F16D9F8B /* OfflineBanner.swift */; };
+		EC9F7C6B42D988E3D6D1E8BB /* PiHoleModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BCF4718684D1491D028063 /* PiHoleModels.swift */; };
+		F5EF663AA6770602771BD2F2 /* PortainerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A576049FF063B4EC98E28D9 /* PortainerAPIClient.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		9A6333B6E6959BE727D37E50 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = DE28C1443C90FD5E0567C4BE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F030701E1A7DE1C00D08FE68;
+			remoteInfo = Homelab;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0DB66F8274714A001051F1BE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		141E9B530530A0BF0D52A289 /* BeszelSystemDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelSystemDetail.swift; sourceTree = "<group>"; };
+		151F3E3C716170F5B65A688F /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
+		15D7F6591D7ABB7E8CB96944 /* GiteaAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaAPIClient.swift; sourceTree = "<group>"; };
+		19F58DFAF2218D934F936D17 /* HomelabApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomelabApp.swift; sourceTree = "<group>"; };
+		24ACF7FA86699161F1FFB10E /* PortainerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortainerModels.swift; sourceTree = "<group>"; };
+		258507E3A00D686FDEF7E9CE /* ServicesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesStore.swift; sourceTree = "<group>"; };
+		30BCF4718684D1491D028063 /* PiHoleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiHoleModels.swift; sourceTree = "<group>"; };
+		334BAFC4A25FD83F52E9CDD0 /* ServiceConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceConnection.swift; sourceTree = "<group>"; };
+		38F7AE0005466E2FF260B000 /* Translations+English.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+English.swift"; sourceTree = "<group>"; };
+		3A088F5140A5297EA91E3821 /* Homelab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Homelab.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3AD1D644D530DE462BB79AA2 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		3CC9947203975F8072646659 /* SkeletonLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonLoader.swift; sourceTree = "<group>"; };
+		3F5B6FAE42892F4BEB3097FD /* StatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBadge.swift; sourceTree = "<group>"; };
+		408F0E514FDE46F6A78D0A58 /* BeszelDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelDashboard.swift; sourceTree = "<group>"; };
+		44F6D851F1B957C876FD6F0B /* GiteaModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaModels.swift; sourceTree = "<group>"; };
+		486E817863BA2B5DA5318488 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
+		4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomelabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4E1E8A717351D5E42B2696F1 /* BeszelAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelAPIClient.swift; sourceTree = "<group>"; };
+		569655DA5311D77756775472 /* PortainerDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortainerDashboard.swift; sourceTree = "<group>"; };
+		57CF72E451CED741576C2F4D /* ServicesStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesStoreTests.swift; sourceTree = "<group>"; };
+		5F1F09E5D4D69F8311840E4F /* ServiceLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceLoginView.swift; sourceTree = "<group>"; };
+		64D8F0162AE327AA60600505 /* Translations+Italian.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+Italian.swift"; sourceTree = "<group>"; };
+		6A576049FF063B4EC98E28D9 /* PortainerAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortainerAPIClient.swift; sourceTree = "<group>"; };
+		6AD5A40912505AFD774ED713 /* SyntaxHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighter.swift; sourceTree = "<group>"; };
+		6EF6E7AF1CDC6676B7421A7B /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
+		735477DB04233B4FDA23469D /* GlassStatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassStatCard.swift; sourceTree = "<group>"; };
+		7432B8C8ACBE47BDF26570DC /* ServiceDashboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDashboardLayout.swift; sourceTree = "<group>"; };
+		7692F78990DA606D426BA429 /* Translations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Translations.swift; sourceTree = "<group>"; };
+		7E6FEE939313E58D34CE4BDB /* ServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceType.swift; sourceTree = "<group>"; };
+		85D0D2A2905370C31F3A8ADE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
+		88B51084F8D0D0D7C999B8C3 /* BeszelModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelModels.swift; sourceTree = "<group>"; };
+		8D1604CF631BC4DC369A42A5 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		94D7A0C04FD3A10D46F836A9 /* ModelDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDecodingTests.swift; sourceTree = "<group>"; };
+		A1776C03666E80A17285732D /* DashboardSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSummary.swift; sourceTree = "<group>"; };
+		A3491FAD0D71DDB3C25D9D90 /* GiteaDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaDashboard.swift; sourceTree = "<group>"; };
+		AB95F4E19C7D3082B4D6484C /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
+		B1CB48124608D3A220C3A444 /* Translations+OtherLanguages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+OtherLanguages.swift"; sourceTree = "<group>"; };
+		B1EBFFF57A15B47F78E81D04 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
+		B236EC8434642BB311F3E1A8 /* PiHoleAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiHoleAPIClient.swift; sourceTree = "<group>"; };
+		B518BC3D0A31F29612A69B75 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BB7A6237B741BF62F16D9F8B /* OfflineBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineBanner.swift; sourceTree = "<group>"; };
+		BE0A64E52150CEEA94E249D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		CBA3D966E73220F618CD9038 /* GiteaRepoDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaRepoDetail.swift; sourceTree = "<group>"; };
+		D7A7931FCA8BA5A9AA1BD3E6 /* Homelab.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Homelab.entitlements; sourceTree = "<group>"; };
+		DB311F83CBAAC39C90D50E6D /* FormattersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattersTests.swift; sourceTree = "<group>"; };
+		DB56E3990A5DE62509F3F7C4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F3116D5544353B573C4C2B0B /* ContainerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerListView.swift; sourceTree = "<group>"; };
+		FC89D463559422B61BC300AF /* ContainerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerDetailView.swift; sourceTree = "<group>"; };
+		FE7A7BFF374B6DE9CE7384EE /* PiHoleDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiHoleDashboard.swift; sourceTree = "<group>"; };
+		FEF389260911EADF7079A97B /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0484D4BF357548D950ABB56C /* Settings */ = {
+			isa = PBXGroup;
+			children = (
+				0DB66F8274714A001051F1BE /* SettingsView.swift */,
+			);
+			path = Settings;
+			sourceTree = "<group>";
+		};
+		104688BC1276270D85B7AC3F /* Homelab */ = {
+			isa = PBXGroup;
+			children = (
+				B518BC3D0A31F29612A69B75 /* Assets.xcassets */,
+				D7A7931FCA8BA5A9AA1BD3E6 /* Homelab.entitlements */,
+				19F58DFAF2218D934F936D17 /* HomelabApp.swift */,
+				DB56E3990A5DE62509F3F7C4 /* Info.plist */,
+				8CBB7F6BE424A7B126D2FFD6 /* DesignSystem */,
+				9F2F7333FB0E7D0D6CA9C243 /* Localization */,
+				4DB668936609CB6CD5BA7CAF /* Models */,
+				DB674F5C3563F5D1A5D15342 /* Networking */,
+				9F580510490E095DDA1A63B9 /* Services */,
+				7DAFCB2BF30198F989D7E950 /* Stores */,
+				BD0DD51259101D7C7FCE5917 /* Theme */,
+				EB0C2E8A1FE201A265D4FC4A /* Utilities */,
+				B95B7C501526C761049BD34F /* Views */,
+			);
+			path = Homelab;
+			sourceTree = "<group>";
+		};
+		1E866E8511A219B4C76B9235 /* Portainer */ = {
+			isa = PBXGroup;
+			children = (
+				24ACF7FA86699161F1FFB10E /* PortainerModels.swift */,
+			);
+			path = Portainer;
+			sourceTree = "<group>";
+		};
+		289C5939524BACC32CDCCF25 /* Gitea */ = {
+			isa = PBXGroup;
+			children = (
+				15D7F6591D7ABB7E8CB96944 /* GiteaAPIClient.swift */,
+			);
+			path = Gitea;
+			sourceTree = "<group>";
+		};
+		3B0F0ED088E1700C927989C0 /* Portainer */ = {
+			isa = PBXGroup;
+			children = (
+				6A576049FF063B4EC98E28D9 /* PortainerAPIClient.swift */,
+			);
+			path = Portainer;
+			sourceTree = "<group>";
+		};
+		48AAFFAA1096205CCB4685B8 /* Gitea */ = {
+			isa = PBXGroup;
+			children = (
+				A3491FAD0D71DDB3C25D9D90 /* GiteaDashboard.swift */,
+				CBA3D966E73220F618CD9038 /* GiteaRepoDetail.swift */,
+			);
+			path = Gitea;
+			sourceTree = "<group>";
+		};
+		4DB668936609CB6CD5BA7CAF /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				334BAFC4A25FD83F52E9CDD0 /* ServiceConnection.swift */,
+				7E6FEE939313E58D34CE4BDB /* ServiceType.swift */,
+				9C3998846D55F959084051D2 /* Beszel */,
+				981FC3E8A73DC27EF4792684 /* Gitea */,
+				F2BD8B68C5C78ECC6C3C024A /* PiHole */,
+				1E866E8511A219B4C76B9235 /* Portainer */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		58F8A8040064B68291A0616F /* ServiceLogin */ = {
+			isa = PBXGroup;
+			children = (
+				5F1F09E5D4D69F8311840E4F /* ServiceLoginView.swift */,
+			);
+			path = ServiceLogin;
+			sourceTree = "<group>";
+		};
+		5A9E1D3A67703C812006DFAC = {
+			isa = PBXGroup;
+			children = (
+				104688BC1276270D85B7AC3F /* Homelab */,
+				E403C416C1CD9D360CB4369E /* HomelabTests */,
+				E163496F466E06D0E015E1FD /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		7DAFCB2BF30198F989D7E950 /* Stores */ = {
+			isa = PBXGroup;
+			children = (
+				258507E3A00D686FDEF7E9CE /* ServicesStore.swift */,
+				151F3E3C716170F5B65A688F /* SettingsStore.swift */,
+			);
+			path = Stores;
+			sourceTree = "<group>";
+		};
+		873F7F23714AC880CCFDA5BF /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				A1776C03666E80A17285732D /* DashboardSummary.swift */,
+				8D1604CF631BC4DC369A42A5 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		8CBB7F6BE424A7B126D2FFD6 /* DesignSystem */ = {
+			isa = PBXGroup;
+			children = (
+				486E817863BA2B5DA5318488 /* GlassCard.swift */,
+				735477DB04233B4FDA23469D /* GlassStatCard.swift */,
+				BB7A6237B741BF62F16D9F8B /* OfflineBanner.swift */,
+				7432B8C8ACBE47BDF26570DC /* ServiceDashboardLayout.swift */,
+				3CC9947203975F8072646659 /* SkeletonLoader.swift */,
+				3F5B6FAE42892F4BEB3097FD /* StatusBadge.swift */,
+			);
+			path = DesignSystem;
+			sourceTree = "<group>";
+		};
+		92577B05F8B135054A9B86B6 /* PiHole */ = {
+			isa = PBXGroup;
+			children = (
+				FE7A7BFF374B6DE9CE7384EE /* PiHoleDashboard.swift */,
+			);
+			path = PiHole;
+			sourceTree = "<group>";
+		};
+		981FC3E8A73DC27EF4792684 /* Gitea */ = {
+			isa = PBXGroup;
+			children = (
+				44F6D851F1B957C876FD6F0B /* GiteaModels.swift */,
+			);
+			path = Gitea;
+			sourceTree = "<group>";
+		};
+		9C3998846D55F959084051D2 /* Beszel */ = {
+			isa = PBXGroup;
+			children = (
+				88B51084F8D0D0D7C999B8C3 /* BeszelModels.swift */,
+			);
+			path = Beszel;
+			sourceTree = "<group>";
+		};
+		9F2F7333FB0E7D0D6CA9C243 /* Localization */ = {
+			isa = PBXGroup;
+			children = (
+				7692F78990DA606D426BA429 /* Translations.swift */,
+				38F7AE0005466E2FF260B000 /* Translations+English.swift */,
+				64D8F0162AE327AA60600505 /* Translations+Italian.swift */,
+				B1CB48124608D3A220C3A444 /* Translations+OtherLanguages.swift */,
+			);
+			path = Localization;
+			sourceTree = "<group>";
+		};
+		9F580510490E095DDA1A63B9 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				85D0D2A2905370C31F3A8ADE /* KeychainService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		B95B7C501526C761049BD34F /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				BE0A64E52150CEEA94E249D7 /* ContentView.swift */,
+				F1265188363BF5B5C00056A5 /* Beszel */,
+				48AAFFAA1096205CCB4685B8 /* Gitea */,
+				873F7F23714AC880CCFDA5BF /* Home */,
+				92577B05F8B135054A9B86B6 /* PiHole */,
+				EB0D5A2B9725AD26C768879F /* Portainer */,
+				58F8A8040064B68291A0616F /* ServiceLogin */,
+				0484D4BF357548D950ABB56C /* Settings */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		BD0DD51259101D7C7FCE5917 /* Theme */ = {
+			isa = PBXGroup;
+			children = (
+				3AD1D644D530DE462BB79AA2 /* AppTheme.swift */,
+			);
+			path = Theme;
+			sourceTree = "<group>";
+		};
+		D43D23351242B6BFC6E743DC /* PiHole */ = {
+			isa = PBXGroup;
+			children = (
+				B236EC8434642BB311F3E1A8 /* PiHoleAPIClient.swift */,
+			);
+			path = PiHole;
+			sourceTree = "<group>";
+		};
+		D5B24EF44902FCBD35F6D145 /* Beszel */ = {
+			isa = PBXGroup;
+			children = (
+				4E1E8A717351D5E42B2696F1 /* BeszelAPIClient.swift */,
+			);
+			path = Beszel;
+			sourceTree = "<group>";
+		};
+		DB674F5C3563F5D1A5D15342 /* Networking */ = {
+			isa = PBXGroup;
+			children = (
+				FEF389260911EADF7079A97B /* APIClient.swift */,
+				AB95F4E19C7D3082B4D6484C /* APIError.swift */,
+				D5B24EF44902FCBD35F6D145 /* Beszel */,
+				289C5939524BACC32CDCCF25 /* Gitea */,
+				D43D23351242B6BFC6E743DC /* PiHole */,
+				3B0F0ED088E1700C927989C0 /* Portainer */,
+			);
+			path = Networking;
+			sourceTree = "<group>";
+		};
+		E163496F466E06D0E015E1FD /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3A088F5140A5297EA91E3821 /* Homelab.app */,
+				4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		E403C416C1CD9D360CB4369E /* HomelabTests */ = {
+			isa = PBXGroup;
+			children = (
+				DB311F83CBAAC39C90D50E6D /* FormattersTests.swift */,
+				94D7A0C04FD3A10D46F836A9 /* ModelDecodingTests.swift */,
+				57CF72E451CED741576C2F4D /* ServicesStoreTests.swift */,
+			);
+			path = HomelabTests;
+			sourceTree = "<group>";
+		};
+		EB0C2E8A1FE201A265D4FC4A /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				B1EBFFF57A15B47F78E81D04 /* Formatters.swift */,
+				6EF6E7AF1CDC6676B7421A7B /* HapticManager.swift */,
+				6AD5A40912505AFD774ED713 /* SyntaxHighlighter.swift */,
+			);
+			path = Utilities;
+			sourceTree = "<group>";
+		};
+		EB0D5A2B9725AD26C768879F /* Portainer */ = {
+			isa = PBXGroup;
+			children = (
+				FC89D463559422B61BC300AF /* ContainerDetailView.swift */,
+				F3116D5544353B573C4C2B0B /* ContainerListView.swift */,
+				569655DA5311D77756775472 /* PortainerDashboard.swift */,
+			);
+			path = Portainer;
+			sourceTree = "<group>";
+		};
+		F1265188363BF5B5C00056A5 /* Beszel */ = {
+			isa = PBXGroup;
+			children = (
+				408F0E514FDE46F6A78D0A58 /* BeszelDashboard.swift */,
+				141E9B530530A0BF0D52A289 /* BeszelSystemDetail.swift */,
+			);
+			path = Beszel;
+			sourceTree = "<group>";
+		};
+		F2BD8B68C5C78ECC6C3C024A /* PiHole */ = {
+			isa = PBXGroup;
+			children = (
+				30BCF4718684D1491D028063 /* PiHoleModels.swift */,
+			);
+			path = PiHole;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0346621FC90669A18B22EFE8 /* HomelabTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DFFA8D42B770740C96D367E7 /* Build configuration list for PBXNativeTarget "HomelabTests" */;
+			buildPhases = (
+				6359780C55E4A792AD23AAF7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				E751A0FDF492AD0D856EB483 /* PBXTargetDependency */,
+			);
+			name = HomelabTests;
+			packageProductDependencies = (
+			);
+			productName = HomelabTests;
+			productReference = 4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F030701E1A7DE1C00D08FE68 /* Homelab */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E752D81550964FB589E746C /* Build configuration list for PBXNativeTarget "Homelab" */;
+			buildPhases = (
+				32D01D902577480FF9EC4AC6 /* Sources */,
+				461F0E0E99E93FB4BD2004D6 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Homelab;
+			packageProductDependencies = (
+			);
+			productName = Homelab;
+			productReference = 3A088F5140A5297EA91E3821 /* Homelab.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		DE28C1443C90FD5E0567C4BE /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 2600;
+				TargetAttributes = {
+					0346621FC90669A18B22EFE8 = {
+						DevelopmentTeam = "";
+					};
+				};
+			};
+			buildConfigurationList = 53B06AFB20AFF82B11048BA4 /* Build configuration list for PBXProject "Homelab" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 5A9E1D3A67703C812006DFAC;
+			minimizedProjectReferenceProxies = 1;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F030701E1A7DE1C00D08FE68 /* Homelab */,
+				0346621FC90669A18B22EFE8 /* HomelabTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		461F0E0E99E93FB4BD2004D6 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				001FA6007779556F8CF2BDC5 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		32D01D902577480FF9EC4AC6 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				63A39B89AC9B8F48B3BC3147 /* APIClient.swift in Sources */,
+				C86FF5E6A543278A18B16E9B /* APIError.swift in Sources */,
+				2DEE79E0C15D816F7170E110 /* AppTheme.swift in Sources */,
+				2BCD4D6ACDA7D4CEA00AFEBA /* BeszelAPIClient.swift in Sources */,
+				CF0124025064FF55FAD14233 /* BeszelDashboard.swift in Sources */,
+				1694BCD702C988AAF0F99127 /* BeszelModels.swift in Sources */,
+				45563EB6F51F8EF1867CF1DC /* BeszelSystemDetail.swift in Sources */,
+				CFFCFA6F071D0F46DECAB36B /* ContainerDetailView.swift in Sources */,
+				A3E3BAB096611E807728CA89 /* ContainerListView.swift in Sources */,
+				9F77F33FFB5F27A3D1A8109E /* ContentView.swift in Sources */,
+				991F9F57CF5DAD5FA3AD929B /* DashboardSummary.swift in Sources */,
+				7E78EE55701AD004992579EF /* Formatters.swift in Sources */,
+				D99466C32D977BCE5D9A029E /* GiteaAPIClient.swift in Sources */,
+				253B46BF21904B59477F2E8E /* GiteaDashboard.swift in Sources */,
+				AD2F16BDA6D33B25BA1DD4B7 /* GiteaModels.swift in Sources */,
+				B52CC2ACDDD34ADB9ECCF77B /* GiteaRepoDetail.swift in Sources */,
+				C18B23568F81455E4164835D /* GlassCard.swift in Sources */,
+				0F634D9389BDB5467A64C25E /* GlassStatCard.swift in Sources */,
+				366228A5C9000FF822E289FB /* HapticManager.swift in Sources */,
+				703D6379BB37D3F83B0C21D5 /* HomeView.swift in Sources */,
+				826BA16B6B4D4F31C3CC2B5C /* HomelabApp.swift in Sources */,
+				6B883FF0F9673181B59F8C83 /* KeychainService.swift in Sources */,
+				EAD085672E3D6DD29C4F51D1 /* OfflineBanner.swift in Sources */,
+				A283181CEA487B0C8346D967 /* PiHoleAPIClient.swift in Sources */,
+				1C4457681E0F071045A8132C /* PiHoleDashboard.swift in Sources */,
+				EC9F7C6B42D988E3D6D1E8BB /* PiHoleModels.swift in Sources */,
+				F5EF663AA6770602771BD2F2 /* PortainerAPIClient.swift in Sources */,
+				60845D39E8A2BD7753B767BB /* PortainerDashboard.swift in Sources */,
+				B51871199ACBFB2987E2C165 /* PortainerModels.swift in Sources */,
+				21BAB7FCB0AECC7133D55F6F /* ServiceConnection.swift in Sources */,
+				8FC5C2BF6FC7CBC21BFF6696 /* ServiceDashboardLayout.swift in Sources */,
+				E5242DCA4ACD2835153FBB96 /* ServiceLoginView.swift in Sources */,
+				E6E04DD8242F5252CD32CCAB /* ServiceType.swift in Sources */,
+				BAA4219103CC83A339C434BD /* ServicesStore.swift in Sources */,
+				7EBB5603EC5B23E166D98E33 /* SettingsStore.swift in Sources */,
+				7E861F79CA67DDAD2078A333 /* SettingsView.swift in Sources */,
+				8EADC34444DEB43F553D0513 /* SkeletonLoader.swift in Sources */,
+				0E5566DAE01FB0E9F10E98C8 /* StatusBadge.swift in Sources */,
+				B75BA3C1B775D95298E0933B /* SyntaxHighlighter.swift in Sources */,
+				7EF18D092660634150160E03 /* Translations+English.swift in Sources */,
+				8BE00328A6AC68DF3E40F05B /* Translations+Italian.swift in Sources */,
+				81457E8BF989BFB2851CDC66 /* Translations+OtherLanguages.swift in Sources */,
+				AAA9BC382610A55D8E374C95 /* Translations.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6359780C55E4A792AD23AAF7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D76DF8769FE2AE2032847D05 /* FormattersTests.swift in Sources */,
+				D84F9D353E2953087A1E5F7D /* ModelDecodingTests.swift in Sources */,
+				E75752B2EF79FC31623F21A3 /* ServicesStoreTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		E751A0FDF492AD0D856EB483 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F030701E1A7DE1C00D08FE68 /* Homelab */;
+			targetProxy = 9A6333B6E6959BE727D37E50 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1A75E2C9352A8381D39BAF1B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Homelab/Homelab.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 74584D6P85;
+				INFOPLIST_FILE = Homelab/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cipnas.homelab;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		288CA37930B89C423CA04B4C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cipnas.homelab.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Homelab.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Homelab";
+			};
+			name = Debug;
+		};
+		35D08FC62C1C9E3C8E77050A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Homelab/Homelab.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = 74584D6P85;
+				INFOPLIST_FILE = Homelab/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cipnas.homelab;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		452C2BF2840EED434A0BD954 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.cipnas.homelab.tests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Homelab.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Homelab";
+			};
+			name = Release;
+		};
+		700BFD62B662742F50A8B66A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = "";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		83F0F0836E3C4EEA0AFFE11C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E752D81550964FB589E746C /* Build configuration list for PBXNativeTarget "Homelab" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1A75E2C9352A8381D39BAF1B /* Debug */,
+				35D08FC62C1C9E3C8E77050A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		53B06AFB20AFF82B11048BA4 /* Build configuration list for PBXProject "Homelab" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				83F0F0836E3C4EEA0AFFE11C /* Debug */,
+				700BFD62B662742F50A8B66A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DFFA8D42B770740C96D367E7 /* Build configuration list for PBXNativeTarget "HomelabTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				288CA37930B89C423CA04B4C /* Debug */,
+				452C2BF2840EED434A0BD954 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = DE28C1443C90FD5E0567C4BE /* Project object */;
+}
