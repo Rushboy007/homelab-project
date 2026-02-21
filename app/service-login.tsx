@@ -31,8 +31,8 @@ import {
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { useMutation } from '@tanstack/react-query';
-import { useServices } from '@/contexts/ServicesContext';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useServicesStore } from '@/store/useServicesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { ServiceType, SERVICE_COLORS, ServiceConnection } from '@/types/services';
 import { portainerApi } from '@/services/portainer-api';
 import { piholeApi } from '@/services/pihole-api';
@@ -44,9 +44,9 @@ export default function ServiceLoginScreen() {
     const serviceType = (type as ServiceType) || 'portainer';
     const insets = useSafeAreaInsets();
     const router = useRouter();
-    const { connectService } = useServices();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const { connectService } = useServicesStore();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
 
     const [url, setUrl] = useState<string>('');
     const [username, setUsername] = useState<string>('');

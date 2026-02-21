@@ -1,18 +1,17 @@
 import React from 'react';
-import { View, Text, StyleSheet, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, Alert } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useQuery } from '@tanstack/react-query';
 import { Box, Shield, Server, GitBranch } from 'lucide-react-native';
 
-import { useServices } from '@/contexts/ServicesContext';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useServicesStore } from '@/store/useServicesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { portainerApi } from '@/services/portainer-api';
 import { piholeApi } from '@/services/pihole-api';
 import { beszelApi } from '@/services/beszel-api';
 import { giteaApi } from '@/services/gitea-api';
 import { SkeletonLoader } from '@/components/SkeletonLoader';
 import { SERVICE_COLORS } from '@/types/services';
-import { Alert } from 'react-native';
 import { GlassCard, GlassGroup } from '@/components/LiquidGlass';
 
 const { width } = Dimensions.get('window');
@@ -54,11 +53,11 @@ const SummaryCard = ({
                         {isLoading ? (
                             <SkeletonLoader width={60} height={24} borderRadius={6} />
                         ) : (
-                            <Text style={[styles.value, { color: colors.text }]}>{value}</Text>
+                            <Text adjustsFontSizeToFit numberOfLines={1} style={[styles.value, { color: colors.text }]}>{value}</Text>
                         )}
                     </View>
                     <View style={styles.titleRow}>
-                        <Text style={[styles.title, { color: colors.textMuted }]}>{title}</Text>
+                        <Text adjustsFontSizeToFit numberOfLines={1} style={[styles.title, { color: colors.textMuted, flexShrink: 1 }]}>{title}</Text>
                         {subValue && !isLoading && (
                             <Text style={[styles.subValue, { color: colors.textSecondary }]}>{subValue}</Text>
                         )}
@@ -70,9 +69,9 @@ const SummaryCard = ({
 };
 
 export const DashboardSummary = () => {
-    const { isConnected, isReachable } = useServices();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const { isConnected, isReachable } = useServicesStore();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
 
     const isPortainerConnected = isConnected('portainer');
     const isPiholeConnected = isConnected('pihole');

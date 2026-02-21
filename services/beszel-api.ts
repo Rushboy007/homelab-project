@@ -2,9 +2,10 @@ import { BeszelSystem, BeszelSystemsResponse, BeszelRecordsResponse } from '@/ty
 
 const REQUEST_TIMEOUT = 8000;
 
-class BeszelAPI {
-    private baseUrl: string = '';
-    private fallbackUrl: string = '';
+import { BaseAPIClient } from './api-client';
+
+class BeszelAPI extends BaseAPIClient {
+    protected readonly serviceType = 'beszel';
     private token: string = '';
 
     configure(url: string, token: string, fallbackUrl?: string) {
@@ -15,23 +16,11 @@ class BeszelAPI {
     }
 
     setFallbackUrl(fallbackUrl: string) {
-        this.fallbackUrl = fallbackUrl.replace(/\/+$/, '');
-        console.log('[BeszelAPI] Fallback URL set:', this.fallbackUrl);
+        super.setFallbackUrl(fallbackUrl);
     }
 
     getFallbackUrl(): string {
-        return this.fallbackUrl;
-    }
-
-    private async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-        try {
-            const response = await fetch(url, { ...options, signal: controller.signal });
-            return response;
-        } finally {
-            clearTimeout(timeout);
-        }
+        return super.getFallbackUrl();
     }
 
     private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -40,35 +29,7 @@ class BeszelAPI {
             'Authorization': this.token,
             ...options.headers,
         };
-        const fetchOpts = { ...options, headers };
-
-        const primaryUrl = `${this.baseUrl}/api${path}`;
-        console.log('[BeszelAPI] Request:', options.method || 'GET', primaryUrl);
-
-        try {
-            const response = await this.fetchWithTimeout(primaryUrl, fetchOpts);
-            if (!response.ok) {
-                const errorText = await response.text().catch(() => 'Unknown error');
-                throw new Error(`Beszel API error: ${response.status}`);
-            }
-            return response.json() as Promise<T>;
-        } catch (primaryError) {
-            if (this.fallbackUrl) {
-                const fallbackFullUrl = `${this.fallbackUrl}/api${path}`;
-                console.log('[BeszelAPI] Primary failed, trying fallback:', fallbackFullUrl);
-                try {
-                    const response = await this.fetchWithTimeout(fallbackFullUrl, fetchOpts);
-                    if (!response.ok) {
-                        throw new Error(`Beszel API error: ${response.status}`);
-                    }
-                    return response.json() as Promise<T>;
-                } catch (fallbackError) {
-                    console.log('[BeszelAPI] Fallback also failed:', (fallbackError as Error).message);
-                    throw new Error(`Connessione fallita su entrambi gli URL. Verifica la rete.`);
-                }
-            }
-            throw primaryError;
-        }
+        return this.requestBase<T>(`/api${path}`, { ...options, headers });
     }
 
     async authenticate(url: string, email: string, password: string): Promise<string> {

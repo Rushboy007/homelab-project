@@ -3,20 +3,12 @@ import {
     View,
     Text,
     StyleSheet,
-    ScrollView,
-    RefreshControl,
     TouchableOpacity,
     Alert,
 } from 'react-native';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import {
     Server,
-    Box,
-    Play,
-    Square,
-    Pause,
-    RotateCw,
-    Trash2,
     HardDrive,
     Image as ImageIcon,
     Cpu,
@@ -27,26 +19,25 @@ import {
     Layers,
     Heart,
     HeartOff,
-    AlertTriangle,
-    Clock,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
-import { useServices } from '@/contexts/ServicesContext';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useServicesStore } from '@/store/useServicesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { portainerApi } from '@/services/portainer-api';
 import { PortainerEndpoint } from '@/types/portainer';
 import { formatBytes } from '@/utils/formatters';
 import { ThemeColors } from '@/constants/themes';
+import { ServiceDashboardLayout } from '@/components/ServiceDashboardLayout';
 import { SkeletonCard } from '@/components/SkeletonLoader';
 
 const PORTAINER_COLOR = '#13B5EA';
 
 export default function PortainerDashboard() {
-    const { getConnection } = useServices();
+    const { getConnection } = useServicesStore();
     const connection = getConnection('portainer');
     const router = useRouter();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const [selectedEndpoint, setSelectedEndpoint] = useState<PortainerEndpoint | null>(null);
 
     const endpointsQuery = useQuery({
@@ -56,7 +47,7 @@ export default function PortainerDashboard() {
         refetchInterval: 30000,
     });
 
-    const endpoints = endpointsQuery.data ?? [];
+    const endpoints = useMemo(() => endpointsQuery.data ?? [], [endpointsQuery.data]);
 
     useEffect(() => {
         if (endpointsQuery.isError && connection) {
@@ -67,7 +58,6 @@ export default function PortainerDashboard() {
     useEffect(() => {
         if (endpoints.length > 0 && !selectedEndpoint) {
             setSelectedEndpoint(endpoints[0]);
-            console.log('[Portainer] Auto-selected endpoint:', endpoints[0].Name);
         }
     }, [endpoints, selectedEndpoint]);
 
@@ -78,7 +68,7 @@ export default function PortainerDashboard() {
         refetchInterval: 15000,
     });
 
-    const containers = containersQuery.data ?? [];
+    const containers = useMemo(() => containersQuery.data ?? [], [containersQuery.data]);
 
     const stats = useMemo(() => {
         const running = containers.filter(c => c.State === 'running').length;
@@ -96,40 +86,17 @@ export default function PortainerDashboard() {
     }, [endpointsQuery, containersQuery]);
 
     const isLoading = endpointsQuery.isLoading || containersQuery.isLoading;
+    const isError = endpointsQuery.isError;
     const s = makeStyles(colors);
 
-    if (isLoading && containers.length === 0 && !endpointsQuery.isError) {
-        return (
-            <View style={s.loadingContainer}>
-                <View style={s.cardsContainer}>
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                </View>
-            </View>
-        );
-    }
-
-    if (endpointsQuery.isError) {
-        return (
-            <View style={s.loadingContainer}>
-                <AlertTriangle size={48} color={colors.warning} />
-                <Text style={s.errorTitle}>{t.error}</Text>
-                <Text style={s.errorMessage}>
-                    {endpointsQuery.error?.message || t.loginErrorFailed}
-                </Text>
-                <TouchableOpacity style={s.retryButton} onPress={() => endpointsQuery.refetch()} activeOpacity={0.7}>
-                    <Text style={s.retryText}>{t.retry}</Text>
-                </TouchableOpacity>
-            </View>
-        );
-    }
-
     return (
-        <ScrollView
-            style={s.container}
-            contentContainerStyle={s.content}
-            refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={PORTAINER_COLOR} />}
+        <ServiceDashboardLayout
+            isLoading={isLoading && containers.length === 0}
+            isError={isError}
+            errorMessage={endpointsQuery.error?.message || t.loginErrorFailed}
+            onRefresh={onRefresh}
+            onRetry={() => endpointsQuery.refetch()}
+            refreshColor={PORTAINER_COLOR}
         >
             {endpoints.length > 1 && (
                 <View style={s.section}>
@@ -246,21 +213,21 @@ export default function PortainerDashboard() {
                                     <View style={s.healthCard}>
                                         <Layers size={18} color={PORTAINER_COLOR} />
                                         <Text style={s.healthValue}>{snapshot.StackCount}</Text>
-                                        <Text style={s.healthLabel}>{t.portainerStacks}</Text>
+                                        <Text adjustsFontSizeToFit numberOfLines={1} style={s.healthLabel}>{t.portainerStacks}</Text>
                                     </View>
                                 )}
                                 {snapshot.HealthyContainerCount > 0 && (
                                     <View style={s.healthCard}>
                                         <Heart size={18} color={colors.running} />
                                         <Text style={s.healthValue}>{snapshot.HealthyContainerCount}</Text>
-                                        <Text style={s.healthLabel}>{t.portainerHealthy}</Text>
+                                        <Text adjustsFontSizeToFit numberOfLines={1} style={s.healthLabel}>{t.portainerHealthy}</Text>
                                     </View>
                                 )}
                                 {snapshot.UnhealthyContainerCount > 0 && (
                                     <View style={s.healthCard}>
                                         <HeartOff size={18} color={colors.stopped} />
                                         <Text style={s.healthValue}>{snapshot.UnhealthyContainerCount}</Text>
-                                        <Text style={s.healthLabel}>{t.portainerUnhealthy}</Text>
+                                        <Text adjustsFontSizeToFit numberOfLines={1} style={s.healthLabel}>{t.portainerUnhealthy}</Text>
                                     </View>
                                 )}
                             </View>
@@ -279,9 +246,7 @@ export default function PortainerDashboard() {
                     <ChevronRight size={18} color={PORTAINER_COLOR} />
                 </TouchableOpacity>
             )}
-
-            <View style={{ height: 30 }} />
-        </ScrollView>
+        </ServiceDashboardLayout>
     );
 }
 
@@ -298,7 +263,7 @@ function StatMiniCard({ label, value, color, colors }: { label: string; value: n
     return (
         <View style={{ flex: 1, backgroundColor: colors.surface, borderRadius: 16, padding: 14, borderWidth: 1, borderColor: colors.border, alignItems: 'center' as const, gap: 4 }}>
             <Text style={{ fontSize: 26, fontWeight: '700' as const, color: color }}>{value}</Text>
-            <Text style={{ fontSize: 11, color: colors.textSecondary, fontWeight: '500' as const }}>{label}</Text>
+            <Text adjustsFontSizeToFit numberOfLines={1} style={{ fontSize: 11, color: colors.textSecondary, fontWeight: '500' as const }}>{label}</Text>
         </View>
     );
 }
@@ -308,22 +273,14 @@ function ResourceCard({ icon, value, label, color, colors }: { icon: React.React
         <View style={{ width: '47%' as unknown as number, flexGrow: 1, backgroundColor: colors.surface, borderRadius: 16, padding: 16, borderWidth: 1, borderColor: colors.border, gap: 6 }}>
             <View style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: color + '1A', alignItems: 'center' as const, justifyContent: 'center' as const, marginBottom: 4 }}>{icon}</View>
             <Text style={{ fontSize: 20, fontWeight: '700' as const, color: colors.text }}>{value}</Text>
-            <Text style={{ fontSize: 12, color: colors.textSecondary, fontWeight: '500' as const }}>{label}</Text>
+            <Text adjustsFontSizeToFit numberOfLines={1} style={{ fontSize: 12, color: colors.textSecondary, fontWeight: '500' as const }}>{label}</Text>
         </View>
     );
 }
 
 function makeStyles(colors: ThemeColors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background },
-        content: { paddingHorizontal: 16, paddingTop: 16 },
-        loadingContainer: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', gap: 12, paddingHorizontal: 24 },
-        cardsContainer: { padding: 16, paddingBottom: 40, gap: 12 },
-        loadingText: { color: colors.textSecondary, fontSize: 14 },
-        errorTitle: { fontSize: 18, fontWeight: '600' as const, color: colors.text, marginTop: 8 },
-        errorMessage: { fontSize: 14, color: colors.textSecondary, textAlign: 'center', lineHeight: 20 },
-        retryButton: { backgroundColor: '#13B5EA', paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12, marginTop: 8 },
-        retryText: { color: '#FFF', fontSize: 15, fontWeight: '600' as const },
+        cardsContainer: { paddingVertical: 16, gap: 12 },
         section: { marginBottom: 24 },
         sectionTitle: { fontSize: 13, fontWeight: '600' as const, color: colors.textMuted, marginBottom: 12, textTransform: 'uppercase' as const, letterSpacing: 0.8 },
         serverHeader: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 14 },

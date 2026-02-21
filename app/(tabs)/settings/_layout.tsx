@@ -1,8 +1,8 @@
 import { Stack } from 'expo-router';
-import { useThemeColors } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function SettingsLayout() {
-    const colors = useThemeColors();
+    const colors = useSettingsStore(s => s.getThemeColors());
 
     return (
         <Stack

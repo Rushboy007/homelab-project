@@ -11,7 +11,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
     View,
-    Text,
     StyleSheet,
     Platform,
     Pressable,
@@ -28,13 +27,14 @@ import Animated, {
     SharedValue,
     Easing,
 } from 'react-native-reanimated';
-import { useThemeColors, useTranslations, useSettings } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { ThemeColors } from '@/constants/themes';
 
 // ─── Liquid Glass safe import ─────────────────────────────────────────────────
 let LiquidGlassView: React.ComponentType<any> | null = null;
 let USE_GLASS = false;
 try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require('@callstack/liquid-glass');
     LiquidGlassView = mod.LiquidGlassView ?? null;
     const isSupported = mod.isLiquidGlassSupported;
@@ -64,7 +64,7 @@ const TAB_DEFS = [
 ] as const;
 
 interface GlassTabBarProps {
-    state: { index: number; routes: Array<{ key: string; name: string }> };
+    state: { index: number; routes: { key: string; name: string }[] };
     navigation: any;
     descriptors: Record<string, unknown>;
 }
@@ -72,9 +72,9 @@ interface GlassTabBarProps {
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function GlassTabBar({ state, navigation }: GlassTabBarProps) {
     const insets = useSafeAreaInsets();
-    const { theme } = useSettings();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const { theme } = useSettingsStore();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
 
     // Tab layout measurements
     const [tabWidths, setTabWidths] = useState([0, 0]);
@@ -119,6 +119,7 @@ export default function GlassTabBar({ state, navigation }: GlassTabBarProps) {
         // Label brightness
         labelOpacity0.value = withTiming(state.index === 0 ? 1 : 0.45, COLOR_TIMING);
         labelOpacity1.value = withTiming(state.index === 1 ? 1 : 0.45, COLOR_TIMING);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [state.index, tabOffsets, tabWidths]);
 
     const handleTabLayout = useCallback((index: number, e: LayoutChangeEvent) => {

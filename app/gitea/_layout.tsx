@@ -1,9 +1,9 @@
 import { Stack } from 'expo-router';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 export default function GiteaLayout() {
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
 
     return (
         <Stack
@@ -12,7 +12,7 @@ export default function GiteaLayout() {
                 headerTintColor: colors.text,
                 headerTitleStyle: { fontWeight: '600' as const },
                 contentStyle: { backgroundColor: colors.background },
-                headerBackTitle: t.back,
+                headerBackTitle: '',
             }}
         >
             <Stack.Screen name="index" options={{ title: 'Gitea' }} />

@@ -2,9 +2,10 @@ import { GiteaUser, GiteaRepo, GiteaOrg, GiteaNotification, GiteaFileContent, Gi
 
 const REQUEST_TIMEOUT = 8000;
 
-class GiteaAPI {
-    private baseUrl: string = '';
-    private fallbackUrl: string = '';
+import { BaseAPIClient } from './api-client';
+
+class GiteaAPI extends BaseAPIClient {
+    protected readonly serviceType = 'gitea';
     private token: string = '';
 
     configure(url: string, token: string, fallbackUrl?: string) {
@@ -15,30 +16,18 @@ class GiteaAPI {
     }
 
     setFallbackUrl(fallbackUrl: string) {
-        this.fallbackUrl = fallbackUrl.replace(/\/+$/, '');
-        console.log('[GiteaAPI] Fallback URL set:', this.fallbackUrl);
+        super.setFallbackUrl(fallbackUrl);
     }
 
     getFallbackUrl(): string {
-        return this.fallbackUrl;
+        return super.getFallbackUrl();
     }
 
-    private getAuthHeader(): string {
+    public getAuthHeader(): string {
         if (this.token.startsWith('basic:')) {
             return `Basic ${this.token.slice(6)}`;
         }
         return `token ${this.token}`;
-    }
-
-    private async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-        try {
-            const response = await fetch(url, { ...options, signal: controller.signal });
-            return response;
-        } finally {
-            clearTimeout(timeout);
-        }
     }
 
     private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -47,35 +36,7 @@ class GiteaAPI {
             'Authorization': this.getAuthHeader(),
             ...options.headers,
         };
-        const fetchOpts = { ...options, headers };
-
-        const primaryUrl = `${this.baseUrl}/api/v1${path}`;
-        console.log('[GiteaAPI] Request:', options.method || 'GET', primaryUrl);
-
-        try {
-            const response = await this.fetchWithTimeout(primaryUrl, fetchOpts);
-            if (!response.ok) {
-                const errorText = await response.text().catch(() => 'Unknown error');
-                throw new Error(`Gitea API error: ${response.status}`);
-            }
-            return response.json() as Promise<T>;
-        } catch (primaryError) {
-            if (this.fallbackUrl) {
-                const fallbackFullUrl = `${this.fallbackUrl}/api/v1${path}`;
-                console.log('[GiteaAPI] Primary failed, trying fallback:', fallbackFullUrl);
-                try {
-                    const response = await this.fetchWithTimeout(fallbackFullUrl, fetchOpts);
-                    if (!response.ok) {
-                        throw new Error(`Gitea API error: ${response.status}`);
-                    }
-                    return response.json() as Promise<T>;
-                } catch (fallbackError) {
-                    console.log('[GiteaAPI] Fallback also failed:', (fallbackError as Error).message);
-                    throw new Error(`Connessione fallita su entrambi gli URL. Verifica la rete.`);
-                }
-            }
-            throw primaryError;
-        }
+        return this.requestBase<T>(`/api/v1${path}`, { ...options, headers });
     }
 
     async authenticate(url: string, username: string, password: string): Promise<{ token: string; username: string }> {
@@ -135,17 +96,20 @@ class GiteaAPI {
         return this.request<{ version: string }>('/version');
     }
 
-    async getRepoContents(owner: string, repo: string, path: string = ''): Promise<GiteaFileContent[]> {
+    async getRepoContents(owner: string, repo: string, path: string = '', ref?: string): Promise<GiteaFileContent[]> {
         const encodedPath = path ? `/${encodeURIComponent(path)}` : '';
-        return this.request<GiteaFileContent[]>(`/repos/${owner}/${repo}/contents${encodedPath}`);
+        const refQuery = ref ? `?ref=${encodeURIComponent(ref)}` : '';
+        return this.request<GiteaFileContent[]>(`/repos/${owner}/${repo}/contents${encodedPath}${refQuery}`);
     }
 
-    async getFileContent(owner: string, repo: string, path: string): Promise<GiteaFileContent> {
-        return this.request<GiteaFileContent>(`/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}`);
+    async getFileContent(owner: string, repo: string, path: string, ref?: string): Promise<GiteaFileContent> {
+        const refQuery = ref ? `?ref=${encodeURIComponent(ref)}` : '';
+        return this.request<GiteaFileContent>(`/repos/${owner}/${repo}/contents/${encodeURIComponent(path)}${refQuery}`);
     }
 
-    async getRepoCommits(owner: string, repo: string, page: number = 1, limit: number = 20): Promise<GiteaCommit[]> {
-        return this.request<GiteaCommit[]>(`/repos/${owner}/${repo}/commits?page=${page}&limit=${limit}`);
+    async getRepoCommits(owner: string, repo: string, page: number = 1, limit: number = 20, ref?: string): Promise<GiteaCommit[]> {
+        const refQuery = ref ? `&sha=${encodeURIComponent(ref)}` : '';
+        return this.request<GiteaCommit[]>(`/repos/${owner}/${repo}/commits?page=${page}&limit=${limit}${refQuery}`);
     }
 
     async getRepoIssues(owner: string, repo: string, state: string = 'open', page: number = 1, limit: number = 20): Promise<GiteaIssue[]> {
@@ -156,8 +120,9 @@ class GiteaAPI {
         return this.request<GiteaBranch[]>(`/repos/${owner}/${repo}/branches`);
     }
 
-    async getRepoReadme(owner: string, repo: string): Promise<GiteaFileContent> {
-        return this.request<GiteaFileContent>(`/repos/${owner}/${repo}/contents/README.md`);
+    async getRepoReadme(owner: string, repo: string, ref?: string): Promise<GiteaFileContent> {
+        const refQuery = ref ? `?ref=${encodeURIComponent(ref)}` : '';
+        return this.request<GiteaFileContent>(`/repos/${owner}/${repo}/contents/README.md${refQuery}`);
     }
 
     async getRepo(owner: string, repo: string): Promise<GiteaRepo> {

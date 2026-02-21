@@ -24,7 +24,7 @@ import {
     Layers,
     Box,
 } from 'lucide-react-native';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { beszelApi } from '@/services/beszel-api';
 import { ThemeColors } from '@/constants/themes';
 import { formatBytes } from '@/utils/formatters';
@@ -33,8 +33,8 @@ const BESZEL_COLOR = '#0EA5E9';
 
 export default function BeszelSystemDetail() {
     const { systemId } = useLocalSearchParams<{ systemId: string }>();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
 
     const systemQuery = useQuery({
         queryKey: ['beszel-system', systemId],
@@ -53,7 +53,7 @@ export default function BeszelSystemDetail() {
     const system = systemQuery.data;
     const info = system?.info;
     const isUp = system?.status === 'up';
-    const records = recordsQuery.data?.items ?? [];
+    const records = useMemo(() => recordsQuery.data?.items ?? [], [recordsQuery.data?.items]);
     const latestRecord = records.length > 0 ? records[0] : null;
     const latestStats = latestRecord?.stats;
 
@@ -72,7 +72,7 @@ export default function BeszelSystemDetail() {
         if (info) {
             const infoAny = info as unknown as Record<string, unknown>;
             if (infoAny['dc'] && Array.isArray(infoAny['dc'])) {
-                return infoAny['dc'] as Array<{ n: string; cpu: number; m: number }>;
+                return infoAny['dc'] as { n: string; cpu: number; m: number }[];
             }
         }
         return [];
@@ -213,7 +213,7 @@ export default function BeszelSystemDetail() {
                                 <View style={[s.resourceIconWrap, { backgroundColor: BESZEL_COLOR + '18' }]}>
                                     <Cpu size={18} color={BESZEL_COLOR} />
                                 </View>
-                                <Text style={s.resourceTitle}>{t.beszelCpu}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.resourceTitle}>{t.beszelCpu}</Text>
                                 <Text style={[s.resourcePercent, { color: getUsageColor(info.cpu ?? 0) }]}>
                                     {(info.cpu ?? 0).toFixed(1)}%
                                 </Text>
@@ -231,7 +231,7 @@ export default function BeszelSystemDetail() {
                                 <View style={[s.resourceIconWrap, { backgroundColor: '#8B5CF618' }]}>
                                     <MemoryStick size={18} color="#8B5CF6" />
                                 </View>
-                                <Text style={s.resourceTitle}>{t.beszelMemory}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.resourceTitle}>{t.beszelMemory}</Text>
                                 <Text style={[s.resourcePercent, { color: getUsageColor(info.mp ?? 0) }]}>
                                     {(info.mp ?? 0).toFixed(1)}%
                                 </Text>
@@ -257,7 +257,7 @@ export default function BeszelSystemDetail() {
                                 <View style={[s.resourceIconWrap, { backgroundColor: colors.warning + '18' }]}>
                                     <HardDrive size={18} color={colors.warning} />
                                 </View>
-                                <Text style={s.resourceTitle}>{t.beszelDisk}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.resourceTitle}>{t.beszelDisk}</Text>
                                 <Text style={[s.resourcePercent, { color: getUsageColor(info.dp ?? 0) }]}>
                                     {(info.dp ?? 0).toFixed(1)}%
                                 </Text>
@@ -287,14 +287,14 @@ export default function BeszelSystemDetail() {
                                     <ArrowUp size={18} color={colors.running} />
                                 </View>
                                 <Text style={s.networkValue}>{formatNetworkRate(netSent)}</Text>
-                                <Text style={s.networkLabel}>{t.beszelNetworkSent}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.networkLabel}>{t.beszelNetworkSent}</Text>
                             </View>
                             <View style={s.networkCard}>
                                 <View style={[s.networkIconWrap, { backgroundColor: colors.info + '18' }]}>
                                     <ArrowDown size={18} color={colors.info} />
                                 </View>
                                 <Text style={s.networkValue}>{formatNetworkRate(netRecv)}</Text>
-                                <Text style={s.networkLabel}>{t.beszelNetworkReceived}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.networkLabel}>{t.beszelNetworkReceived}</Text>
                             </View>
                         </View>
                     </View>

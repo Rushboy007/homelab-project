@@ -1,28 +1,32 @@
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming, withSequence, Easing } from 'react-native-reanimated';
-import { ServicesProvider, useServices } from '@/contexts/ServicesContext';
-import { SettingsProvider, useThemeColors } from '@/contexts/SettingsContext';
-import { useSettings } from '@/contexts/SettingsContext';
+import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
+import { useServicesStore } from '@/store/useServicesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { queryClient } from '@/services/queryClient';
 
 SplashScreen.preventAutoHideAsync();
 
-const queryClient = new QueryClient();
 
-const { width, height } = Dimensions.get('window');
 
 function RootLayoutNav() {
-    const { isReady } = useServices();
-    const colors = useThemeColors();
-    const { theme } = useSettings();
+    const isReady = useServicesStore(s => s.isReady);
+    const initServices = useServicesStore(s => s.init);
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const theme = useSettingsStore(s => s.theme);
 
     const overlayOpacity = useSharedValue(0);
     const [overlayColor, setOverlayColor] = useState(colors.background);
     const prevTheme = useRef(theme);
+
+    // Initialize ServicesStore on mount
+    useEffect(() => {
+        initServices();
+    }, [initServices]);
 
     useEffect(() => {
         if (isReady) {
@@ -38,6 +42,7 @@ function RootLayoutNav() {
             overlayOpacity.value = withTiming(0, { duration: 400, easing: Easing.out(Easing.ease) }); // fade out to reveal new theme
         }
         prevTheme.current = theme;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [theme, isReady, colors.background]);
 
     const overlayStyle = useAnimatedStyle(() => {
@@ -85,13 +90,8 @@ export default function RootLayout() {
     return (
         <QueryClientProvider client={queryClient}>
             <GestureHandlerRootView style={{ flex: 1 }}>
-                <SettingsProvider>
-                    <ServicesProvider>
-                        <RootLayoutNav />
-                    </ServicesProvider>
-                </SettingsProvider>
+                <RootLayoutNav />
             </GestureHandlerRootView>
         </QueryClientProvider>
     );
 }
-

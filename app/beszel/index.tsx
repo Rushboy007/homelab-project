@@ -3,16 +3,11 @@ import {
     View,
     Text,
     StyleSheet,
-    ScrollView,
-    RefreshControl,
-    Dimensions,
-    ActivityIndicator,
     TouchableOpacity,
     Alert,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useQuery } from '@tanstack/react-query';
-import { SkeletonCard } from '@/components/SkeletonLoader';
+import { ServiceDashboardLayout } from '@/components/ServiceDashboardLayout';
 import {
     Server,
     Cpu,
@@ -28,13 +23,13 @@ import {
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
-import { useServices } from '@/contexts/ServicesContext';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useServicesStore } from '@/store/useServicesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { Translations } from '@/constants/translations';
 import { beszelApi } from '@/services/beszel-api';
 import { BeszelSystem } from '@/types/beszel';
 import { ThemeColors } from '@/constants/themes';
 import { formatBytes } from '@/utils/formatters';
-import { BeszelSystemInfo } from '@/types/beszel';
 
 const BESZEL_COLOR = '#0EA5E9';
 
@@ -50,13 +45,11 @@ const formatNetRate = (val: number | undefined): string => {
 };
 
 export default function BeszelDashboard() {
-    const { getConnection } = useServices();
+    const { getConnection } = useServicesStore();
     const connection = getConnection('beszel');
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const router = useRouter();
-    const insets = useSafeAreaInsets();
-
     const systemsQuery = useQuery({
         queryKey: ['beszel-systems'],
         queryFn: () => beszelApi.getSystems(),
@@ -94,10 +87,13 @@ export default function BeszelDashboard() {
     };
 
     return (
-        <ScrollView
-            style={s.container}
-            contentContainerStyle={[s.content, { paddingBottom: insets.bottom + 16 }]}
-            refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={BESZEL_COLOR} />}
+        <ServiceDashboardLayout
+            isLoading={systemsQuery.isLoading}
+            isError={systemsQuery.isError}
+            errorMessage={systemsQuery.error?.message || t.loginErrorFailed}
+            onRefresh={onRefresh}
+            onRetry={() => systemsQuery.refetch()}
+            refreshColor={BESZEL_COLOR}
         >
             <View style={s.overviewCard}>
                 <View style={s.overviewRow}>
@@ -126,18 +122,7 @@ export default function BeszelDashboard() {
                 <Text style={s.refreshHintText}>{t.beszelRefreshRate}</Text>
             </View>
 
-            {systemsQuery.isLoading ? (
-                <View style={s.listContainer}>
-                    <SkeletonCard />
-                    <SkeletonCard />
-                    <SkeletonCard />
-                </View>
-            ) : systemsQuery.isError ? (
-                <View style={s.emptyContainer}>
-                    <WifiOff size={48} color={colors.danger} />
-                    <Text style={s.emptyText}>{t.error}</Text>
-                </View>
-            ) : systems.length === 0 ? (
+            {systems.length === 0 ? (
                 <View style={s.emptyContainer}>
                     <Server size={48} color={colors.textMuted} />
                     <Text style={s.emptyText}>{t.beszelNoSystems}</Text>
@@ -156,9 +141,7 @@ export default function BeszelDashboard() {
                     ))}
                 </View>
             )}
-
-            <View style={{ height: 30 }} />
-        </ScrollView>
+        </ServiceDashboardLayout>
     );
 }
 
@@ -171,7 +154,7 @@ const SystemCard = React.memo(function SystemCard({
 }: {
     system: BeszelSystem;
     colors: ThemeColors;
-    t: ReturnType<typeof useTranslations>;
+    t: Translations;
     formatUptimeHours: (s: number) => string;
     onPress: () => void;
 }) {
@@ -273,11 +256,7 @@ const SystemCard = React.memo(function SystemCard({
 
 function makeStyles(colors: ThemeColors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background },
-        content: { paddingHorizontal: 16, paddingTop: 16 },
         listContainer: { paddingBottom: 40, gap: 12 },
-        loadingContainer: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', gap: 12 },
-        loadingText: { color: colors.textSecondary, fontSize: 14 },
         overviewCard: { backgroundColor: colors.surface, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.border, marginBottom: 12 },
         overviewRow: { flexDirection: 'row', alignItems: 'center', gap: 14 },
         overviewIconWrap: { width: 48, height: 48, borderRadius: 14, alignItems: 'center', justifyContent: 'center' },

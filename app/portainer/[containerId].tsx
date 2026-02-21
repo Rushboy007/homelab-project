@@ -19,7 +19,7 @@ import {
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import * as Clipboard from 'expo-clipboard';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { portainerApi, PortainerStack } from '@/services/portainer-api';
 import { ContainerAction } from '@/types/portainer';
 import { formatBytes, formatUptime, formatDate, calculateCpuPercent } from '@/utils/formatters';
@@ -32,8 +32,8 @@ export default function ContainerDetailScreen() {
     const { containerId, endpointId } = useLocalSearchParams<{ containerId: string; endpointId: string }>();
     const epId = Number(endpointId);
     const queryClient = useQueryClient();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const [activeTab, setActiveTab] = useState<TabType>('info');
     const [isEditing, setIsEditing] = useState<boolean>(false);
     const [editName, setEditName] = useState<string>('');

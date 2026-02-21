@@ -16,7 +16,7 @@
  */
 import React from 'react';
 import { View, ViewStyle, StyleProp, Platform } from 'react-native';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 // ─── Safe Liquid Glass imports ─────────────────────────────────────────────────
 let _LiquidGlassView: React.ComponentType<any> | null = null;
@@ -27,6 +27,7 @@ let _LiquidGlassContainerView: React.ComponentType<any> | null = null;
 let GLASS_SUPPORTED = false;
 
 try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require('@callstack/liquid-glass');
     _LiquidGlassView = mod.LiquidGlassView ?? null;
     _LiquidGlassContainerView = mod.LiquidGlassContainerView ?? null;
@@ -88,7 +89,7 @@ export const GlassCard = React.memo(function GlassCard({
     colorScheme,
     fallbackStyle,
 }: GlassCardProps) {
-    const { theme } = useSettings();
+    const { theme } = useSettingsStore();
     const activeColorScheme = colorScheme || theme;
     const GlassView = _LiquidGlassView as any;
 
@@ -144,7 +145,7 @@ export const GlassButtonWrapper = React.memo(function GlassButtonWrapper({
     colorScheme,
     fallbackStyle,
 }: GlassCardProps) {
-    const { theme } = useSettings();
+    const { theme } = useSettingsStore();
     const activeColorScheme = colorScheme || theme;
     const GlassView = _LiquidGlassView as any;
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useThemeColors } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { ThemeColors } from '@/constants/themes';
 
 interface StatusBadgeProps {
@@ -26,7 +26,7 @@ export function getStateColor(state: string, colors: ThemeColors): string {
 }
 
 export default React.memo(function StatusBadge({ state, size = 'small' }: StatusBadgeProps) {
-    const colors = useThemeColors();
+    const colors = useSettingsStore(s => s.getThemeColors());
     const color = getStateColor(state, colors);
     const isSmall = size === 'small';
 

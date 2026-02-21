@@ -4,36 +4,33 @@ import {
     Text,
     StyleSheet,
     ScrollView,
-    RefreshControl,
-    ActivityIndicator,
     TouchableOpacity,
     Alert,
 } from 'react-native';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueries } from '@tanstack/react-query';
 import {
     GitBranch,
     Star,
     GitFork,
-    CircleDot,
     Lock,
     Unlock,
     Building2,
     User,
     ChevronRight,
-    ShieldAlert,
     Clock,
     Folder,
     ArrowDownAZ,
 } from 'lucide-react-native';
-import { SkeletonCard } from '@/components/SkeletonLoader';
+import { ServiceDashboardLayout } from '@/components/ServiceDashboardLayout';
 import { useRouter } from 'expo-router';
 import * as Haptics from 'expo-haptics';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useServices } from '@/contexts/ServicesContext';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useServicesStore } from '@/store/useServicesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { giteaApi } from '@/services/gitea-api';
-import { GiteaRepo, GiteaHeatmapItem } from '@/types/gitea';
+import { GiteaRepo } from '@/types/gitea';
 import { ThemeColors } from '@/constants/themes';
+import { Translations } from '@/constants/translations';
 
 const GITEA_COLOR = '#609926';
 const GITEA_2FA_SHOWN_KEY = 'gitea_2fa_hint_shown';
@@ -65,10 +62,10 @@ const CELL_GAP = 2;
 const WEEKS_TO_SHOW = 20;
 
 export default function GiteaDashboard() {
-    const { getConnection } = useServices();
+    const { getConnection } = useServicesStore();
     const connection = getConnection('gitea');
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const router = useRouter();
 
     const [sortOrder, setSortOrder] = useState<'recent' | 'alpha'>('recent');
@@ -125,17 +122,26 @@ export default function GiteaDashboard() {
     });
 
     const user = userQuery.data;
-    const repos = reposQuery.data ?? [];
-    const orgs = orgsQuery.data ?? [];
-    const heatmapData = heatmapQuery.data ?? [];
+    const repos = useMemo(() => reposQuery.data ?? [], [reposQuery.data]);
+    const orgs = useMemo(() => orgsQuery.data ?? [], [orgsQuery.data]);
+    const heatmapData = useMemo(() => heatmapQuery.data ?? [], [heatmapQuery.data]);
+
+    const branchQueries = useQueries({
+        queries: repos.map(repo => ({
+            queryKey: ['gitea-branches', repo.owner.login, repo.name],
+            queryFn: () => giteaApi.getRepoBranches(repo.owner.login, repo.name),
+            enabled: !!repos.length,
+            staleTime: 600000,
+        })),
+    });
 
     const repoStats = useMemo(() => {
         const totalRepos = repos.length;
         const totalStars = repos.reduce((acc, r) => acc + r.stars_count, 0);
-        const totalForks = repos.reduce((acc, r) => acc + r.forks_count, 0);
+        const totalBranches = branchQueries.reduce((acc: number, query: any) => acc + (query.data?.length ?? 0), 0);
         const privateRepos = repos.filter(r => r.private).length;
-        return { totalRepos, totalStars, totalForks, privateRepos, publicRepos: totalRepos - privateRepos };
-    }, [repos]);
+        return { totalRepos, totalStars, totalBranches, privateRepos, publicRepos: totalRepos - privateRepos };
+    }, [repos, branchQueries]);
 
     const sortedRepos = useMemo(() => {
         const sorted = [...repos];
@@ -163,8 +169,8 @@ export default function GiteaDashboard() {
         const startDate = new Date(today);
         startDate.setDate(startDate.getDate() - totalDays + 1);
 
-        const weeks: Array<Array<{ date: Date; count: number; level: number }>> = [];
-        let currentWeek: Array<{ date: Date; count: number; level: number }> = [];
+        const weeks: { date: Date; count: number; level: number }[][] = [];
+        let currentWeek: { date: Date; count: number; level: number }[] = [];
 
         for (let i = 0; i < totalDays; i++) {
             const d = new Date(startDate);
@@ -197,7 +203,8 @@ export default function GiteaDashboard() {
         reposQuery.refetch();
         orgsQuery.refetch();
         heatmapQuery.refetch();
-    }, [userQuery, reposQuery, orgsQuery, heatmapQuery]);
+        branchQueries.forEach((q: any) => q.refetch());
+    }, [userQuery, reposQuery, orgsQuery, heatmapQuery, branchQueries]);
 
     const handleRepoPress = useCallback((repo: GiteaRepo) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -214,16 +221,6 @@ export default function GiteaDashboard() {
 
     const s = makeStyles(colors);
 
-    if (userQuery.isLoading && !user) {
-        return (
-            <View style={s.loadingContainer}>
-                <SkeletonCard />
-                <SkeletonCard />
-                <SkeletonCard />
-            </View>
-        );
-    }
-
     const formatDate = (dateStr: string): string => {
         const date = new Date(dateStr);
         const now = new Date();
@@ -237,10 +234,13 @@ export default function GiteaDashboard() {
     };
 
     return (
-        <ScrollView
-            style={s.container}
-            contentContainerStyle={s.content}
-            refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={GITEA_COLOR} />}
+        <ServiceDashboardLayout
+            isLoading={userQuery.isLoading && !user}
+            isError={userQuery.isError}
+            errorMessage={userQuery.error?.message || t.loginErrorFailed}
+            onRefresh={onRefresh}
+            onRetry={() => userQuery.refetch()}
+            refreshColor={GITEA_COLOR}
         >
             {user && (
                 <View style={s.userCard}>
@@ -266,9 +266,9 @@ export default function GiteaDashboard() {
                     <Text style={s.miniStatLabel}>{t.giteaStars}</Text>
                 </View>
                 <View style={s.miniStatCard}>
-                    <GitFork size={16} color={colors.info} />
-                    <Text style={s.miniStatValue}>{repoStats.totalForks}</Text>
-                    <Text style={s.miniStatLabel}>{t.giteaForks}</Text>
+                    <GitBranch size={16} color={colors.info} />
+                    <Text style={s.miniStatValue}>{repoStats.totalBranches}</Text>
+                    <Text style={s.miniStatLabel}>{t.giteaBranches}</Text>
                 </View>
             </View>
 
@@ -352,9 +352,7 @@ export default function GiteaDashboard() {
                     ))
                 )}
             </View>
-
-            <View style={{ height: 30 }} />
-        </ScrollView>
+        </ServiceDashboardLayout>
     );
 }
 
@@ -367,7 +365,7 @@ const RepoCard = React.memo(function RepoCard({
 }: {
     repo: GiteaRepo;
     colors: ThemeColors;
-    t: ReturnType<typeof useTranslations>;
+    t: Translations;
     formatDate: (d: string) => string;
     onPress: () => void;
 }) {
@@ -425,15 +423,6 @@ const RepoCard = React.memo(function RepoCard({
 
 function makeStyles(colors: ThemeColors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background },
-        content: { paddingHorizontal: 16, paddingTop: 16 },
-        loadingContainer: {
-            flex: 1,
-            padding: 16,
-            justifyContent: 'center',
-            gap: 12
-        },
-        loadingText: { color: colors.textSecondary, fontSize: 14 },
         userCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 18, padding: 18, borderWidth: 1, borderColor: colors.border, marginBottom: 16, gap: 14 },
         avatarWrap: { width: 52, height: 52, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
         userInfo: { flex: 1 },

@@ -12,7 +12,12 @@
   <img src="fotogithub/IMG_8879.jpg" width="18%" />
 </div>
 
+<p align="center">
+  <b>🌍 Supported Languages: English, Italian, French, Spanish, German</b>
+</p>
+
 <br />
+
 
 # 🏠 Homelab Dashboard App
 
@@ -70,7 +75,7 @@ To run this project locally on your machine or deploy it to your device (via loc
    To build the `.ipa` for AltStore or install straight to your phone, open the `ios/Homelab.xcworkspace` in Xcode, select your device, and hit `Play` (Build).
 
 ## 🌍 Language Support
-The app intuitively includes support for Italian (`it`) and English (`en`), with translation dictionaries configured locally.
+The app features comprehensive support for 5 languages: English 🇺🇸, Italian 🇮🇹, French 🇫🇷, Spanish 🇪🇸, and German 🇩🇪. It automatically detects your device's system language and adapts the interface seamlessly.
 
 ## 📝 License
 This project is meant for personal homelab use. Build, tweak, and enjoy your beautiful dashboard!
@@ -133,7 +138,7 @@ Per avviare questo progetto localmente sul tuo computer o compilarlo per il tuo 
    Per generare il file `.ipa` da inviare ad AltStore o per installare l'app direttamente sul tuo telefono permanentemente via cavo, apri il file `ios/Homelab.xcworkspace` in Xcode, seleziona in alto il tuo iPhone collegato (non il simulatore) e premi il pulsante `Play ▶️` (Build).
 
 ## 🌍 Lingue Supportate
-L'app include un supporto logico e traduzioni sia in Italiano (`it`) che in Inglese (`en`). Leggerà la lingua impostata originariamente dal sistema operativo del tuo telefono e si adatterà da sola.
+L'app include il supporto completo per 5 lingue: Inglese 🇺🇸, Italiano 🇮🇹, Francese 🇫🇷, Spagnolo 🇪🇸 e Tedesco 🇩🇪. Rileva automaticamente la lingua del sistema operativo del tuo telefono e adatta l'interfaccia in modo intelligente.
 
 ## 📝 Licenza
 Questo progetto è stato creato per uso personale e amatoriale in ambiente homelab. Modificalo, costruiscici sopra e goditi la tua bellissima dashboard!

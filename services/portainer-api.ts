@@ -8,9 +8,10 @@ import {
 
 const REQUEST_TIMEOUT = 8000;
 
-class PortainerAPI {
-    private baseUrl: string = '';
-    private fallbackUrl: string = '';
+import { BaseAPIClient } from './api-client';
+
+class PortainerAPI extends BaseAPIClient {
+    protected readonly serviceType = 'portainer';
     private jwt: string = '';
     private apiKey: string = '';
     private useApiKey: boolean = false;
@@ -34,12 +35,11 @@ class PortainerAPI {
     }
 
     setFallbackUrl(fallbackUrl: string) {
-        this.fallbackUrl = fallbackUrl.replace(/\/+$/, '');
-        console.log('[PortainerAPI] Fallback URL set:', this.fallbackUrl);
+        super.setFallbackUrl(fallbackUrl);
     }
 
     getFallbackUrl(): string {
-        return this.fallbackUrl;
+        return super.getFallbackUrl();
     }
 
     isUsingApiKey(): boolean {
@@ -63,50 +63,9 @@ class PortainerAPI {
         return headers;
     }
 
-    private async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-        try {
-            const response = await fetch(url, { ...options, credentials: 'omit', signal: controller.signal });
-            return response;
-        } finally {
-            clearTimeout(timeout);
-        }
-    }
-
     private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
-        const method = options.method || 'GET';
         const headers = this.buildHeaders(options.headers as Record<string, string>);
-        const fetchOpts = { ...options, headers };
-
-        const primaryUrl = `${this.baseUrl}/api${path}`;
-        console.log('[PortainerAPI] Request:', method, primaryUrl);
-
-        try {
-            const response = await this.fetchWithTimeout(primaryUrl, fetchOpts);
-            if (!response.ok) {
-                const errorText = await response.text().catch(() => 'Unknown error');
-                throw new Error(`Portainer API error: ${response.status} - ${errorText}`);
-            }
-            return this.parseResponse<T>(response);
-        } catch (primaryError) {
-            if (this.fallbackUrl) {
-                const fallbackFullUrl = `${this.fallbackUrl}/api${path}`;
-                console.log('[PortainerAPI] Primary failed, trying fallback:', fallbackFullUrl, (primaryError as Error).message);
-                try {
-                    const response = await this.fetchWithTimeout(fallbackFullUrl, fetchOpts);
-                    if (!response.ok) {
-                        const errorText = await response.text().catch(() => 'Unknown error');
-                        throw new Error(`Portainer API error: ${response.status} - ${errorText}`);
-                    }
-                    return this.parseResponse<T>(response);
-                } catch (fallbackError) {
-                    console.log('[PortainerAPI] Fallback also failed:', (fallbackError as Error).message);
-                    throw new Error(`Connessione fallita su entrambi gli URL. Verifica la rete.`);
-                }
-            }
-            throw primaryError;
-        }
+        return this.requestBase<T>(`/api${path}`, { ...options, headers }, async (res) => this.parseResponse<T>(res));
     }
 
     private async parseResponse<T>(response: Response): Promise<T> {

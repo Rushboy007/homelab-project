@@ -14,7 +14,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Search, X, Play, Square, RotateCcw, Filter } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { portainerApi } from '@/services/portainer-api';
 import { Container, ContainerAction } from '@/types/portainer';
 import { getContainerName, formatDate } from '@/utils/formatters';
@@ -28,8 +28,8 @@ export default function ContainersScreen() {
     const epId = Number(endpointId);
     const router = useRouter();
     const queryClient = useQueryClient();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const [search, setSearch] = useState<string>('');
     const [filter, setFilter] = useState<FilterType>('all');
 
@@ -54,7 +54,7 @@ export default function ContainersScreen() {
         },
     });
 
-    const containers = containersQuery.data ?? [];
+    const containers = useMemo(() => containersQuery.data ?? [], [containersQuery.data]);
 
     const filteredContainers = useMemo(() => {
         let result = containers;

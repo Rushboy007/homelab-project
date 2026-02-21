@@ -10,12 +10,10 @@ import {
 } from 'react-native';
 import {
     LogOut,
-    Globe,
     Info,
     Languages,
     Moon,
     Sun,
-    Check,
     Box,
     Shield,
     Activity,
@@ -23,13 +21,13 @@ import {
     Link2,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { useServices } from '@/contexts/ServicesContext';
-import { useSettings, useThemeColors, useTranslations } from '@/contexts/SettingsContext';
-import { Language } from '@/constants/translations';
+import { useServicesStore } from '@/store/useServicesStore';
+import { Translations, Language } from '@/constants/translations';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { ThemeMode, ThemeColors } from '@/constants/themes';
 import { ServiceType, SERVICE_COLORS } from '@/types/services';
 
-const SERVICE_LIST: { type: ServiceType; icon: (color: string) => React.ReactNode; nameKey: keyof ReturnType<typeof useTranslations> }[] = [
+const SERVICE_LIST: { type: ServiceType; icon: (color: string) => React.ReactNode; nameKey: keyof Translations }[] = [
     { type: 'portainer', icon: (c) => <Box size={18} color={c} />, nameKey: 'servicePortainer' },
     { type: 'pihole', icon: (c) => <Shield size={18} color={c} />, nameKey: 'servicePihole' },
     { type: 'beszel', icon: (c) => <Activity size={18} color={c} />, nameKey: 'serviceBeszel' },
@@ -37,10 +35,10 @@ const SERVICE_LIST: { type: ServiceType; icon: (color: string) => React.ReactNod
 ];
 
 export default function SettingsScreen() {
-    const { connections, disconnectService, isConnected, updateServiceFallbackUrl } = useServices();
-    const { language, theme, setLanguage, setTheme } = useSettings();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const { connections, disconnectService, isConnected, updateServiceFallbackUrl } = useServicesStore();
+    const { language, theme, setLanguage, setTheme } = useSettingsStore();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const [fallbackInputs, setFallbackInputs] = useState<Record<string, string>>({});
 
     const handleDisconnect = useCallback((type: ServiceType, name: string) => {
@@ -92,27 +90,30 @@ export default function SettingsScreen() {
                             <Text style={s.settingLabel}>{t.settingsLanguage}</Text>
                         </View>
                     </View>
-                    <View style={s.toggleRow}>
-                        <TouchableOpacity
-                            style={[s.toggleOption, language === 'it' && s.toggleOptionActive]}
-                            onPress={() => handleLanguageChange('it')}
-                            activeOpacity={0.7}
-                        >
-                            {language === 'it' && <Check size={14} color={colors.accent} />}
-                            <Text style={[s.toggleText, language === 'it' && s.toggleTextActive]}>
-                                {t.settingsItalian}
-                            </Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={[s.toggleOption, language === 'en' && s.toggleOptionActive]}
-                            onPress={() => handleLanguageChange('en')}
-                            activeOpacity={0.7}
-                        >
-                            {language === 'en' && <Check size={14} color={colors.accent} />}
-                            <Text style={[s.toggleText, language === 'en' && s.toggleTextActive]}>
-                                {t.settingsEnglish}
-                            </Text>
-                        </TouchableOpacity>
+                    <View style={s.languageGrid}>
+                        {(['it', 'en', 'fr', 'es', 'de'] as Language[]).map((lang) => (
+                            <TouchableOpacity
+                                key={lang}
+                                style={[s.languageOption, language === lang && s.languageOptionActive]}
+                                onPress={() => handleLanguageChange(lang)}
+                                activeOpacity={0.7}
+                            >
+                                <Text style={s.languageFlag}>
+                                    {lang === 'it' ? '🇮🇹' :
+                                        lang === 'en' ? '🇬🇧' :
+                                            lang === 'fr' ? '🇫🇷' :
+                                                lang === 'es' ? '🇪🇸' :
+                                                    '🇩🇪'}
+                                </Text>
+                                <Text style={[s.languageText, language === lang && s.languageTextActive]}>
+                                    {lang === 'it' ? t.settingsItalian :
+                                        lang === 'en' ? t.settingsEnglish :
+                                            lang === 'fr' ? t.settingsFrench :
+                                                lang === 'es' ? t.settingsSpanish :
+                                                    t.settingsGerman}
+                                </Text>
+                            </TouchableOpacity>
+                        ))}
                     </View>
                     <View style={s.divider} />
                     <View style={s.settingRowContainer}>
@@ -242,6 +243,12 @@ function makeStyles(colors: ThemeColors) {
         toggleOptionActive: { backgroundColor: colors.accent + '15', borderColor: colors.accent + '44' },
         toggleText: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' as const },
         toggleTextActive: { color: colors.accent, fontWeight: '600' as const },
+        languageGrid: { flexDirection: 'row', flexWrap: 'wrap', paddingHorizontal: 16, paddingBottom: 14, gap: 8 },
+        languageOption: { width: '48%', flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 10, paddingHorizontal: 12, borderRadius: 10, backgroundColor: colors.surfaceHover, borderWidth: 1, borderColor: colors.border },
+        languageOptionActive: { backgroundColor: colors.accent + '15', borderColor: colors.accent + '44' },
+        languageFlag: { fontSize: 16 },
+        languageText: { fontSize: 14, color: colors.textSecondary, fontWeight: '500' as const },
+        languageTextActive: { color: colors.accent, fontWeight: '600' as const },
         serviceRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14 },
         serviceLeft: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1 },
         serviceIconWrap: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },

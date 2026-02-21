@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
     View,
     Text,
@@ -10,8 +10,9 @@ import {
     Modal,
     Alert,
     Share,
+    useWindowDimensions,
 } from 'react-native';
-import { useLocalSearchParams, Stack } from 'expo-router';
+import { useLocalSearchParams, Stack, useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import {
     FileText,
@@ -21,7 +22,6 @@ import {
     Folder,
     File,
     Star,
-    GitFork,
     Lock,
     Unlock,
     ChevronRight,
@@ -31,33 +31,165 @@ import {
     Code,
     Share2,
     Maximize2,
-    Minimize2,
+    ChevronDown,
+    BookOpen,
 } from 'lucide-react-native';
+import { Image } from 'expo-image';
+import Markdown, { ASTNode } from 'react-native-markdown-display';
+
 import * as Haptics from 'expo-haptics';
-import * as Clipboard from 'expo-clipboard';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { giteaApi } from '@/services/gitea-api';
-import { GiteaFileContent, GiteaCommit, GiteaIssue } from '@/types/gitea';
+import { GiteaFileContent } from '@/types/gitea';
 import { ThemeColors } from '@/constants/themes';
 import { formatBytes } from '@/utils/formatters';
 
 const GITEA_COLOR = '#609926';
 
+const safeBase64Decode = (str: string): string => {
+    try {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+        let output = '';
+        let input = str.replace(/[^A-Za-z0-9+/=]/g, '');
+        for (let i = 0; i < input.length; i += 4) {
+            const enc1 = chars.indexOf(input.charAt(i));
+            const enc2 = chars.indexOf(input.charAt(i + 1));
+            const enc3 = chars.indexOf(input.charAt(i + 2));
+            const enc4 = chars.indexOf(input.charAt(i + 3));
+            if (enc1 === -1 || enc2 === -1) continue;
+            const chr1 = (enc1 << 2) | (enc2 >> 4);
+            const chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+            const chr3 = ((enc3 & 3) << 6) | enc4;
+            output += String.fromCharCode(chr1);
+            if (enc3 !== 64 && enc3 !== -1) output += String.fromCharCode(chr2);
+            if (enc4 !== 64 && enc4 !== -1) output += String.fromCharCode(chr3);
+        }
+        return decodeURIComponent(escape(output));
+    } catch (e) {
+        // Fallback for binary data or failed UTF-8 conversion
+        try {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=';
+            let output = '';
+            let input = str.replace(/[^A-Za-z0-9+/=]/g, '');
+            for (let i = 0; i < input.length; i += 4) {
+                const enc1 = chars.indexOf(input.charAt(i));
+                const enc2 = chars.indexOf(input.charAt(i + 1));
+                const enc3 = chars.indexOf(input.charAt(i + 2));
+                const enc4 = chars.indexOf(input.charAt(i + 3));
+                if (enc1 === -1 || enc2 === -1) continue;
+                output += String.fromCharCode((enc1 << 2) | (enc2 >> 4));
+                if (enc3 !== 64 && enc3 !== -1) output += String.fromCharCode(((enc2 & 15) << 4) | (enc3 >> 2));
+                if (enc4 !== 64 && enc4 !== -1) output += String.fromCharCode(((enc3 & 3) << 6) | enc4);
+            }
+            return output;
+        } catch {
+            try { return atob(str); } catch { return 'Error decoding binary content'; }
+        }
+    }
+};
+
+const decodeFileContent = (content?: string, encoding?: string): string => {
+    if (!content) return '';
+    let decoded = '';
+    if (encoding === 'base64') {
+        decoded = safeBase64Decode(content.replace(/\n/g, ''));
+    } else {
+        decoded = content;
+    }
+    if (decoded.length > 5000) {
+        return decoded.substring(0, 5000) + '\n\n--- [TRUNCATED FOR PERFORMANCE] ---';
+    }
+    return decoded;
+};
+
+const CodeHighlighter = ({ code, extension, colors }: { code: string; extension: string; colors: ThemeColors }) => {
+    // Simple regex-based highlighting for common languages
+    const getTokens = (text: string) => {
+        const tokens: { text: string; color?: string; fontWeight?: any }[] = [];
+        const patterns = [
+            { name: 'comment', regex: /(\/\/.*|\/\*[\s\S]*?\*\/|#.*)/g, color: colors.textMuted },
+            { name: 'string', regex: /("(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|`(?:[^`\\]|\\.)*`)/g, color: '#CE9178' },
+            { name: 'keyword', regex: /\b(await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|false|finally|for|function|if|import|in|instanceof|new|null|return|super|switch|this|throw|true|try|typeof|var|void|while|with|yield|let|static|async|from|as|def|import|from|elif|lambda|pass|global|nonlocal|assert|with|del|yield)\b/g, color: '#569CD6', fontWeight: '600' },
+            { name: 'number', regex: /\b(\d+\.?\d*)\b/g, color: '#B5CEA8' },
+            { name: 'function', regex: /\b([a-zA-Z_]\w*)(?=\s*\()/g, color: '#DCDCAA' },
+            { name: 'boolean', regex: /\b(true|false)\b/g, color: '#569CD6' },
+            { name: 'property', regex: /([a-zA-Z_]\w*)(?=\s*:)/g, color: '#9CDCFE' },
+        ];
+
+        let lastIndex = 0;
+        const matches: { start: number; end: number; color: string; fontWeight?: any; type: string }[] = [];
+
+        patterns.forEach(p => {
+            let match;
+            p.regex.lastIndex = 0;
+            while ((match = p.regex.exec(text)) !== null) {
+                matches.push({ start: match.index, end: p.regex.lastIndex, color: p.color, fontWeight: p.fontWeight, type: p.name });
+            }
+        });
+
+        matches.sort((a, b) => a.start - b.start);
+
+        let filteredMatches: typeof matches = [];
+        let currentEnd = 0;
+        for (const m of matches) {
+            if (m.start >= currentEnd) {
+                filteredMatches.push(m);
+                currentEnd = m.end;
+            }
+        }
+
+        let currentIndex = 0;
+        filteredMatches.forEach(m => {
+            if (m.start > currentIndex) {
+                tokens.push({ text: text.substring(currentIndex, m.start) });
+            }
+            tokens.push({ text: text.substring(m.start, m.end), color: m.color, fontWeight: m.fontWeight });
+            currentIndex = m.end;
+        });
+
+        if (currentIndex < text.length) {
+            tokens.push({ text: text.substring(currentIndex) });
+        }
+
+        return tokens;
+    };
+
+    const tokens = useMemo(() => getTokens(code), [code, colors]);
+
+    return (
+        <Text style={{ fontFamily: 'monospace', fontSize: 13, color: colors.text }}>
+            {tokens.map((t, i) => (
+                <Text key={i} style={{ color: t.color || colors.text, fontWeight: t.fontWeight || '400' }}>
+                    {t.text}
+                </Text>
+            ))}
+        </Text>
+    );
+};
+
 type TabType = 'files' | 'commits' | 'issues' | 'branches';
 
 export default function GiteaRepoDetail() {
-    const { owner, repoName, fullName } = useLocalSearchParams<{
+    const { owner, repoName, path, file } = useLocalSearchParams<{
         repoId: string;
         owner: string;
         repoName: string;
         fullName: string;
+        path?: string;
+        file?: string;
     }>();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const router = useRouter();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const [activeTab, setActiveTab] = useState<TabType>('files');
-    const [currentPath, setCurrentPath] = useState<string>('');
-    const [viewingFile, setViewingFile] = useState<string | null>(null);
+    const currentPath = path || '';
+    const viewingFile = file || null;
     const [fullscreenFile, setFullscreenFile] = useState<boolean>(false);
+
+    const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
+    const [viewMode, setViewMode] = useState<'preview' | 'code'>('preview');
+    const [showBranchModal, setShowBranchModal] = useState<boolean>(false);
+    const { width: windowWidth } = useWindowDimensions();
 
     const repoQuery = useQuery({
         queryKey: ['gitea-repo', owner, repoName],
@@ -66,24 +198,27 @@ export default function GiteaRepoDetail() {
         staleTime: 30000,
     });
 
+    const repo = repoQuery.data;
+    const effectiveBranch = selectedBranch || repo?.default_branch;
+
     const filesQuery = useQuery({
-        queryKey: ['gitea-files', owner, repoName, currentPath],
-        queryFn: () => giteaApi.getRepoContents(owner, repoName, currentPath),
-        enabled: !!owner && !!repoName && activeTab === 'files',
+        queryKey: ['gitea-files', owner, repoName, currentPath, effectiveBranch],
+        queryFn: () => giteaApi.getRepoContents(owner, repoName, currentPath, effectiveBranch),
+        enabled: !!owner && !!repoName && activeTab === 'files' && !!effectiveBranch,
         staleTime: 30000,
     });
 
     const fileContentQuery = useQuery({
-        queryKey: ['gitea-file-content', owner, repoName, viewingFile],
-        queryFn: () => giteaApi.getFileContent(owner, repoName, viewingFile!),
-        enabled: !!owner && !!repoName && !!viewingFile,
+        queryKey: ['gitea-file-content', owner, repoName, viewingFile, effectiveBranch],
+        queryFn: () => giteaApi.getFileContent(owner, repoName, viewingFile!, effectiveBranch),
+        enabled: !!owner && !!repoName && !!viewingFile && !!effectiveBranch,
         staleTime: 60000,
     });
 
     const commitsQuery = useQuery({
-        queryKey: ['gitea-commits', owner, repoName],
-        queryFn: () => giteaApi.getRepoCommits(owner, repoName, 1, 30),
-        enabled: !!owner && !!repoName && activeTab === 'commits',
+        queryKey: ['gitea-commits', owner, repoName, effectiveBranch],
+        queryFn: () => giteaApi.getRepoCommits(owner, repoName, 1, 30, effectiveBranch),
+        enabled: !!owner && !!repoName && activeTab === 'commits' && !!effectiveBranch,
         staleTime: 30000,
     });
 
@@ -97,11 +232,18 @@ export default function GiteaRepoDetail() {
     const branchesQuery = useQuery({
         queryKey: ['gitea-branches', owner, repoName],
         queryFn: () => giteaApi.getRepoBranches(owner, repoName),
-        enabled: !!owner && !!repoName && activeTab === 'branches',
+        enabled: !!owner && !!repoName, // Load branches broadly to populate selector
         staleTime: 60000,
     });
 
-    const repo = repoQuery.data;
+    const readmeQuery = useQuery({
+        queryKey: ['gitea-readme', owner, repoName, effectiveBranch],
+        queryFn: () => giteaApi.getRepoReadme(owner, repoName, effectiveBranch),
+        enabled: !!owner && !!repoName && activeTab === 'files' && currentPath === '' && !!effectiveBranch,
+        staleTime: 30000,
+        retry: false, // README might not exist
+    });
+
     const files = filesQuery.data ?? [];
     const commits = commitsQuery.data ?? [];
     const issues = issuesQuery.data ?? [];
@@ -114,50 +256,35 @@ export default function GiteaRepoDetail() {
     });
 
     const onRefresh = useCallback(() => {
-        repoQuery.refetch();
-        if (activeTab === 'files') filesQuery.refetch();
+        if (activeTab === 'files') {
+            filesQuery.refetch();
+            if (currentPath === '') readmeQuery.refetch();
+        }
         if (activeTab === 'commits') commitsQuery.refetch();
         if (activeTab === 'issues') issuesQuery.refetch();
         if (activeTab === 'branches') branchesQuery.refetch();
-    }, [activeTab, repoQuery, filesQuery, commitsQuery, issuesQuery, branchesQuery]);
+    }, [activeTab, currentPath, filesQuery, readmeQuery, commitsQuery, issuesQuery, branchesQuery]);
 
     const handleFilePress = useCallback((file: GiteaFileContent) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         if (file.type === 'dir') {
-            setCurrentPath(file.path);
-            setViewingFile(null);
+            router.push(`/gitea/${owner}-${repoName}?owner=${owner}&repoName=${repoName}&path=${encodeURIComponent(file.path)}`);
         } else {
-            setViewingFile(file.path);
+            router.push(`/gitea/${owner}-${repoName}?owner=${owner}&repoName=${repoName}&path=${encodeURIComponent(currentPath)}&file=${encodeURIComponent(file.path)}`);
         }
-    }, []);
+    }, [owner, repoName, currentPath, router]);
 
     const handleBackPath = useCallback(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        if (viewingFile) {
-            setViewingFile(null);
-            return;
-        }
-        const parts = currentPath.split('/');
-        parts.pop();
-        setCurrentPath(parts.join('/'));
-    }, [currentPath, viewingFile]);
+        router.back();
+    }, [router]);
 
-    const decodeFileContent = (content?: string, encoding?: string): string => {
-        if (!content) return '';
-        if (encoding === 'base64') {
-            try {
-                return atob(content.replace(/\n/g, ''));
-            } catch {
-                return content;
-            }
-        }
-        return content;
-    };
+
 
     const handleShareFile = useCallback(async () => {
         if (!viewingFile || !owner || !repoName) return;
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-        const rawUrl = `${giteaApi['baseUrl']}/api/v1/repos/${owner}/${repoName}/raw/${encodeURIComponent(viewingFile)}`;
+        const rawUrl = `${giteaApi.getBaseUrl()}/api/v1/repos/${owner}/${repoName}/raw/${encodeURIComponent(viewingFile)}`;
         try {
             await Share.share({
                 message: rawUrl,
@@ -183,6 +310,52 @@ export default function GiteaRepoDetail() {
         return date.toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: '2-digit' });
     };
 
+    const isImageFile = (filename: string | null) => {
+        if (!filename) return false;
+        const ext = filename.split('.').pop()?.toLowerCase();
+        return ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'].includes(ext || '');
+    };
+
+    const markdownStyles = {
+        body: { color: colors.text, fontSize: 14, lineHeight: 22 },
+        heading1: { color: colors.text, fontSize: 24, fontWeight: 'bold' as const, marginTop: 16, marginBottom: 8 },
+        heading2: { color: colors.text, fontSize: 20, fontWeight: 'bold' as const, marginTop: 16, marginBottom: 8, borderBottomWidth: 1, borderBottomColor: colors.border, paddingBottom: 4 },
+        heading3: { color: colors.text, fontSize: 18, fontWeight: 'bold' as const, marginTop: 16, marginBottom: 8 },
+        link: { color: GITEA_COLOR, textDecorationLine: 'none' as const },
+        code_inline: { backgroundColor: colors.surfaceHover, color: colors.text, paddingHorizontal: 4, paddingVertical: 2, borderRadius: 4, fontFamily: 'monospace' },
+        code_block: { backgroundColor: colors.surfaceHover, color: colors.text, padding: 12, borderRadius: 8, fontFamily: 'monospace', marginVertical: 8 },
+        fence: { backgroundColor: colors.surfaceHover, color: colors.text, padding: 12, borderRadius: 8, fontFamily: 'monospace', marginVertical: 8 },
+        blockquote: { borderLeftWidth: 4, borderLeftColor: colors.border, paddingLeft: 12, marginVertical: 8, color: colors.textMuted },
+        hr: { backgroundColor: colors.border, height: 1, marginVertical: 16 },
+        list_item: { marginVertical: 4 },
+        image: { borderRadius: 8, marginVertical: 8 },
+    };
+
+    const markdownRules = {
+        image: (node: ASTNode, children: any, parent: any, styles: any) => {
+            let uri = node.attributes.src;
+            if (uri && !uri.startsWith('http')) {
+                const cleanUri = uri.startsWith('/') ? uri.slice(1) : uri;
+                uri = `${giteaApi.getBaseUrl()}/api/v1/repos/${owner}/${repoName}/raw/${encodeURIComponent(cleanUri)}?ref=${encodeURIComponent(effectiveBranch || repo?.default_branch || '')}`;
+            }
+
+            return (
+                <Image
+                    key={node.key}
+                    source={{
+                        uri,
+                        headers: {
+                            Authorization: giteaApi.getAuthHeader(),
+                        },
+                    }}
+                    style={{ width: '100%', height: 200, borderRadius: 8, marginVertical: 8 }}
+                    contentFit="contain"
+                    transition={200}
+                />
+            );
+        },
+    };
+
     const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
         { key: 'files', label: t.giteaFiles, icon: <FileText size={14} color={activeTab === 'files' ? GITEA_COLOR : colors.textMuted} /> },
         { key: 'commits', label: t.giteaCommits, icon: <GitCommit size={14} color={activeTab === 'commits' ? GITEA_COLOR : colors.textMuted} /> },
@@ -190,12 +363,27 @@ export default function GiteaRepoDetail() {
         { key: 'branches', label: t.giteaBranches, icon: <GitBranch size={14} color={activeTab === 'branches' ? GITEA_COLOR : colors.textMuted} /> },
     ];
 
+    const getHeaderTitle = () => {
+        if (viewingFile) return viewingFile.split('/').pop() || '';
+        if (currentPath) return currentPath.split('/').pop() || '';
+        return repoName || '';
+    };
+
+    const headerTitle = getHeaderTitle();
+    const displayHeaderTitle = headerTitle.length > 20 ? headerTitle.substring(0, 17) + '...' : headerTitle;
+
     const fileContent = fileContentQuery.data;
-    const decodedContent = fileContent ? decodeFileContent(fileContent.content, fileContent.encoding) : '';
+    const decodedContent = useMemo(() =>
+        fileContent ? decodeFileContent(fileContent.content, fileContent.encoding) : ''
+        , [fileContent?.content, fileContent?.encoding]);
+
+    const readmeContent = useMemo(() =>
+        readmeQuery.data ? decodeFileContent(readmeQuery.data.content, readmeQuery.data.encoding) : ''
+        , [readmeQuery.data?.content, readmeQuery.data?.encoding]);
 
     return (
         <>
-            <Stack.Screen options={{ title: repoName || '' }} />
+            <Stack.Screen options={{ title: displayHeaderTitle }} />
             <ScrollView
                 style={s.container}
                 contentContainerStyle={s.content}
@@ -216,8 +404,8 @@ export default function GiteaRepoDetail() {
                                 <Text style={s.repoMetaText}>{repo.stars_count}</Text>
                             </View>
                             <View style={s.repoMetaItem}>
-                                <GitFork size={13} color={colors.textMuted} />
-                                <Text style={s.repoMetaText}>{repo.forks_count}</Text>
+                                <GitBranch size={13} color={colors.info} />
+                                <Text style={s.repoMetaText}>{branchesQuery.data?.length ?? 0}</Text>
                             </View>
                             <View style={s.repoMetaItem}>
                                 <CircleDot size={13} color={colors.running} />
@@ -231,11 +419,12 @@ export default function GiteaRepoDetail() {
                             ) : null}
                         </View>
                         <View style={s.repoInfoRow}>
-                            <Text style={s.repoInfoLabel}>{t.giteaDefaultBranch}:</Text>
-                            <View style={s.branchBadge}>
+                            <Text style={s.repoInfoLabel}>Branch:</Text>
+                            <TouchableOpacity style={s.branchSelectorBtn} onPress={() => setShowBranchModal(true)} activeOpacity={0.7}>
                                 <GitBranch size={11} color={GITEA_COLOR} />
-                                <Text style={s.branchBadgeText}>{repo.default_branch}</Text>
-                            </View>
+                                <Text style={s.branchBadgeText} numberOfLines={1}>{effectiveBranch}</Text>
+                                <ChevronDown size={11} color={GITEA_COLOR} />
+                            </TouchableOpacity>
                             <Text style={s.repoInfoSep}>•</Text>
                             <Text style={s.repoInfoLabel}>{formatBytes(repo.size * 1024)}</Text>
                         </View>
@@ -251,14 +440,13 @@ export default function GiteaRepoDetail() {
                                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
                                 setActiveTab(tab.key);
                                 if (tab.key === 'files') {
-                                    setCurrentPath('');
-                                    setViewingFile(null);
+                                    router.replace(`/gitea/${owner}-${repoName}?owner=${owner}&repoName=${repoName}`);
                                 }
                             }}
                             activeOpacity={0.7}
                         >
                             {tab.icon}
-                            <Text style={[s.tabText, activeTab === tab.key && s.tabTextActive]}>
+                            <Text adjustsFontSizeToFit numberOfLines={1} style={[s.tabText, activeTab === tab.key && s.tabTextActive]}>
                                 {tab.label}
                             </Text>
                         </TouchableOpacity>
@@ -305,6 +493,20 @@ export default function GiteaRepoDetail() {
                                 ))}
                             </View>
                         )}
+
+                        {currentPath === '' && readmeQuery.data && !viewingFile && (
+                            <View style={s.readmeCard}>
+                                <View style={s.readmeHeader}>
+                                    <BookOpen size={16} color={colors.textMuted} />
+                                    <Text style={s.readmeTitle}>README.md</Text>
+                                </View>
+                                <View style={s.readmeContent}>
+                                    <Markdown style={markdownStyles} rules={markdownRules}>
+                                        {readmeContent}
+                                    </Markdown>
+                                </View>
+                            </View>
+                        )}
                     </View>
                 )}
 
@@ -314,6 +516,17 @@ export default function GiteaRepoDetail() {
                             <ArrowLeft size={16} color={GITEA_COLOR} />
                             <Text style={s.backPathText}>{viewingFile}</Text>
                         </TouchableOpacity>
+
+                        {(viewingFile || '').toLowerCase().endsWith('.md') || isImageFile(viewingFile) ? (
+                            <View style={s.segmentControl}>
+                                <TouchableOpacity style={[s.segmentBtn, viewMode === 'preview' && s.segmentBtnActive]} onPress={() => setViewMode('preview')}>
+                                    <Text adjustsFontSizeToFit numberOfLines={1} style={[s.segmentBtnText, viewMode === 'preview' && s.segmentBtnTextActive]}>{t.giteaPreview}</Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity style={[s.segmentBtn, viewMode === 'code' && s.segmentBtnActive]} onPress={() => setViewMode('code')}>
+                                    <Text adjustsFontSizeToFit numberOfLines={1} style={[s.segmentBtnText, viewMode === 'code' && s.segmentBtnTextActive]}>{t.giteaCode}</Text>
+                                </TouchableOpacity>
+                            </View>
+                        ) : null}
 
                         {fileContentQuery.isLoading ? (
                             <View style={s.fileContentLoading}>
@@ -341,15 +554,75 @@ export default function GiteaRepoDetail() {
                                         <Maximize2 size={16} color={GITEA_COLOR} />
                                     </TouchableOpacity>
                                 </View>
-                                <ScrollView nestedScrollEnabled style={s.fileContentScroll}>
-                                    <ScrollView horizontal showsHorizontalScrollIndicator>
-                                        <View style={s.fileContentTextContainer}>
-                                            <Text style={s.fileContentText} selectable>
-                                                {decodedContent || t.noData}
-                                            </Text>
+                                {fileContent && fileContent.size > 100000 ? (
+                                    <View style={{ padding: 24, alignItems: 'center' }}>
+                                        <FileText size={48} color={colors.textMuted} />
+                                        <Text style={{ color: colors.text, marginTop: 12, textAlign: 'center' }}>
+                                            {t.error} - File too large for preview ({formatBytes(fileContent.size)})
+                                        </Text>
+                                    </View>
+                                ) : isImageFile(viewingFile) ? (
+                                    viewMode === 'preview' ? (
+                                        <View style={[s.fileImageContainer, { padding: 16 }]}>
+                                            <Image
+                                                source={{ uri: `data:image/${viewingFile?.split('.').pop()};base64,${fileContentQuery.data?.content?.replace(/[\n\r]/g, '') || ''}` }}
+                                                style={[s.fileImage, { width: windowWidth - 64, height: 300 }]}
+                                                contentFit="contain"
+                                                transition={200}
+                                            />
                                         </View>
+                                    ) : (
+                                        <ScrollView nestedScrollEnabled style={s.fileContentScroll}>
+                                            <ScrollView horizontal showsHorizontalScrollIndicator>
+                                                <View style={s.fileContentTextContainer}>
+                                                    <Text style={s.fileContentText} selectable>
+                                                        {decodedContent || t.noData}
+                                                    </Text>
+                                                </View>
+                                            </ScrollView>
+                                        </ScrollView>
+                                    )
+                                ) : viewingFile.toLowerCase().endsWith('.md') ? (
+                                    <ScrollView nestedScrollEnabled style={s.fileContentScroll}>
+                                        {viewMode === 'preview' ? (
+                                            <View style={s.fileMarkdownContainer}>
+                                                <Markdown style={markdownStyles} rules={markdownRules}>
+                                                    {decodedContent || t.noData}
+                                                </Markdown>
+                                            </View>
+                                        ) : (
+                                            <ScrollView horizontal showsHorizontalScrollIndicator>
+                                                <View style={s.fileContentTextContainer}>
+                                                    <Text style={s.fileContentText} selectable>
+                                                        {decodedContent || t.noData}
+                                                    </Text>
+                                                </View>
+                                            </ScrollView>
+                                        )}
                                     </ScrollView>
-                                </ScrollView>
+                                ) : (
+                                    <ScrollView nestedScrollEnabled style={s.fileContentScroll}>
+                                        {viewMode === 'preview' ? (
+                                            <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={{ flexGrow: 1 }}>
+                                                <View style={{ padding: 16 }}>
+                                                    <CodeHighlighter
+                                                        code={decodedContent || t.noData}
+                                                        extension={(viewingFile || '').split('.').pop() || ''}
+                                                        colors={colors}
+                                                    />
+                                                </View>
+                                            </ScrollView>
+                                        ) : (
+                                            <ScrollView horizontal showsHorizontalScrollIndicator>
+                                                <View style={s.fileContentTextContainer}>
+                                                    <Text style={s.fileContentText} selectable>
+                                                        {decodedContent || t.noData}
+                                                    </Text>
+                                                </View>
+                                            </ScrollView>
+                                        )}
+                                    </ScrollView>
+                                )}
                             </View>
                         )}
                     </View>
@@ -477,7 +750,46 @@ export default function GiteaRepoDetail() {
                 )}
 
                 <View style={{ height: 30 }} />
+                <View style={{ height: 30 }} />
             </ScrollView>
+
+            <Modal visible={showBranchModal} animationType="fade" transparent={true} onRequestClose={() => setShowBranchModal(false)}>
+                <View style={s.modalOverlay}>
+                    <View style={[s.modalContent, { backgroundColor: colors.surface }]}>
+                        <View style={s.modalHeader}>
+                            <Text style={[s.modalTitle, { color: colors.text }]}>Branch</Text>
+                            <TouchableOpacity onPress={() => setShowBranchModal(false)} style={s.modalCloseBtn} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+                                <X size={20} color={colors.textMuted} />
+                            </TouchableOpacity>
+                        </View>
+                        <ScrollView style={s.modalScroll}>
+                            {branchesQuery.data?.map(b => (
+                                <TouchableOpacity
+                                    key={b.name}
+                                    style={[s.modalBranchItem, effectiveBranch === b.name && { backgroundColor: GITEA_COLOR + '18' }]}
+                                    onPress={() => {
+                                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                                        setSelectedBranch(b.name);
+                                        setShowBranchModal(false);
+                                        // Reset view state safely
+                                        router.replace(`/gitea/${owner}-${repoName}?owner=${owner}&repoName=${repoName}`);
+                                    }}
+                                >
+                                    <GitBranch size={16} color={effectiveBranch === b.name ? GITEA_COLOR : colors.textMuted} />
+                                    <Text style={[s.modalBranchText, { color: effectiveBranch === b.name ? GITEA_COLOR : colors.text }]}>
+                                        {b.name}
+                                    </Text>
+                                    {b.name === repo?.default_branch && (
+                                        <View style={s.defaultBadge}>
+                                            <Text style={s.defaultBadgeText}>default</Text>
+                                        </View>
+                                    )}
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    </View>
+                </View>
+            </Modal>
 
             <Modal
                 visible={fullscreenFile && !!viewingFile}
@@ -502,15 +814,68 @@ export default function GiteaRepoDetail() {
                             </TouchableOpacity>
                         </View>
                     </View>
-                    <ScrollView style={s.fullscreenScroll} contentContainerStyle={s.fullscreenScrollContent}>
-                        <ScrollView horizontal showsHorizontalScrollIndicator>
-                            <View style={s.fileContentTextContainer}>
-                                <Text style={[s.fileContentText, { color: colors.text }]} selectable>
-                                    {decodedContent || t.noData}
-                                </Text>
+                    {isImageFile(viewingFile) ? (
+                        viewMode === 'preview' ? (
+                            <View style={[s.fullscreenContainer, { justifyContent: 'center', alignItems: 'center' }]}>
+                                <Image
+                                    source={{ uri: `data:image/${viewingFile?.split('.').pop()};base64,${fileContentQuery.data?.content?.replace(/\n/g, '')}` }}
+                                    style={{ width: windowWidth, height: '80%' }}
+                                    contentFit="contain"
+                                    transition={200}
+                                />
                             </View>
+                        ) : (
+                            <ScrollView style={s.fullscreenScroll} contentContainerStyle={s.fullscreenScrollContent}>
+                                <ScrollView horizontal showsHorizontalScrollIndicator>
+                                    <View style={s.fileContentTextContainer}>
+                                        <Text style={[s.fileContentText, { color: colors.text }]} selectable>
+                                            {decodedContent || t.noData}
+                                        </Text>
+                                    </View>
+                                </ScrollView>
+                            </ScrollView>
+                        )
+                    ) : viewingFile?.toLowerCase().endsWith('.md') ? (
+                        <ScrollView style={s.fullscreenScroll} contentContainerStyle={s.fullscreenScrollContent}>
+                            <ScrollView horizontal showsHorizontalScrollIndicator={viewMode === 'code'}>
+                                {viewMode === 'preview' ? (
+                                    <View style={[s.fileMarkdownContainer, { padding: 16, minWidth: '100%' }]}>
+                                        <Markdown style={markdownStyles} rules={markdownRules}>
+                                            {decodedContent || t.noData}
+                                        </Markdown>
+                                    </View>
+                                ) : (
+                                    <View style={s.fileContentTextContainer}>
+                                        <Text style={[s.fileContentText, { color: colors.text }]} selectable>
+                                            {decodedContent || t.noData}
+                                        </Text>
+                                    </View>
+                                )}
+                            </ScrollView>
                         </ScrollView>
-                    </ScrollView>
+                    ) : (
+                        <ScrollView style={s.fullscreenScroll} contentContainerStyle={s.fullscreenScrollContent}>
+                            {viewMode === 'preview' ? (
+                                <ScrollView horizontal showsHorizontalScrollIndicator contentContainerStyle={{ flexGrow: 1 }}>
+                                    <View style={{ padding: 16 }}>
+                                        <CodeHighlighter
+                                            code={decodedContent || t.noData}
+                                            extension={(viewingFile || '').split('.').pop() || ''}
+                                            colors={colors}
+                                        />
+                                    </View>
+                                </ScrollView>
+                            ) : (
+                                <ScrollView horizontal showsHorizontalScrollIndicator>
+                                    <View style={s.fileContentTextContainer}>
+                                        <Text style={[s.fileContentText, { color: colors.text }]} selectable>
+                                            {decodedContent || t.noData}
+                                        </Text>
+                                    </View>
+                                </ScrollView>
+                            )}
+                        </ScrollView>
+                    )}
                 </View>
             </Modal>
         </>
@@ -559,6 +924,8 @@ function makeStyles(colors: ThemeColors) {
         fileContentSize: { fontSize: 11, color: colors.textMuted },
         fileActionBtn: { padding: 6 },
         fileContentScroll: { maxHeight: 500 },
+        fileImageContainer: { alignItems: 'center', justifyContent: 'center' },
+        fileImage: { borderRadius: 12 },
         fileContentTextContainer: { minWidth: '100%', padding: 16 },
         fileContentText: { fontFamily: 'monospace', fontSize: 13, lineHeight: 20, color: colors.text },
         commitList: { backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.border, overflow: 'hidden', paddingLeft: 8 },
@@ -591,12 +958,31 @@ function makeStyles(colors: ThemeColors) {
         branchItemBorder: { borderBottomWidth: 1, borderBottomColor: colors.border },
         branchIcon: { width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center' },
         branchContent: { flex: 1 },
-        branchNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+        branchNameRow: { flexDirection: 'row', alignItems: 'center', gap: 6, flex: 1, paddingRight: 8 },
         branchName: { fontSize: 14, color: colors.text, fontWeight: '600' as const },
         protectedBadge: { padding: 2 },
         defaultBadge: { backgroundColor: GITEA_COLOR + '18', paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6 },
         defaultBadgeText: { fontSize: 10, color: GITEA_COLOR, fontWeight: '600' as const },
         branchCommit: { fontSize: 12, color: colors.textMuted, marginTop: 3 },
+        branchSelectorBtn: { flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: GITEA_COLOR + '15', paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8, maxWidth: 160 },
+        segmentControl: { flexDirection: 'row', backgroundColor: colors.surfaceHover, borderRadius: 10, padding: 4, marginBottom: 16, borderWidth: 1, borderColor: colors.border },
+        segmentBtn: { flex: 1, paddingVertical: 8, alignItems: 'center', borderRadius: 8 },
+        segmentBtnActive: { backgroundColor: colors.surface, shadowColor: '#000', shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.1, shadowRadius: 2, elevation: 2 },
+        segmentBtnText: { fontSize: 13, color: colors.textSecondary, fontWeight: '500' as const },
+        segmentBtnTextActive: { color: GITEA_COLOR, fontWeight: '600' as const },
+        fileMarkdownContainer: { padding: 16 },
+        readmeCard: { backgroundColor: colors.surface, borderRadius: 16, borderWidth: 1, borderColor: colors.border, marginTop: 16, overflow: 'hidden' },
+        readmeHeader: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: colors.border, backgroundColor: colors.surfaceHover },
+        readmeTitle: { fontSize: 14, fontWeight: '600' as const, color: colors.text },
+        readmeContent: { padding: 16 },
+        modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'flex-end' },
+        modalContent: { borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '80%', paddingBottom: 40 },
+        modalHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 20, paddingVertical: 16, borderBottomWidth: 1, borderBottomColor: colors.border },
+        modalTitle: { fontSize: 18, fontWeight: '700' as const },
+        modalCloseBtn: { padding: 4 },
+        modalScroll: { padding: 16, paddingBottom: 40 },
+        modalBranchItem: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 14, paddingHorizontal: 16, borderRadius: 12, marginBottom: 8 },
+        modalBranchText: { fontSize: 15, fontWeight: '500' as const, flex: 1 },
         fullscreenContainer: { flex: 1 },
         fullscreenHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 16, paddingVertical: 14, paddingTop: 60, borderBottomWidth: 1 },
         fullscreenHeaderLeft: { flexDirection: 'row', alignItems: 'center', gap: 8, flex: 1, marginRight: 12 },

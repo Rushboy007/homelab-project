@@ -10,9 +10,10 @@ import {
 
 const REQUEST_TIMEOUT = 8000;
 
-class PiholeAPI {
-    private baseUrl: string = '';
-    private fallbackUrl: string = '';
+import { BaseAPIClient } from './api-client';
+
+class PiholeAPI extends BaseAPIClient {
+    protected readonly serviceType = 'pihole';
     private sid: string = '';
 
     configure(url: string, sid: string, fallbackUrl?: string) {
@@ -23,23 +24,11 @@ class PiholeAPI {
     }
 
     setFallbackUrl(fallbackUrl: string) {
-        this.fallbackUrl = fallbackUrl.replace(/\/+$/, '');
-        console.log('[PiholeAPI] Fallback URL set:', this.fallbackUrl);
+        super.setFallbackUrl(fallbackUrl);
     }
 
     getFallbackUrl(): string {
-        return this.fallbackUrl;
-    }
-
-    private async fetchWithTimeout(url: string, options: RequestInit = {}): Promise<Response> {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
-        try {
-            const response = await fetch(url, { ...options, signal: controller.signal });
-            return response;
-        } finally {
-            clearTimeout(timeout);
-        }
+        return super.getFallbackUrl();
     }
 
     private async request<T>(path: string, options: RequestInit = {}): Promise<T> {
@@ -48,35 +37,7 @@ class PiholeAPI {
             'X-FTL-SID': this.sid,
             ...options.headers,
         };
-        const fetchOpts = { ...options, headers };
-
-        const primaryUrl = `${this.baseUrl}/api${path}`;
-        console.log('[PiholeAPI] Request:', options.method || 'GET', primaryUrl);
-
-        try {
-            const response = await this.fetchWithTimeout(primaryUrl, fetchOpts);
-            if (!response.ok) {
-                const errorText = await response.text().catch(() => 'Unknown error');
-                throw new Error(`Pi-hole API error: ${response.status}`);
-            }
-            return response.json() as Promise<T>;
-        } catch (primaryError) {
-            if (this.fallbackUrl) {
-                const fallbackFullUrl = `${this.fallbackUrl}/api${path}`;
-                console.log('[PiholeAPI] Primary failed, trying fallback:', fallbackFullUrl);
-                try {
-                    const response = await this.fetchWithTimeout(fallbackFullUrl, fetchOpts);
-                    if (!response.ok) {
-                        throw new Error(`Pi-hole API error: ${response.status}`);
-                    }
-                    return response.json() as Promise<T>;
-                } catch (fallbackError) {
-                    console.log('[PiholeAPI] Fallback also failed:', (fallbackError as Error).message);
-                    throw new Error(`Connessione fallita su entrambi gli URL. Verifica la rete.`);
-                }
-            }
-            throw primaryError;
-        }
+        return this.requestBase<T>(`/api${path}`, { ...options, headers });
     }
 
     async authenticate(url: string, password: string): Promise<string> {

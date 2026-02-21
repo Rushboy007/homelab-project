@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { useThemeColors } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 interface StatCardProps {
     label: string;
@@ -10,7 +10,7 @@ interface StatCardProps {
 }
 
 export default React.memo(function StatCard({ label, value, icon, color }: StatCardProps) {
-    const colors = useThemeColors();
+    const colors = useSettingsStore(s => s.getThemeColors());
     const accentColor = color ?? colors.accent;
 
     return (

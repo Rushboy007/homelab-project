@@ -3,15 +3,11 @@ import {
     View,
     Text,
     StyleSheet,
-    ScrollView,
-    RefreshControl,
     TouchableOpacity,
     Alert,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { SkeletonCard } from '@/components/SkeletonLoader';
+import { ServiceDashboardLayout } from '@/components/ServiceDashboardLayout';
 import {
     Shield,
     ShieldOff,
@@ -21,25 +17,21 @@ import {
     Globe,
     Users,
     Database,
-    Zap,
-    RefreshCw,
     Clock,
-    Server,
-    AlertTriangle,
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
-import { useServices } from '@/contexts/ServicesContext';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useServicesStore } from '@/store/useServicesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
 import { piholeApi } from '@/services/pihole-api';
 import { ThemeColors } from '@/constants/themes';
 
 const PIHOLE_COLOR = '#CD2326';
 
 export default function PiholeDashboard() {
-    const { getConnection } = useServices();
+    const { getConnection } = useServicesStore();
     const connection = getConnection('pihole');
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const queryClient = useQueryClient();
 
     const statsQuery = useQuery({
@@ -138,16 +130,6 @@ export default function PiholeDashboard() {
 
     const s = makeStyles(colors);
 
-    if (statsQuery.isLoading && !stats) {
-        return (
-            <View style={s.loadingContainer}>
-                <SkeletonCard />
-                <SkeletonCard />
-                <SkeletonCard />
-            </View>
-        );
-    }
-
     const formatNumber = (n: number): string => {
         if (n >= 1000000) return `${(n / 1000000).toFixed(1)}M`;
         if (n >= 1000) return `${(n / 1000).toFixed(1)}K`;
@@ -178,10 +160,13 @@ export default function PiholeDashboard() {
     const forwardedPercent = (forwardedQueries / maxQuery) * 100;
 
     return (
-        <ScrollView
-            style={s.container}
-            contentContainerStyle={s.content}
-            refreshControl={<RefreshControl refreshing={false} onRefresh={onRefresh} tintColor={PIHOLE_COLOR} />}
+        <ServiceDashboardLayout
+            isLoading={statsQuery.isLoading && !stats}
+            isError={statsQuery.isError}
+            errorMessage={statsQuery.error?.message || t.loginErrorFailed}
+            onRefresh={onRefresh}
+            onRetry={() => statsQuery.refetch()}
+            refreshColor={PIHOLE_COLOR}
         >
             <TouchableOpacity
                 style={[s.blockingCard, { borderColor: isBlocking ? colors.running + '44' : colors.stopped + '44' }]}
@@ -215,15 +200,15 @@ export default function PiholeDashboard() {
                                 <View style={[s.statIconWrap, { backgroundColor: PIHOLE_COLOR + '18' }]}>
                                     <Search size={18} color={PIHOLE_COLOR} />
                                 </View>
-                                <Text style={s.statValue}>{formatNumber(totalQueries)}</Text>
-                                <Text style={s.statLabel}>{t.piholeTotalQueries}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.statValue}>{formatNumber(totalQueries)}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.statLabel}>{t.piholeTotalQueries}</Text>
                             </View>
                             <View style={s.statCard}>
                                 <View style={[s.statIconWrap, { backgroundColor: colors.stopped + '18' }]}>
                                     <Ban size={18} color={colors.stopped} />
                                 </View>
-                                <Text style={s.statValue}>{formatNumber(blockedQueries)}</Text>
-                                <Text style={s.statLabel}>{t.piholeBlockedQueries}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.statValue}>{formatNumber(blockedQueries)}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.statLabel}>{t.piholeBlockedQueries}</Text>
                             </View>
                         </View>
                         <View style={s.statsGrid}>
@@ -231,15 +216,15 @@ export default function PiholeDashboard() {
                                 <View style={[s.statIconWrap, { backgroundColor: colors.warning + '18' }]}>
                                     <BarChart3 size={18} color={colors.warning} />
                                 </View>
-                                <Text style={s.statValue}>{(stats.queries?.percent_blocked ?? 0).toFixed(1)}%</Text>
-                                <Text style={s.statLabel}>{t.piholePercentBlocked}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.statValue}>{(stats.queries?.percent_blocked ?? 0).toFixed(1)}%</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.statLabel}>{t.piholePercentBlocked}</Text>
                             </View>
                             <View style={s.statCard}>
                                 <View style={[s.statIconWrap, { backgroundColor: colors.info + '18' }]}>
                                     <Globe size={18} color={colors.info} />
                                 </View>
-                                <Text style={s.statValue}>{formatNumber(uniqueDomains)}</Text>
-                                <Text style={s.statLabel}>{t.piholeUniqueDomains}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.statValue}>{formatNumber(uniqueDomains)}</Text>
+                                <Text adjustsFontSizeToFit numberOfLines={1} style={s.statLabel}>{t.piholeUniqueDomains}</Text>
                             </View>
                         </View>
                     </View>
@@ -374,12 +359,11 @@ export default function PiholeDashboard() {
                 </View>
             )}
 
-            <View style={{ height: 30 }} />
-        </ScrollView>
+        </ServiceDashboardLayout>
     );
 }
 
-function QueryGraph({ history, colors }: { history: Array<{ timestamp: number; total: number; blocked: number }>; colors: ThemeColors }) {
+function QueryGraph({ history, colors }: { history: { timestamp: number; total: number; blocked: number }[]; colors: ThemeColors }) {
     const recent = history.slice(-24);
     const maxVal = Math.max(1, ...recent.map(h => h.total));
     const graphHeight = 100;
@@ -415,10 +399,6 @@ function QueryGraph({ history, colors }: { history: Array<{ timestamp: number; t
 
 function makeStyles(colors: ThemeColors) {
     return StyleSheet.create({
-        container: { flex: 1, backgroundColor: colors.background },
-        content: { paddingHorizontal: 16, paddingTop: 16 },
-        loadingContainer: { flex: 1, backgroundColor: colors.background, alignItems: 'center', justifyContent: 'center', gap: 12 },
-        loadingText: { color: colors.textSecondary, fontSize: 14 },
         blockingCard: { flexDirection: 'row', alignItems: 'center', backgroundColor: colors.surface, borderRadius: 18, padding: 18, borderWidth: 1.5, marginBottom: 24, gap: 14 },
         blockingIconWrap: { width: 56, height: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
         blockingContent: { flex: 1 },

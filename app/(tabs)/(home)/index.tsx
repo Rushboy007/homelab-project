@@ -19,8 +19,9 @@ import {
 } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import Animated, { FadeInDown, FadeIn } from 'react-native-reanimated';
-import { useServices } from '@/contexts/ServicesContext';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useServicesStore } from '@/store/useServicesStore';
+import { useSettingsStore } from '@/store/useSettingsStore';
+import { Translations } from '@/constants/translations';
 import { ServiceType, SERVICE_COLORS } from '@/types/services';
 import { ThemeColors } from '@/constants/themes';
 import { DashboardSummary } from './DashboardSummary';
@@ -33,8 +34,8 @@ const CARD_WIDTH = (width - 32 - CARD_GAP) / 2;
 
 interface ServiceItem {
     type: ServiceType;
-    nameKey: keyof ReturnType<typeof useTranslations>;
-    descKey: keyof ReturnType<typeof useTranslations>;
+    nameKey: keyof Translations;
+    descKey: keyof Translations;
     icon: (color: string, size: number) => React.ReactNode;
 }
 
@@ -68,9 +69,9 @@ const SERVICES: ServiceItem[] = [
 export default function LauncherScreen() {
     const insets = useSafeAreaInsets();
     const router = useRouter();
-    const { isConnected, connectedCount, isReachable } = useServices();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const { isConnected, connectedCount, isReachable } = useServicesStore();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
 
     const handleServicePress = useCallback((type: ServiceType) => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -132,7 +133,7 @@ export default function LauncherScreen() {
                         >
                             <View style={s.headerBadgeInner}>
                                 <Zap size={14} color={colors.accent} />
-                                <Text style={s.headerBadgeText}>{connectedCount}/4</Text>
+                                <Text style={s.headerBadgeText}>{connectedCount()}/4</Text>
                             </View>
                         </GlassButtonWrapper>
                     </View>
@@ -162,7 +163,7 @@ export default function LauncherScreen() {
                     style={s.footer}
                 >
                     <Text style={s.footerText}>
-                        {t.launcherServices} • {connectedCount} {t.launcherConnected.toLowerCase()}
+                        {t.launcherServices} • {connectedCount()} {t.launcherConnected.toLowerCase()}
                     </Text>
                 </Animated.View>
             </ScrollView>
@@ -184,7 +185,7 @@ const ServiceCard = React.memo(function ServiceCard({
     /** true=ok | false=offline | null=pinging | undefined=not configured */
     reachable: boolean | null | undefined;
     colors: ThemeColors;
-    t: ReturnType<typeof useTranslations>;
+    t: Translations;
     onPress: () => void;
     index: number;
 }) {

@@ -11,18 +11,18 @@ import {
     Pressable,
     ActivityIndicator,
 } from 'react-native';
-import { useServices } from '@/contexts/ServicesContext';
+import { useServicesStore } from '@/store/useServicesStore';
 import { ServiceType } from '@/types/services';
-import { useThemeColors, useTranslations } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 interface OfflineBannerProps {
     serviceType: ServiceType;
 }
 
 export function OfflineBanner({ serviceType }: OfflineBannerProps) {
-    const { checkReachability, isPinging } = useServices();
-    const colors = useThemeColors();
-    const t = useTranslations();
+    const { checkReachability, isPinging } = useServicesStore();
+    const colors = useSettingsStore(s => s.getThemeColors());
+    const t = useSettingsStore(s => s.getTranslations());
     const pinging = isPinging(serviceType);
 
     return (

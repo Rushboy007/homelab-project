@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import Animated, {
     useSharedValue,
     useAnimatedStyle,
@@ -8,7 +8,7 @@ import Animated, {
     withSequence,
     Easing,
 } from 'react-native-reanimated';
-import { useThemeColors } from '@/contexts/SettingsContext';
+import { useSettingsStore } from '@/store/useSettingsStore';
 
 interface SkeletonLoaderProps {
     width?: number | string;
@@ -25,7 +25,7 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
     style,
     flex,
 }) => {
-    const colors = useThemeColors();
+    const colors = useSettingsStore(s => s.getThemeColors());
     const opacity = useSharedValue(0.3);
 
     useEffect(() => {
@@ -57,7 +57,7 @@ export const SkeletonLoader: React.FC<SkeletonLoaderProps> = ({
 };
 
 export const SkeletonCard: React.FC = () => {
-    const colors = useThemeColors();
+    const colors = useSettingsStore(s => s.getThemeColors());
 
     return (
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
