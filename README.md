@@ -2,6 +2,10 @@
 
 A premium, fully native dual-platform solution for monitoring and managing your personal Homelab ecosystem. This project features two distinct, purpose-built native applications sharing the same design soul but optimized for their respective platforms.
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=JohnnWi/homelab-project&type=date&legend=top-left)](https://www.star-history.com/#JohnnWi/homelab-project&type=date&legend=top-left)
+
 ---
 
 ## 📱 iOS Version (Swift Native + Liquid Glass)
