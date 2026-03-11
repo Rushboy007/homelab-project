@@ -24,7 +24,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,7 +35,6 @@ import com.homelab.app.data.remote.dto.beszel.BeszelSmartDevice
 import com.homelab.app.ui.common.ErrorScreen
 import com.homelab.app.ui.theme.StatusOrange
 import com.homelab.app.ui.theme.StatusPurple
-import com.homelab.app.ui.theme.primaryColor
 import com.homelab.app.util.ServiceType
 import com.homelab.app.util.UiState
 
@@ -66,7 +64,7 @@ fun BeszelSystemDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                             contentDescription = stringResource(R.string.back)
                         )
                     }
@@ -74,7 +72,7 @@ fun BeszelSystemDetailScreen(
                 actions = {
                     IconButton(onClick = { viewModel.fetchSystemDetail(systemId) }) {
                         Icon(
-                            Icons.Filled.Refresh,
+                            imageVector = Icons.Filled.Refresh,
                             contentDescription = stringResource(R.string.refresh)
                         )
                     }
@@ -192,11 +190,13 @@ private fun BeszelSystemDetailContent(
                     )
                 }
             }
+
             model.perCoreCpuPercent.takeIf { it.isNotEmpty() }?.let { cores ->
                 item {
                     PerCoreCpuSection(cores = cores)
                 }
             }
+
             if (model.containers.isNotEmpty()) {
                 item {
                     ContainersSection(containers = model.containers)

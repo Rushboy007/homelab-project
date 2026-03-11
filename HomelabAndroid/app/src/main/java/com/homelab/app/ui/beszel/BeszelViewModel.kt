@@ -1,36 +1,45 @@
 package com.homelab.app.ui.beszel
 
+import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import android.content.Context
 import com.homelab.app.data.remote.dto.beszel.BeszelContainer
 import com.homelab.app.data.remote.dto.beszel.BeszelRecordStats
+import com.homelab.app.data.remote.dto.beszel.BeszelSmartDevice
 import com.homelab.app.data.remote.dto.beszel.BeszelSystem
 import com.homelab.app.data.remote.dto.beszel.BeszelSystemDetails
 import com.homelab.app.data.remote.dto.beszel.BeszelSystemRecord
-import com.homelab.app.data.remote.dto.beszel.BeszelSmartDevice
 import com.homelab.app.data.repository.BeszelRepository
+import com.homelab.app.data.repository.ServicesRepository
+import com.homelab.app.domain.model.ServiceInstance
 import com.homelab.app.util.ErrorHandler
 import com.homelab.app.util.Logger
+import com.homelab.app.util.ServiceType
 import com.homelab.app.util.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
 @HiltViewModel
 class BeszelViewModel @Inject constructor(
     private val repository: BeszelRepository,
+    private val servicesRepository: ServicesRepository,
+    savedStateHandle: SavedStateHandle,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private var systemDetailRequestToken: Long = 0
+
+    val instanceId: String = checkNotNull(savedStateHandle["instanceId"])
 
     private val _systemsState = MutableStateFlow<UiState<List<BeszelSystem>>>(UiState.Loading)
     val systemsState: StateFlow<UiState<List<BeszelSystem>>> = _systemsState
@@ -46,6 +55,10 @@ class BeszelViewModel @Inject constructor(
 
     private val _smartDevices = MutableStateFlow<List<BeszelSmartDevice>>(emptyList())
     val smartDevices: StateFlow<List<BeszelSmartDevice>> = _smartDevices
+
+    val instances: StateFlow<List<ServiceInstance>> = servicesRepository.instancesByType
+        .map { it[ServiceType.BESZEL].orEmpty() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     internal val systemDetailUiModel: StateFlow<BeszelSystemDetailUiModel?> = combine(
         _systemDetailState,
@@ -73,10 +86,9 @@ class BeszelViewModel @Inject constructor(
         viewModelScope.launch {
             _systemsState.value = UiState.Loading
             try {
-                val systems = repository.getSystems()
-                _systemsState.value = UiState.Success(systems)
-            } catch (e: Exception) {
-                val message = ErrorHandler.getMessage(context, e)
+                _systemsState.value = UiState.Success(repository.getSystems(instanceId))
+            } catch (error: Exception) {
+                val message = ErrorHandler.getMessage(context, error)
                 _systemsState.value = UiState.Error(message, retryAction = { fetchSystems() })
             }
         }
@@ -89,15 +101,15 @@ class BeszelViewModel @Inject constructor(
             _systemDetails.value = null
             _records.value = emptyList()
             _smartDevices.value = emptyList()
+
             try {
-                val system = repository.getSystem(systemId)
+                val system = repository.getSystem(instanceId, systemId)
                 if (requestToken != systemDetailRequestToken) return@launch
                 _systemDetailState.value = UiState.Success(system)
 
-                // Fire-and-forget: extended system details (non-critical)
                 launch {
                     try {
-                        val details = repository.getSystemDetails(systemId)
+                        val details = repository.getSystemDetails(instanceId, systemId)
                         if (requestToken == systemDetailRequestToken) {
                             _systemDetails.value = details
                         }
@@ -108,11 +120,9 @@ class BeszelViewModel @Inject constructor(
                     }
                 }
 
-                // Fire-and-forget: records (non-critical)
                 launch {
                     try {
-                        val rawRecords = repository.getSystemRecords(systemId, limit = 60)
-                        // The API returns newest records first. Sort chronologically so graphs plot left to right natively.
+                        val rawRecords = repository.getSystemRecords(instanceId, systemId, limit = 60)
                         if (requestToken == systemDetailRequestToken) {
                             _records.value = rawRecords.sortedBy { it.created }
                         }
@@ -123,10 +133,9 @@ class BeszelViewModel @Inject constructor(
                     }
                 }
 
-                // Fire-and-forget: SMART devices (non-critical, may not be configured)
                 launch {
                     try {
-                        val devices = repository.getSmartDevices(systemId)
+                        val devices = repository.getSmartDevices(instanceId, systemId)
                         if (requestToken == systemDetailRequestToken) {
                             _smartDevices.value = devices
                         }
@@ -136,11 +145,17 @@ class BeszelViewModel @Inject constructor(
                         }
                     }
                 }
-            } catch (e: Exception) {
+            } catch (error: Exception) {
                 if (requestToken != systemDetailRequestToken) return@launch
-                val message = ErrorHandler.getMessage(context, e)
+                val message = ErrorHandler.getMessage(context, error)
                 _systemDetailState.value = UiState.Error(message, retryAction = { fetchSystemDetail(systemId) })
             }
+        }
+    }
+
+    fun setPreferredInstance(newInstanceId: String) {
+        viewModelScope.launch {
+            servicesRepository.setPreferredInstance(ServiceType.BESZEL, newInstanceId)
         }
     }
 

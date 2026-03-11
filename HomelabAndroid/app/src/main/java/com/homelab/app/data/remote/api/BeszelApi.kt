@@ -26,17 +26,20 @@ interface BeszelApi {
         @Query("perPage") perPage: Int = 50,
         // Only fetch fields needed for the dashboard: identity + CPU/memory + disk (root + extra filesystems).
         @Query("fields") fields: String = "id,name,host,status,info.cpu,info.mp,info.dp,info.efs"
+        @Header("X-Homelab-Instance-Id") instanceId: String
     ): BeszelSystemsResponse
 
     @GET("api/collections/systems/records/{id}")
     suspend fun getSystem(
         @Header("X-Homelab-Service") service: String = "Beszel",
+        @Header("X-Homelab-Instance-Id") instanceId: String,
         @Path("id") id: String
     ): BeszelSystem
 
     @GET("api/collections/system_stats/records?sort=-created")
     suspend fun getSystemRecords(
         @Header("X-Homelab-Service") service: String = "Beszel",
+        @Header("X-Homelab-Instance-Id") instanceId: String,
         @Query("filter", encoded = true) filter: String,
         @Query("perPage") limit: Int = 30
     ): BeszelRecordsResponse
@@ -44,6 +47,7 @@ interface BeszelApi {
     @GET("api/collections/system_details/records")
     suspend fun getSystemDetails(
         @Header("X-Homelab-Service") service: String = "Beszel",
+        @Header("X-Homelab-Instance-Id") instanceId: String,
         @Query("filter", encoded = true) filter: String,
         @Query("perPage") limit: Int = 1
     ): BeszelSystemDetailsResponse
@@ -51,6 +55,7 @@ interface BeszelApi {
     @GET("api/collections/smart_devices/records")
     suspend fun getSmartDevices(
         @Header("X-Homelab-Service") service: String = "Beszel",
+        @Header("X-Homelab-Instance-Id") instanceId: String,
         @Query("filter", encoded = true) filter: String,
         @Query("perPage") limit: Int = 10
     ): BeszelSmartDevicesResponse
