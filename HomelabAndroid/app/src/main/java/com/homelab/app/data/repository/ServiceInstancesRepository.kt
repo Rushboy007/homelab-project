@@ -46,6 +46,7 @@ class ServiceInstancesRepository @Inject constructor(
 
     suspend fun initialize() {
         migrateLegacyDataIfNeeded()
+        normalizeStoredInstancesIfNeeded()
         repairAllPreferredInstances()
     }
 
@@ -66,10 +67,11 @@ class ServiceInstancesRepository @Inject constructor(
     }
 
     suspend fun saveInstance(instance: ServiceInstance) {
-        dao.upsert(instance.toEntity())
-        val currentPreferred = settingsManager.preferredInstanceId(instance.type).first()
+        val normalized = normalizeInstance(instance)
+        dao.upsert(normalized.toEntity())
+        val currentPreferred = settingsManager.preferredInstanceId(normalized.type).first()
         if (currentPreferred.isNullOrBlank()) {
-            settingsManager.setPreferredInstanceId(instance.type, instance.id)
+            settingsManager.setPreferredInstanceId(normalized.type, normalized.id)
         }
     }
 
@@ -101,7 +103,7 @@ class ServiceInstancesRepository @Inject constructor(
                 val legacy = settingsManager.getLegacyConnection(type)
 
                 if (legacy != null && existing.isEmpty()) {
-                    val migrated = legacy.migratedInstance(UUID.randomUUID().toString())
+                    val migrated = normalizeInstance(legacy.migratedInstance(UUID.randomUUID().toString()))
                     dao.upsert(migrated.toEntity())
                     settingsManager.setPreferredInstanceId(type, migrated.id)
                 } else if (existing.isNotEmpty()) {
@@ -115,6 +117,25 @@ class ServiceInstancesRepository @Inject constructor(
             }
 
         settingsManager.setServiceInstancesMigrated(true)
+    }
+
+    private suspend fun normalizeStoredInstancesIfNeeded() {
+        val entities = dao.getAll()
+        if (entities.isEmpty()) return
+
+        val normalized = entities.map { entity ->
+            val normalizedUrl = normalizeUrl(entity.url)
+            val normalizedFallback = normalizeOptionalUrl(entity.fallbackUrl)
+            if (normalizedUrl == entity.url && normalizedFallback == entity.fallbackUrl) {
+                entity
+            } else {
+                entity.copy(url = normalizedUrl, fallbackUrl = normalizedFallback)
+            }
+        }
+
+        if (normalized != entities) {
+            dao.upsertAll(normalized)
+        }
     }
 
     suspend fun repairAllPreferredInstances() {
@@ -142,7 +163,8 @@ private fun ServiceInstanceEntity.toDomain(): ServiceInstance {
         apiKey = apiKey,
         piholePassword = piholePassword,
         piholeAuthMode = piholeAuthMode?.let(PiHoleAuthMode::valueOf),
-        fallbackUrl = fallbackUrl
+        fallbackUrl = fallbackUrl,
+        allowSelfSigned = allowSelfSigned
     )
 }
 
@@ -157,6 +179,31 @@ private fun ServiceInstance.toEntity(): ServiceInstanceEntity {
         apiKey = apiKey,
         piholePassword = piholePassword,
         piholeAuthMode = piholeAuthMode?.name,
-        fallbackUrl = fallbackUrl
+        fallbackUrl = fallbackUrl,
+        allowSelfSigned = allowSelfSigned
     )
+}
+
+private fun normalizeUrl(raw: String): String {
+    var clean = raw.trim()
+    clean = clean.trimEnd { it == ')' || it == ']' || it == '}' || it == ',' || it == ';' }
+    if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+        clean = "https://$clean"
+    }
+    return clean.replace(Regex("/+$"), "")
+}
+
+private fun normalizeOptionalUrl(raw: String?): String? {
+    if (raw.isNullOrBlank()) return null
+    val normalized = normalizeUrl(raw)
+    return normalized.ifBlank { null }
+}
+
+private fun normalizeInstance(instance: ServiceInstance): ServiceInstance {
+    val normalizedUrl = normalizeUrl(instance.url)
+    val normalizedFallback = normalizeOptionalUrl(instance.fallbackUrl)
+    if (normalizedUrl == instance.url && normalizedFallback == instance.fallbackUrl) {
+        return instance
+    }
+    return instance.copy(url = normalizedUrl, fallbackUrl = normalizedFallback)
 }

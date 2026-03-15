@@ -13,8 +13,14 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.security.SecureRandom
+import java.security.cert.X509Certificate
 import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
+import javax.inject.Named
+import javax.net.ssl.SSLContext
+import javax.net.ssl.TrustManager
+import javax.net.ssl.X509TrustManager
 
 @Module
 @InstallIn(SingletonComponent::class)
@@ -42,13 +48,68 @@ object NetworkModule {
             }
         }
 
+        val trustAllCerts = arrayOf<TrustManager>(
+            object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
+            }
+        )
+
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, trustAllCerts, SecureRandom())
+        val sslSocketFactory = sslContext.socketFactory
+        val trustManager = trustAllCerts.first() as X509TrustManager
+
         return OkHttpClient.Builder()
-            .connectTimeout(15, TimeUnit.SECONDS) // Breve per non bloccare in attesa
+            .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
             .addInterceptor(smartFallbackInterceptor)
             .addInterceptor(authInterceptor)
             .addInterceptor(loggingInterceptor)
+            .sslSocketFactory(sslSocketFactory, trustManager)
+            .hostnameVerifier { _, _ -> true }
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    @Named("insecure")
+    fun provideInsecureOkHttpClient(
+        smartFallbackInterceptor: SmartFallbackInterceptor,
+        authInterceptor: AuthInterceptor
+    ): OkHttpClient {
+        val loggingInterceptor = HttpLoggingInterceptor().apply {
+            level = if (BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BODY
+            } else {
+                HttpLoggingInterceptor.Level.BASIC
+            }
+        }
+
+        val trustAllCerts = arrayOf<TrustManager>(
+            object : X509TrustManager {
+                override fun checkClientTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun checkServerTrusted(chain: Array<out X509Certificate>?, authType: String?) {}
+                override fun getAcceptedIssuers(): Array<X509Certificate> = emptyArray()
+            }
+        )
+
+        val sslContext = SSLContext.getInstance("TLS")
+        sslContext.init(null, trustAllCerts, SecureRandom())
+        val sslSocketFactory = sslContext.socketFactory
+        val trustManager = trustAllCerts.first() as X509TrustManager
+
+        return OkHttpClient.Builder()
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
+            .addInterceptor(smartFallbackInterceptor)
+            .addInterceptor(authInterceptor)
+            .addInterceptor(loggingInterceptor)
+            .sslSocketFactory(sslSocketFactory, trustManager)
+            .hostnameVerifier { _, _ -> true }
             .build()
     }
 
@@ -56,8 +117,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient, json: Json): Retrofit {
         return Retrofit.Builder()
-            // L'URL base è ininfluente perché lo SmartFallbackInterceptor rimpiazza l'host
-            .baseUrl("https://placeholder.local/") 
+            .baseUrl("https://placeholder.local/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
@@ -65,7 +125,23 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun providePortainerApi(retrofit: Retrofit): com.homelab.app.data.remote.api.PortainerApi {
+    @Named("insecure")
+    fun provideInsecureRetrofit(
+        @Named("insecure") okHttpClient: OkHttpClient,
+        json: Json
+    ): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl("https://placeholder.local/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun providePortainerApi(
+        @Named("insecure") retrofit: Retrofit
+    ): com.homelab.app.data.remote.api.PortainerApi {
         return retrofit.create(com.homelab.app.data.remote.api.PortainerApi::class.java)
     }
 
@@ -85,5 +161,11 @@ object NetworkModule {
     @Singleton
     fun provideGiteaApi(retrofit: Retrofit): com.homelab.app.data.remote.api.GiteaApi {
         return retrofit.create(com.homelab.app.data.remote.api.GiteaApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideNginxProxyManagerApi(retrofit: Retrofit): com.homelab.app.data.remote.api.NginxProxyManagerApi {
+        return retrofit.create(com.homelab.app.data.remote.api.NginxProxyManagerApi::class.java)
     }
 }

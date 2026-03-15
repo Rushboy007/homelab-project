@@ -212,10 +212,11 @@ struct HomeView: View {
     @ViewBuilder
     private func serviceDestination(for route: HomeServiceRoute) -> some View {
         switch route.type {
-        case .portainer: PortainerDashboard(instanceId: route.instanceId)
-        case .pihole: PiHoleDashboard(instanceId: route.instanceId)
-        case .beszel: BeszelDashboard(instanceId: route.instanceId)
-        case .gitea: GiteaDashboard(instanceId: route.instanceId)
+        case .portainer:         PortainerDashboard(instanceId: route.instanceId)
+        case .pihole:            PiHoleDashboard(instanceId: route.instanceId)
+        case .beszel:            BeszelDashboard(instanceId: route.instanceId)
+        case .gitea:             GiteaDashboard(instanceId: route.instanceId)
+        case .nginxProxyManager: NpmDashboard(instanceId: route.instanceId)
         }
     }
 }

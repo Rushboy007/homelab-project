@@ -69,6 +69,11 @@ class AuthInterceptor @Inject constructor(
                         }
                     }
                 }
+                ServiceType.NGINX_PROXY_MANAGER -> {
+                    if (instance.token.isNotBlank()) {
+                        requestBuilder.addHeader("Authorization", "Bearer ${instance.token}")
+                    }
+                }
                 else -> {}
             }
         }

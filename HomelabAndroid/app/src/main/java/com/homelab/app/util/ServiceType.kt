@@ -11,5 +11,6 @@ enum class ServiceType(val displayName: String) {
     PIHOLE("Pi-hole"),
     BESZEL("Beszel"),
     GITEA("Gitea"),
+    NGINX_PROXY_MANAGER("Nginx Proxy Manager"),
     UNKNOWN("Unknown")
 }

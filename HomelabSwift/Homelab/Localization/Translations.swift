@@ -59,10 +59,12 @@ struct Translations {
     let servicePihole: String
     let serviceBeszel: String
     let serviceGitea: String
+    let serviceNpm: String
     let servicePortainerDesc: String
     let servicePiholeDesc: String
     let serviceBeszelDesc: String
     let serviceGiteaDesc: String
+    let serviceNpmDesc: String
 
     // Login
     let loginTitle: String
@@ -286,6 +288,110 @@ struct Translations {
     let giteaBranchLabel: String
     let giteaFileTooLarge: String
 
+    // Nginx Proxy Manager
+    let npmProxyHosts: String
+    let npmRedirections: String
+    let npmStreams: String
+    let npm404Hosts: String
+    let npmHostReport: String
+    let npmNoProxyHosts: String
+    let npmDisabled: String
+    let npmOffline: String
+    let npmCache: String
+    let npmSecurity: String
+    let loginHintNpm: String
+
+    // Nginx Proxy Manager – CRUD
+    let npmOverview: String
+    let npmSslCertificates: String
+    let npmAddProxyHost: String
+    let npmEditProxyHost: String
+    let npmAddRedirection: String
+    let npmEditRedirection: String
+    let npmAddStream: String
+    let npmEditStream: String
+    let npmAddDeadHost: String
+    let npmEditDeadHost: String
+    let npmAddCertificate: String
+    let npmDomainNames: String
+    let npmDomainNamesHint: String
+    let npmForwardScheme: String
+    let npmForwardHost: String
+    let npmForwardPort: String
+    let npmSslForced: String
+    let npmCachingEnabled: String
+    let npmWebsocket: String
+    let npmHttp2: String
+    let npmHsts: String
+    let npmHstsSubdomains: String
+    let npmAdvancedConfig: String
+    let npmEnabled: String
+    let npmForwardHttpCode: String
+    let npmForwardDomain: String
+    let npmPreservePath: String
+    let npmIncomingPort: String
+    let npmForwardingHost: String
+    let npmForwardingPort: String
+    let npmTcpForwarding: String
+    let npmUdpForwarding: String
+    let npmCertificate: String
+    let npmCertificateNone: String
+    let npmNiceName: String
+    let npmLetsencryptEmail: String
+    let npmDnsChallenge: String
+    let npmLetsencryptAgree: String
+    let npmRenew: String
+    let npmDelete: String
+    let npmDeleteConfirm: String
+    let npmDeleteConfirmTitle: String
+    let npmNoRedirections: String
+    let npmNoStreams: String
+    let npmNoDeadHosts: String
+    let npmNoCertificates: String
+    let npmExpires: String
+    let npmExpired: String
+    let npmLetsencrypt: String
+    let npmCustomCert: String
+    let npmProvider: String
+    let npmAccessList: String
+    let npmAccessListNone: String
+    let npmAddAccessList: String
+    let npmEditAccessList: String
+    let npmUsers: String
+    let npmAuditLogs: String
+    let npmSettings: String
+    let npmComingSoon: String
+    let npmNoUsers: String
+    let npmNoAuditLogs: String
+    let npmNoSettings: String
+    let npmAddUser: String
+    let npmEditUser: String
+    let npmUserEmail: String
+    let npmUserName: String
+    let npmUserNickname: String
+    let npmUserPassword: String
+    let npmUserPasswordHint: String
+    let npmUserRole: String
+    let npmUserRoleAdmin: String
+    let npmUserRoleUser: String
+    let npmAuditActionCreated: String
+    let npmAuditActionUpdated: String
+    let npmAuditActionDeleted: String
+    let npmAccessListUsers: String
+    let npmAccessListClients: String
+    let npmAccessListUsername: String
+    let npmAccessListPassword: String
+    let npmAccessListAddress: String
+    let npmAccessListAllow: String
+    let npmAccessListDeny: String
+    let npmAccessListNoUsers: String
+    let npmAccessListNoClients: String
+    let npmAccessListRules: String
+    let npmSaveSuccess: String
+    let npmDeleteSuccess: String
+    let npmRenewSuccess: String
+    let loginHintNpm2FAWarning: String
+
     // Units
     let unitDays: String
     let unitHours: String
@@ -450,6 +556,7 @@ struct Translations {
     let errorUnauthorized: String
     let errorBothFailed: String
     let errorUnknown: String
+    let errorAtsRequiresSecure: String
     let unknown: String
     let none: String
     let statusOn: String

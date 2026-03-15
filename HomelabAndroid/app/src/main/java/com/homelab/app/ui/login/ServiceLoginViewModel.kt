@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.homelab.app.R
 import com.homelab.app.data.repository.BeszelRepository
 import com.homelab.app.data.repository.GiteaRepository
+import com.homelab.app.data.repository.NginxProxyManagerRepository
 import com.homelab.app.data.repository.PiholeRepository
 import com.homelab.app.data.repository.PortainerRepository
 import com.homelab.app.data.repository.ServiceInstancesRepository
@@ -31,7 +32,8 @@ class ServiceLoginViewModel @Inject constructor(
     private val portainerRepository: PortainerRepository,
     private val piholeRepository: PiholeRepository,
     private val beszelRepository: BeszelRepository,
-    private val giteaRepository: GiteaRepository
+    private val giteaRepository: GiteaRepository,
+    private val nginxProxyManagerRepository: NginxProxyManagerRepository
 ) : ViewModel() {
 
     private val existingInstanceId: String? = savedStateHandle["instanceId"]
@@ -158,6 +160,26 @@ class ServiceLoginViewModel @Inject constructor(
                                 fallbackUrl = cleanFallbackUrl
                             )
                         }
+                        ServiceType.NGINX_PROXY_MANAGER -> {
+                            require(trimmedUsername.isNotBlank()) { context.getString(R.string.login_error_email_required) }
+                            val authPassword = trimmedPassword.ifBlank {
+                                if (existing != null && existing.url == cleanUrl && existing.username == trimmedUsername) {
+                                    return@ifBlank ""
+                                }
+                                throw IllegalArgumentException(context.getString(R.string.login_error_password_required))
+                            }
+                            require(authPassword.isNotBlank()) { context.getString(R.string.login_error_password_required) }
+                            val token = nginxProxyManagerRepository.authenticate(cleanUrl, trimmedUsername, authPassword)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                token = token,
+                                username = trimmedUsername,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
                         ServiceType.UNKNOWN -> throw IllegalArgumentException(context.getString(R.string.error_unknown))
                     }
                 }
@@ -174,10 +196,11 @@ class ServiceLoginViewModel @Inject constructor(
 
     private fun cleanUrl(url: String): String {
         var clean = url.trim()
+        clean = clean.trimEnd { it == ')' || it == ']' || it == '}' || it == ',' || it == ';' }
         if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
             clean = "https://$clean"
         }
-        return clean.removeSuffix("/")
+        return clean.replace(Regex("/+$"), "")
     }
 
     private fun cleanOptionalUrl(url: String): String? {

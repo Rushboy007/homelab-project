@@ -41,11 +41,19 @@ struct PiholeDomainListView: View {
                 .padding()
             } else {
                 VStack(spacing: 0) {
-                    Picker(localizer.t.piholeListType, selection: $selectedTab) {
-                        Text(localizer.t.piholeAllowed).tag(PiholeDomainListType.allow)
-                        Text(localizer.t.piholeBlocked).tag(PiholeDomainListType.deny)
+                    ViewThatFits(in: .horizontal) {
+                        Picker(localizer.t.piholeListType, selection: $selectedTab) {
+                            Text(localizer.t.piholeAllowed).tag(PiholeDomainListType.allow)
+                            Text(localizer.t.piholeBlocked).tag(PiholeDomainListType.deny)
+                        }
+                        .pickerStyle(.segmented)
+
+                        Picker(localizer.t.piholeListType, selection: $selectedTab) {
+                            Text(localizer.t.piholeAllowed).tag(PiholeDomainListType.allow)
+                            Text(localizer.t.piholeBlocked).tag(PiholeDomainListType.deny)
+                        }
+                        .pickerStyle(.menu)
                     }
-                    .pickerStyle(.segmented)
                     .padding()
 
                     List {

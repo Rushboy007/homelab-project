@@ -72,7 +72,9 @@ actor PortainerAPIClient {
         req.httpBody = body1
         req.timeoutInterval = 8
 
-        let session = URLSession.shared
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 8
+        let session = URLSession(configuration: config, delegate: BaseNetworkEngine.insecureDelegateForPortainerAuth, delegateQueue: nil)
         let (data1, resp1) = try await session.data(for: req)
 
         if let http = resp1 as? HTTPURLResponse, http.statusCode == 200 {

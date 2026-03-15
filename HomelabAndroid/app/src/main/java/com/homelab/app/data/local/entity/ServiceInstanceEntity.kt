@@ -1,5 +1,6 @@
 package com.homelab.app.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -14,5 +15,7 @@ data class ServiceInstanceEntity(
     val apiKey: String?,
     val piholePassword: String?,
     val piholeAuthMode: String?,
-    val fallbackUrl: String?
+    val fallbackUrl: String?,
+    @ColumnInfo(defaultValue = "0")
+    val allowSelfSigned: Boolean
 )

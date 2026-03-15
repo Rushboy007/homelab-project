@@ -165,8 +165,9 @@ private fun WelcomeScreen(onNext: () -> Unit) {
             onClick = onNext,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            shape = RoundedCornerShape(16.dp)
+                .heightIn(min = 56.dp),
+            shape = RoundedCornerShape(16.dp),
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
         ) {
             Text(
                 text = stringResource(R.string.onboarding_welcome_button),
@@ -236,8 +237,9 @@ private fun AskSetupScreen(onYes: () -> Unit, onNo: () -> Unit) {
                 onClick = onYes,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp)
+                    .heightIn(min = 56.dp),
+                shape = RoundedCornerShape(16.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
             ) {
                 Text(
                     text = stringResource(R.string.onboarding_ask_pin_yes),
@@ -248,7 +250,8 @@ private fun AskSetupScreen(onYes: () -> Unit, onNo: () -> Unit) {
 
             TextButton(
                 onClick = onNo,
-                modifier = Modifier.fillMaxWidth().height(48.dp)
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                contentPadding = PaddingValues(vertical = 12.dp)
             ) {
                 Text(
                     text = stringResource(R.string.onboarding_ask_pin_no),

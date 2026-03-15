@@ -587,30 +587,40 @@ struct SettingsView: View {
                             Spacer()
                         }
 
-                        HStack(spacing: 8) {
+                        FlowLayout(spacing: 8) {
                             if preferredId != instance.id {
-                                Button(localizer.t.settingsSetDefault) {
+                                Button {
                                     HapticManager.light()
                                     servicesStore.setPreferredInstance(id: instance.id, for: type)
+                                } label: {
+                                    Text(localizer.t.settingsSetDefault)
+                                        .multilineTextAlignment(.center)
+                                        .fixedSize(horizontal: false, vertical: true)
                                 }
                                 .font(.caption.bold())
                                 .buttonStyle(.bordered)
                             }
 
-                            Button(localizer.t.actionEdit) {
+                            Button {
                                 showInstanceEditor = ServiceEditorContext(serviceType: type, instanceId: instance.id)
+                            } label: {
+                                Text(localizer.t.actionEdit)
+                                    .multilineTextAlignment(.center)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                             .font(.caption.bold())
                             .buttonStyle(.bordered)
                             .tint(type.colors.primary)
 
-                            Button(localizer.t.delete, role: .destructive) {
+                            Button(role: .destructive) {
                                 showDeleteInstance = instance
+                            } label: {
+                                Text(localizer.t.delete)
+                                    .multilineTextAlignment(.center)
+                                    .fixedSize(horizontal: false, vertical: true)
                             }
                             .font(.caption.bold())
                             .buttonStyle(.bordered)
-
-                            Spacer()
                         }
                     }
                     .padding(.horizontal, 12)
@@ -626,6 +636,9 @@ struct SettingsView: View {
                     Image(systemName: "plus.circle.fill")
                     Text(localizer.t.settingsAddInstance)
                         .fontWeight(.semibold)
+                        .lineLimit(2)
+                        .multilineTextAlignment(.leading)
+                        .fixedSize(horizontal: false, vertical: true)
                     Spacer()
                 }
                 .foregroundStyle(type.colors.primary)

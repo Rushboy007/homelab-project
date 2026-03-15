@@ -41,7 +41,7 @@ fun M3ExpressiveButtonCard(
 
     Surface(
         modifier = modifier
-            .height(56.dp)
+            .heightIn(min = 56.dp)
             .scale(scale)
             .clickable(
                 interactionSource = interactionSource,
@@ -55,7 +55,9 @@ fun M3ExpressiveButtonCard(
         color = MaterialTheme.colorScheme.surfaceContainerLow
     ) {
         Row(
-            modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {

@@ -16,6 +16,9 @@ final class BaseNetworkEngine: Sendable {
     private let timeoutInterval: TimeInterval = 8
     private let pingTimeout: TimeInterval = 3
 
+    private static let insecureDelegate = InsecureTrustDelegate()
+    static let insecureDelegateForPortainerAuth = insecureDelegate
+
     init(serviceType: ServiceType, instanceId: UUID) {
         self.serviceType = serviceType
         self.instanceId = instanceId
@@ -119,7 +122,7 @@ final class BaseNetworkEngine: Sendable {
         guard let url = URL(string: urlString) else { return false }
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = pingTimeout
-        let session = URLSession(configuration: config)
+        let session = URLSession(configuration: config, delegate: BaseNetworkEngine.insecureDelegate, delegateQueue: nil)
         var request = URLRequest(url: url)
         for (key, value) in extraHeaders {
             request.setValue(value, forHTTPHeaderField: key)
@@ -141,7 +144,7 @@ final class BaseNetworkEngine: Sendable {
         config.timeoutIntervalForResource = timeoutInterval
         config.httpShouldSetCookies = false
         config.httpCookieAcceptPolicy = .never
-        return URLSession(configuration: config)
+        return URLSession(configuration: config, delegate: BaseNetworkEngine.insecureDelegate, delegateQueue: nil)
     }
 
     private func performRequest<T: Decodable>(
@@ -261,6 +264,20 @@ final class BaseNetworkEngine: Sendable {
 
         if http.statusCode >= 400 {
             throw APIError.httpError(statusCode: http.statusCode, body: "")
+        }
+    }
+}
+
+final class InsecureTrustDelegate: NSObject, URLSessionDelegate {
+    func urlSession(
+        _ session: URLSession,
+        didReceive challenge: URLAuthenticationChallenge,
+        completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void
+    ) {
+        if let trust = challenge.protectionSpace.serverTrust {
+            completionHandler(.useCredential, URLCredential(trust: trust))
+        } else {
+            completionHandler(.performDefaultHandling, nil)
         }
     }
 }

@@ -16,6 +16,7 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
     var piholePassword: String?
     var piholeAuthMode: PiHoleAuthMode?
     var fallbackUrl: String?
+    var allowSelfSigned: Bool
 
     init(
         id: UUID = UUID(),
@@ -27,7 +28,8 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
         apiKey: String? = nil,
         piholePassword: String? = nil,
         piholeAuthMode: PiHoleAuthMode? = nil,
-        fallbackUrl: String? = nil
+        fallbackUrl: String? = nil,
+        allowSelfSigned: Bool = false
     ) {
         self.id = id
         self.type = type
@@ -39,6 +41,7 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
         self.piholePassword = piholePassword?.trimmedNilIfEmpty
         self.piholeAuthMode = piholeAuthMode
         self.fallbackUrl = Self.cleanOptionalURL(fallbackUrl)
+        self.allowSelfSigned = allowSelfSigned
     }
 
     var displayLabel: String {
@@ -79,7 +82,8 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
         apiKey: String? = nil,
         piholePassword: String? = nil,
         piholeAuthMode: PiHoleAuthMode? = nil,
-        fallbackUrl: String? = nil
+        fallbackUrl: String? = nil,
+        allowSelfSigned: Bool = false
     ) -> ServiceInstance {
         ServiceInstance(
             id: id,
@@ -91,7 +95,8 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
             apiKey: apiKey ?? self.apiKey,
             piholePassword: piholePassword ?? self.piholePassword,
             piholeAuthMode: piholeAuthMode ?? self.piholeAuthMode,
-            fallbackUrl: fallbackUrl ?? self.fallbackUrl
+            fallbackUrl: fallbackUrl ?? self.fallbackUrl,
+            allowSelfSigned: allowSelfSigned
         )
     }
 
@@ -125,6 +130,7 @@ struct ServiceConnection: Codable, Identifiable, Equatable {
     var piholePassword: String?
     var piholeAuthMode: PiHoleAuthMode?
     var fallbackUrl: String?
+    var allowSelfSigned: Bool
 
     init(
         type: ServiceType,
@@ -134,7 +140,8 @@ struct ServiceConnection: Codable, Identifiable, Equatable {
         apiKey: String? = nil,
         piholePassword: String? = nil,
         piholeAuthMode: PiHoleAuthMode? = nil,
-        fallbackUrl: String? = nil
+        fallbackUrl: String? = nil,
+        allowSelfSigned: Bool = false
     ) {
         self.type = type
         self.url = url.trimmingCharacters(in: .whitespaces).replacingOccurrences(of: "/+$", with: "", options: .regularExpression)
@@ -144,6 +151,7 @@ struct ServiceConnection: Codable, Identifiable, Equatable {
         self.piholePassword = piholePassword
         self.piholeAuthMode = piholeAuthMode
         self.fallbackUrl = fallbackUrl?.isEmpty == true ? nil : fallbackUrl
+        self.allowSelfSigned = allowSelfSigned
     }
 
     var piHoleStoredSecret: String? {
@@ -166,7 +174,8 @@ struct ServiceConnection: Codable, Identifiable, Equatable {
             apiKey: apiKey,
             piholePassword: migratedPiHolePassword,
             piholeAuthMode: piholeAuthMode ?? self.piholeAuthMode,
-            fallbackUrl: fallbackUrl
+            fallbackUrl: fallbackUrl,
+            allowSelfSigned: allowSelfSigned
         )
     }
 
@@ -181,7 +190,8 @@ struct ServiceConnection: Codable, Identifiable, Equatable {
             apiKey: apiKey,
             piholePassword: type == .pihole ? piHoleStoredSecret : piholePassword,
             piholeAuthMode: piholeAuthMode,
-            fallbackUrl: fallbackUrl
+            fallbackUrl: fallbackUrl,
+            allowSelfSigned: allowSelfSigned
         )
     }
 }

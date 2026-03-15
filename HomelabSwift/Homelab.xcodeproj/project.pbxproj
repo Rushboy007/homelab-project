@@ -62,13 +62,29 @@
 		EAD085672E3D6DD29C4F51D1 /* OfflineBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7A6237B741BF62F16D9F8B /* OfflineBanner.swift */; };
 		EAD2BFA167A908127589739B /* BookmarkFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3CDD98D8B34D601F2231E2 /* BookmarkFormView.swift */; };
 		EC9F7C6B42D988E3D6D1E8BB /* PiHoleModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BCF4718684D1491D028063 /* PiHoleModels.swift */; };
-		F0000101 /* LoadableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000103 /* LoadableState.swift */; };
-		F0000102 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000104 /* Logger.swift */; };
-		F5EF663AA6770602771BD2F2 /* PortainerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A576049FF063B4EC98E28D9 /* PortainerAPIClient.swift */; };
-		F0000004 /* EditBookmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926A6BFB721AB80FE1A8F795 /* EditBookmarkView.swift */; };
 		F0000001 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000011 /* LockScreenView.swift */; };
 		F0000002 /* PinEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000012 /* PinEntryView.swift */; };
 		F0000003 /* PinSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000013 /* PinSetupView.swift */; };
+		F0000004 /* EditBookmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926A6BFB721AB80FE1A8F795 /* EditBookmarkView.swift */; };
+		F0000101 /* LoadableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000103 /* LoadableState.swift */; };
+		F0000102 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000104 /* Logger.swift */; };
+		F1000001 /* NginxProxyManagerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000003 /* NginxProxyManagerAPIClient.swift */; };
+		F1000002 /* NginxProxyManagerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000004 /* NginxProxyManagerModels.swift */; };
+		F1000101 /* NpmDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000201 /* NpmDashboard.swift */; };
+		F1000102 /* NpmProxyHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000202 /* NpmProxyHostCard.swift */; };
+		F1000103 /* NpmRedirectionHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000203 /* NpmRedirectionHostCard.swift */; };
+		F1000104 /* NpmStreamCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000204 /* NpmStreamCard.swift */; };
+		F1000105 /* NpmDeadHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000205 /* NpmDeadHostCard.swift */; };
+		F1000106 /* NpmCertificateCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000206 /* NpmCertificateCard.swift */; };
+		F1000107 /* NpmProxyHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000207 /* NpmProxyHostForm.swift */; };
+		F1000108 /* NpmRedirectionHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000208 /* NpmRedirectionHostForm.swift */; };
+		F1000109 /* NpmStreamForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000209 /* NpmStreamForm.swift */; };
+		F1000110 /* NpmDeadHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000210 /* NpmDeadHostForm.swift */; };
+		F1000111 /* NpmCertificateForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000211 /* NpmCertificateForm.swift */; };
+		F1000112 /* NpmAccessListCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000212 /* NpmAccessListCard.swift */; };
+		F1000113 /* NpmAccessListForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000213 /* NpmAccessListForm.swift */; };
+		F1000114 /* NpmUserForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000214 /* NpmUserForm.swift */; };
+		F5EF663AA6770602771BD2F2 /* PortainerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A576049FF063B4EC98E28D9 /* PortainerAPIClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,7 +119,7 @@
 		408F0E514FDE46F6A78D0A58 /* BeszelDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelDashboard.swift; sourceTree = "<group>"; };
 		44F6D851F1B957C876FD6F0B /* GiteaModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaModels.swift; sourceTree = "<group>"; };
 		486E817863BA2B5DA5318488 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
-		4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomelabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HomelabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E1E8A717351D5E42B2696F1 /* BeszelAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelAPIClient.swift; sourceTree = "<group>"; };
 		569655DA5311D77756775472 /* PortainerDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortainerDashboard.swift; sourceTree = "<group>"; };
 		57CF72E451CED741576C2F4D /* ServicesStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesStoreTests.swift; sourceTree = "<group>"; };
@@ -138,16 +154,32 @@
 		D7A7931FCA8BA5A9AA1BD3E6 /* Homelab.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Homelab.entitlements; sourceTree = "<group>"; };
 		DB311F83CBAAC39C90D50E6D /* FormattersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattersTests.swift; sourceTree = "<group>"; };
 		DB56E3990A5DE62509F3F7C4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		F0000011 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
+		F0000012 /* PinEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinEntryView.swift; sourceTree = "<group>"; };
+		F0000013 /* PinSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinSetupView.swift; sourceTree = "<group>"; };
+		F0000103 /* LoadableState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableState.swift; sourceTree = "<group>"; };
+		F0000104 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		F1000003 /* NginxProxyManagerAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NginxProxyManagerAPIClient.swift; sourceTree = "<group>"; };
+		F1000004 /* NginxProxyManagerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NginxProxyManagerModels.swift; sourceTree = "<group>"; };
+		F1000201 /* NpmDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDashboard.swift; sourceTree = "<group>"; };
+		F1000202 /* NpmProxyHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmProxyHostCard.swift; sourceTree = "<group>"; };
+		F1000203 /* NpmRedirectionHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmRedirectionHostCard.swift; sourceTree = "<group>"; };
+		F1000204 /* NpmStreamCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmStreamCard.swift; sourceTree = "<group>"; };
+		F1000205 /* NpmDeadHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDeadHostCard.swift; sourceTree = "<group>"; };
+		F1000206 /* NpmCertificateCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmCertificateCard.swift; sourceTree = "<group>"; };
+		F1000207 /* NpmProxyHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmProxyHostForm.swift; sourceTree = "<group>"; };
+		F1000208 /* NpmRedirectionHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmRedirectionHostForm.swift; sourceTree = "<group>"; };
+		F1000209 /* NpmStreamForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmStreamForm.swift; sourceTree = "<group>"; };
+		F1000210 /* NpmDeadHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDeadHostForm.swift; sourceTree = "<group>"; };
+		F1000211 /* NpmCertificateForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmCertificateForm.swift; sourceTree = "<group>"; };
+		F1000212 /* NpmAccessListCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmAccessListCard.swift; sourceTree = "<group>"; };
+		F1000213 /* NpmAccessListForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmAccessListForm.swift; sourceTree = "<group>"; };
+		F1000214 /* NpmUserForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmUserForm.swift; sourceTree = "<group>"; };
 		F3116D5544353B573C4C2B0B /* ContainerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerListView.swift; sourceTree = "<group>"; };
 		F66269A42B77821CF87E7B8D /* Bookmark.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
 		FC89D463559422B61BC300AF /* ContainerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerDetailView.swift; sourceTree = "<group>"; };
 		FE7A7BFF374B6DE9CE7384EE /* PiHoleDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiHoleDashboard.swift; sourceTree = "<group>"; };
 		FEF389260911EADF7079A97B /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
-		F0000103 /* LoadableState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableState.swift; sourceTree = "<group>"; };
-		F0000104 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
-		F0000011 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
-		F0000012 /* PinEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinEntryView.swift; sourceTree = "<group>"; };
-		F0000013 /* PinSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinSetupView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -235,6 +267,7 @@
 				981FC3E8A73DC27EF4792684 /* Gitea */,
 				F2BD8B68C5C78ECC6C3C024A /* PiHole */,
 				1E866E8511A219B4C76B9235 /* Portainer */,
+				F1000006 /* NginxProxyManager */,
 				F66269A42B77821CF87E7B8D /* Bookmark.swift */,
 				2B5C4C40E64220DEFF15C7B1 /* PiholeDomain.swift */,
 			);
@@ -355,6 +388,7 @@
 				12F56B41C1D2A1E1450A4A8E /* Bookmarks */,
 				CEE88851734FA609F64E149B /* Pihole */,
 				F0000020 /* Security */,
+				F1000301 /* NginxProxyManager */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -400,6 +434,7 @@
 				289C5939524BACC32CDCCF25 /* Gitea */,
 				D43D23351242B6BFC6E743DC /* PiHole */,
 				3B0F0ED088E1700C927989C0 /* Portainer */,
+				F1000005 /* NginxProxyManager */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -444,6 +479,53 @@
 			path = Portainer;
 			sourceTree = "<group>";
 		};
+		F0000020 /* Security */ = {
+			isa = PBXGroup;
+			children = (
+				F0000011 /* LockScreenView.swift */,
+				F0000012 /* PinEntryView.swift */,
+				F0000013 /* PinSetupView.swift */,
+			);
+			path = Security;
+			sourceTree = "<group>";
+		};
+		F1000005 /* NginxProxyManager */ = {
+			isa = PBXGroup;
+			children = (
+				F1000003 /* NginxProxyManagerAPIClient.swift */,
+			);
+			path = NginxProxyManager;
+			sourceTree = "<group>";
+		};
+		F1000006 /* NginxProxyManager */ = {
+			isa = PBXGroup;
+			children = (
+				F1000004 /* NginxProxyManagerModels.swift */,
+			);
+			path = NginxProxyManager;
+			sourceTree = "<group>";
+		};
+		F1000301 /* NginxProxyManager */ = {
+			isa = PBXGroup;
+			children = (
+				F1000201 /* NpmDashboard.swift */,
+				F1000202 /* NpmProxyHostCard.swift */,
+				F1000203 /* NpmRedirectionHostCard.swift */,
+				F1000204 /* NpmStreamCard.swift */,
+				F1000205 /* NpmDeadHostCard.swift */,
+				F1000206 /* NpmCertificateCard.swift */,
+				F1000207 /* NpmProxyHostForm.swift */,
+				F1000208 /* NpmRedirectionHostForm.swift */,
+				F1000209 /* NpmStreamForm.swift */,
+				F1000210 /* NpmDeadHostForm.swift */,
+				F1000211 /* NpmCertificateForm.swift */,
+				F1000212 /* NpmAccessListCard.swift */,
+				F1000213 /* NpmAccessListForm.swift */,
+				F1000214 /* NpmUserForm.swift */,
+			);
+			path = NginxProxyManager;
+			sourceTree = "<group>";
+		};
 		F1265188363BF5B5C00056A5 /* Beszel */ = {
 			isa = PBXGroup;
 			children = (
@@ -459,16 +541,6 @@
 				30BCF4718684D1491D028063 /* PiHoleModels.swift */,
 			);
 			path = PiHole;
-			sourceTree = "<group>";
-		};
-		F0000020 /* Security */ = {
-			isa = PBXGroup;
-			children = (
-				F0000011 /* LockScreenView.swift */,
-				F0000012 /* PinEntryView.swift */,
-				F0000013 /* PinSetupView.swift */,
-			);
-			path = Security;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -513,7 +585,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					0346621FC90669A18B22EFE8 = {
 						DevelopmentTeam = "";
@@ -614,6 +686,22 @@
 				F0000001 /* LockScreenView.swift in Sources */,
 				F0000002 /* PinEntryView.swift in Sources */,
 				F0000003 /* PinSetupView.swift in Sources */,
+				F1000001 /* NginxProxyManagerAPIClient.swift in Sources */,
+				F1000002 /* NginxProxyManagerModels.swift in Sources */,
+				F1000101 /* NpmDashboard.swift in Sources */,
+				F1000102 /* NpmProxyHostCard.swift in Sources */,
+				F1000103 /* NpmRedirectionHostCard.swift in Sources */,
+				F1000104 /* NpmStreamCard.swift in Sources */,
+				F1000105 /* NpmDeadHostCard.swift in Sources */,
+				F1000106 /* NpmCertificateCard.swift in Sources */,
+				F1000107 /* NpmProxyHostForm.swift in Sources */,
+				F1000108 /* NpmRedirectionHostForm.swift in Sources */,
+				F1000109 /* NpmStreamForm.swift in Sources */,
+				F1000110 /* NpmDeadHostForm.swift in Sources */,
+				F1000111 /* NpmCertificateForm.swift in Sources */,
+				F1000112 /* NpmAccessListCard.swift in Sources */,
+				F1000113 /* NpmAccessListForm.swift in Sources */,
+				F1000114 /* NpmUserForm.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -651,7 +739,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.homelab.homelab;
+				PRODUCT_BUNDLE_IDENTIFIER = homelab.foreverhomelab;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -687,7 +775,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.homelab.homelab;
+				PRODUCT_BUNDLE_IDENTIFIER = homelab.foreverhomelab;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -748,6 +836,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -761,6 +850,7 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -806,6 +896,7 @@
 				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -826,6 +917,7 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;

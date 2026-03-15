@@ -69,3 +69,8 @@ HomelabAndroid/local.properties
 HomelabAndroid/.idea/
 HomelabAndroid/**/*.iml
 HomelabAndroid/.kotlin/
+
+# Media / Screenshots
+media-docs/
+foto-android/
+foto-ios/

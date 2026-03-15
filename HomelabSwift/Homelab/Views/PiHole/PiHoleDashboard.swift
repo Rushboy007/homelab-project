@@ -693,19 +693,35 @@ struct PiholeQueryLogView: View {
                 }
             case .loaded:
                 VStack(spacing: 12) {
-                    Picker(localizer.t.piholeQueries, selection: $statusFilter) {
-                        ForEach(PiholeQueryStatusFilter.allCases) { filter in
-                            switch filter {
-                            case .all:
-                                Text(localizer.t.piholeFilterAll).tag(filter)
-                            case .blocked:
-                                Text(localizer.t.piholeFilterBlocked).tag(filter)
-                            case .allowed:
-                                Text(localizer.t.piholeFilterAllowed).tag(filter)
+                    ViewThatFits(in: .horizontal) {
+                        Picker(localizer.t.piholeQueries, selection: $statusFilter) {
+                            ForEach(PiholeQueryStatusFilter.allCases) { filter in
+                                switch filter {
+                                case .all:
+                                    Text(localizer.t.piholeFilterAll).tag(filter)
+                                case .blocked:
+                                    Text(localizer.t.piholeFilterBlocked).tag(filter)
+                                case .allowed:
+                                    Text(localizer.t.piholeFilterAllowed).tag(filter)
+                                }
                             }
                         }
+                        .pickerStyle(.segmented)
+
+                        Picker(localizer.t.piholeQueries, selection: $statusFilter) {
+                            ForEach(PiholeQueryStatusFilter.allCases) { filter in
+                                switch filter {
+                                case .all:
+                                    Text(localizer.t.piholeFilterAll).tag(filter)
+                                case .blocked:
+                                    Text(localizer.t.piholeFilterBlocked).tag(filter)
+                                case .allowed:
+                                    Text(localizer.t.piholeFilterAllowed).tag(filter)
+                                }
+                            }
+                        }
+                        .pickerStyle(.menu)
                     }
-                    .pickerStyle(.segmented)
 
                     HStack {
                         Menu {

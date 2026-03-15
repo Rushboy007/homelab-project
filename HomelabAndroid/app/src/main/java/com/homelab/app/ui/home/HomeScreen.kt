@@ -107,6 +107,7 @@ fun HomeScreen(
     val piholeSummary by viewModel.piholeSummary.collectAsStateWithLifecycle()
     val beszelSummary by viewModel.beszelSummary.collectAsStateWithLifecycle()
     val giteaSummary by viewModel.giteaSummary.collectAsStateWithLifecycle()
+    val npmSummary by viewModel.npmSummary.collectAsStateWithLifecycle()
     var showReorderDialog by rememberSaveable { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -231,7 +232,8 @@ fun HomeScreen(
                     portainer = portainerSummary,
                     pihole = piholeSummary,
                     beszel = beszelSummary,
-                    gitea = giteaSummary
+                    gitea = giteaSummary,
+                    npm = npmSummary
                 )
             }
 
@@ -598,7 +600,8 @@ private fun DashboardSummary(
     portainer: HomeViewModel.PortainerSummary?,
     pihole: HomeViewModel.PiholeSummary?,
     beszel: HomeViewModel.BeszelSummary?,
-    gitea: HomeViewModel.GiteaSummary?
+    gitea: HomeViewModel.GiteaSummary?,
+    npm: HomeViewModel.NpmSummary?
 ) {
     // Don't show if no services are defined in order
     if (serviceOrder.isEmpty()) return
@@ -622,6 +625,7 @@ private fun DashboardSummary(
                 ServiceType.PIHOLE -> pihole
                 ServiceType.BESZEL -> beszel
                 ServiceType.GITEA -> gitea
+                ServiceType.NGINX_PROXY_MANAGER -> npm
                 else -> null
             }
             type to summary
@@ -666,6 +670,14 @@ private fun DashboardSummary(
                                         type = type,
                                         value = s.totalRepos.toString(),
                                         label = pluralStringResource(R.plurals.home_summary_gitea, s.totalRepos, s.totalRepos)
+                                    )
+                                }
+                                ServiceType.NGINX_PROXY_MANAGER -> {
+                                    val s = summary as HomeViewModel.NpmSummary
+                                    DashboardSummaryCard(
+                                        type = type,
+                                        value = "${s.proxyHosts}/${s.total}",
+                                        label = stringResource(R.string.npm_proxy_hosts)
                                     )
                                 }
                                 else -> {}

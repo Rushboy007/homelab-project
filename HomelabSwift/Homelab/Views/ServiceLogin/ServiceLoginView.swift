@@ -26,7 +26,7 @@ struct ServiceLoginView: View {
 
     private var isEditing: Bool { existingInstance != nil }
     private var serviceColor: Color { serviceType.colors.primary }
-    private var needsUsername: Bool { serviceType == .beszel || serviceType == .gitea }
+    private var needsUsername: Bool { serviceType == .beszel || serviceType == .gitea || serviceType == .nginxProxyManager }
 
     var body: some View {
         NavigationStack {
@@ -91,21 +91,41 @@ struct ServiceLoginView: View {
     private var formSection: some View {
         VStack(spacing: 14) {
             if let hint = loginHint {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(systemName: "info.circle.fill")
-                        .foregroundStyle(AppTheme.info)
-                        .font(.subheadline)
-                    Text(hint)
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.info)
+                VStack(spacing: 8) {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "info.circle.fill")
+                            .foregroundStyle(AppTheme.info)
+                            .font(.subheadline)
+                        Text(hint)
+                            .font(.caption)
+                            .foregroundStyle(AppTheme.info)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(14)
+                    .background(AppTheme.info.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12, style: .continuous)
+                            .stroke(AppTheme.info.opacity(0.2), lineWidth: 1)
+                    )
+
+                    if serviceType == .nginxProxyManager {
+                        HStack(alignment: .top, spacing: 10) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .foregroundStyle(AppTheme.danger)
+                                .font(.subheadline)
+                            Text(localizer.t.loginHintNpm2FAWarning)
+                                .font(.caption)
+                                .foregroundStyle(AppTheme.danger)
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(14)
+                        .background(AppTheme.danger.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                .stroke(AppTheme.danger.opacity(0.2), lineWidth: 1)
+                        )
+                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(14)
-                .background(AppTheme.info.opacity(0.08), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .stroke(AppTheme.info.opacity(0.2), lineWidth: 1)
-                )
             }
 
             if let errorMessage {
@@ -158,11 +178,12 @@ struct ServiceLoginView: View {
                 )
             } else {
                 if needsUsername {
+                    let isEmailField = serviceType == .beszel || serviceType == .nginxProxyManager
                     InputField(
-                        icon: serviceType == .beszel ? "envelope.fill" : "person.fill",
-                        placeholder: serviceType == .beszel ? localizer.t.loginEmail : localizer.t.loginUsername,
+                        icon: isEmailField ? "envelope.fill" : "person.fill",
+                        placeholder: isEmailField ? localizer.t.loginEmail : localizer.t.loginUsername,
                         text: $username,
-                        keyboardType: serviceType == .beszel ? .emailAddress : .default
+                        keyboardType: isEmailField ? .emailAddress : .default
                     )
                 }
 
@@ -186,6 +207,9 @@ struct ServiceLoginView: View {
                     } else {
                         Text(isEditing ? localizer.t.save : localizer.t.loginConnect)
                             .fontWeight(.semibold)
+                            .lineLimit(2)
+                            .multilineTextAlignment(.center)
+                            .fixedSize(horizontal: false, vertical: true)
                     }
                 }
                 .frame(maxWidth: .infinity)
@@ -202,9 +226,10 @@ struct ServiceLoginView: View {
 
     private var loginHint: String? {
         switch serviceType {
-        case .portainer: return localizer.t.loginHintPortainer
-        case .pihole: return localizer.t.loginHintPihole
-        case .gitea:  return localizer.t.loginHintGitea2FA
+        case .portainer:         return localizer.t.loginHintPortainer
+        case .pihole:            return localizer.t.loginHintPihole
+        case .gitea:             return localizer.t.loginHintGitea2FA
+        case .nginxProxyManager: return localizer.t.loginHintNpm
         default: return nil
         }
     }
@@ -249,7 +274,7 @@ struct ServiceLoginView: View {
                 HapticManager.success()
                 dismiss()
             } catch {
-                showError(error.localizedDescription)
+                showError(resolveErrorMessage(error))
             }
             isLoading = false
         }
@@ -366,12 +391,44 @@ struct ServiceLoginView: View {
                 username: resolvedUsername,
                 fallbackUrl: fallbackUrl
             )
+
+        case .nginxProxyManager:
+            let identity = normalizedOptional(username) ?? existingInstance?.username
+            let secret = normalizedOptional(password)
+            guard let identity, !identity.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            if existingInstance != nil && url != existingInstance?.url && secret == nil {
+                throw APIError.custom(localizer.t.loginErrorPasswordRequired)
+            }
+            let token: String
+            if let secret, !secret.isEmpty {
+                let client = NginxProxyManagerAPIClient(instanceId: existingInstanceId ?? UUID())
+                token = try await client.authenticate(url: url, email: identity, password: secret)
+            } else if let existingToken = existingInstance?.token, !existingToken.isEmpty {
+                token = existingToken
+            } else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .nginxProxyManager,
+                label: label,
+                url: url,
+                token: token,
+                username: identity,
+                fallbackUrl: fallbackUrl
+            )
         }
     }
 
     private func normalizedURL(_ raw: String) -> String {
         var clean = raw.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !clean.isEmpty else { return "" }
+        let trailing = CharacterSet(charactersIn: ")]},;")
+        while let last = clean.unicodeScalars.last, trailing.contains(last) {
+            clean = String(clean.dropLast())
+        }
         if !clean.hasPrefix("http://") && !clean.hasPrefix("https://") {
             clean = "https://" + clean
         }
@@ -402,6 +459,16 @@ struct ServiceLoginView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
             withAnimation(.spring(response: 0.2, dampingFraction: 0.75)) { shakeOffset = 0 }
         }
+    }
+
+    private func resolveErrorMessage(_ error: Error) -> String {
+        if let mapped = APIError.localizedNetworkError(error) {
+            return mapped
+        }
+        if let apiError = error as? APIError {
+            return apiError.localizedDescription
+        }
+        return error.localizedDescription
     }
 }
 

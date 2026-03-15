@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.homelab.app.data.repository.BeszelRepository
 import com.homelab.app.data.repository.GiteaRepository
 import com.homelab.app.data.repository.LocalPreferencesRepository
+import com.homelab.app.data.repository.NginxProxyManagerRepository
 import com.homelab.app.data.repository.PiholeRepository
 import com.homelab.app.data.repository.PortainerRepository
 import com.homelab.app.data.repository.ServicesRepository
@@ -28,6 +29,7 @@ class HomeViewModel @Inject constructor(
     private val piholeRepository: PiholeRepository,
     private val beszelRepository: BeszelRepository,
     private val giteaRepository: GiteaRepository,
+    private val nginxProxyManagerRepository: NginxProxyManagerRepository,
     private val localPreferencesRepository: LocalPreferencesRepository
 ) : ViewModel() {
 
@@ -35,6 +37,7 @@ class HomeViewModel @Inject constructor(
     data class PiholeSummary(val totalQueries: Int)
     data class BeszelSummary(val online: Int, val total: Int)
     data class GiteaSummary(val totalRepos: Int)
+    data class NpmSummary(val proxyHosts: Int, val total: Int)
 
     val reachability: StateFlow<Map<String, Boolean?>> = servicesRepository.reachability
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
@@ -83,6 +86,9 @@ class HomeViewModel @Inject constructor(
 
     private val _giteaSummary = MutableStateFlow<GiteaSummary?>(null)
     val giteaSummary: StateFlow<GiteaSummary?> = _giteaSummary
+
+    private val _npmSummary = MutableStateFlow<NpmSummary?>(null)
+    val npmSummary: StateFlow<NpmSummary?> = _npmSummary
 
     private var summaryJob: Job? = null
 
@@ -164,6 +170,17 @@ class HomeViewModel @Inject constructor(
                     } catch (error: Exception) {
                         Log.e("HomeViewModel", "Gitea summary error: ${error.message}")
                         _giteaSummary.value = null
+                    }
+                }
+
+                val npmInstance = preferredInstances[ServiceType.NGINX_PROXY_MANAGER]
+                if (npmInstance != null) {
+                    try {
+                        val report = nginxProxyManagerRepository.getHostReport(npmInstance.id)
+                        _npmSummary.value = NpmSummary(proxyHosts = report.proxy, total = report.total)
+                    } catch (error: Exception) {
+                        Log.e("HomeViewModel", "NPM summary error: ${error.message}")
+                        _npmSummary.value = null
                     }
                 }
             } finally {

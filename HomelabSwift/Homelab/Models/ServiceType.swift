@@ -5,15 +5,17 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
     case pihole
     case beszel
     case gitea
+    case nginxProxyManager
 
     public var id: String { rawValue }
 
     public var displayName: String {
         switch self {
-        case .portainer: return "Portainer"
-        case .pihole:    return "Pi-hole"
-        case .beszel:    return "Beszel"
-        case .gitea:     return "Gitea"
+        case .portainer:          return "Portainer"
+        case .pihole:             return "Pi-hole"
+        case .beszel:             return "Beszel"
+        case .gitea:              return "Gitea"
+        case .nginxProxyManager:  return "Nginx Proxy Manager"
         }
     }
 
@@ -21,37 +23,41 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
     public var description: String {
         let t = Localizer.shared.t
         switch self {
-        case .portainer: return t.servicePortainerDesc
-        case .pihole:    return t.servicePiholeDesc
-        case .beszel:    return t.serviceBeszelDesc
-        case .gitea:     return t.serviceGiteaDesc
+        case .portainer:          return t.servicePortainerDesc
+        case .pihole:             return t.servicePiholeDesc
+        case .beszel:             return t.serviceBeszelDesc
+        case .gitea:              return t.serviceGiteaDesc
+        case .nginxProxyManager:  return t.serviceNpmDesc
         }
     }
 
     public var symbolName: String {
         switch self {
-        case .portainer: return "shippingbox.fill"
-        case .pihole:    return "shield.fill"
-        case .beszel:    return "server.rack"
-        case .gitea:     return "arrow.triangle.branch"
+        case .portainer:          return "shippingbox.fill"
+        case .pihole:             return "shield.fill"
+        case .beszel:             return "server.rack"
+        case .gitea:              return "arrow.triangle.branch"
+        case .nginxProxyManager:  return "globe"
         }
     }
 
     public var iconUrl: String {
         switch self {
-        case .portainer: return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png"
-        case .pihole:    return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png"
-        case .beszel:    return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png"
-        case .gitea:     return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png"
+        case .portainer:          return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png"
+        case .pihole:             return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png"
+        case .beszel:             return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png"
+        case .gitea:              return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png"
+        case .nginxProxyManager:  return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png"
         }
     }
 
     public var colors: ServiceColorSet {
         switch self {
-        case .portainer: return ServiceColorSet(primary: Color(hex: "#13B5EA"), dark: Color(hex: "#0D8ECF"), bg: Color(hex: "#13B5EA").opacity(0.09))
-        case .pihole:    return ServiceColorSet(primary: Color(hex: "#CD2326"), dark: Color(hex: "#9B1B1E"), bg: Color(hex: "#CD2326").opacity(0.09))
-        case .beszel:    return ServiceColorSet(primary: Color(hex: "#0EA5E9"), dark: Color(hex: "#0284C7"), bg: Color(hex: "#0EA5E9").opacity(0.09))
-        case .gitea:     return ServiceColorSet(primary: Color(hex: "#609926"), dark: Color(hex: "#4A7A1E"), bg: Color(hex: "#609926").opacity(0.09))
+        case .portainer:          return ServiceColorSet(primary: Color(hex: "#13B5EA"), dark: Color(hex: "#0D8ECF"), bg: Color(hex: "#13B5EA").opacity(0.09))
+        case .pihole:             return ServiceColorSet(primary: Color(hex: "#CD2326"), dark: Color(hex: "#9B1B1E"), bg: Color(hex: "#CD2326").opacity(0.09))
+        case .beszel:             return ServiceColorSet(primary: Color(hex: "#0EA5E9"), dark: Color(hex: "#0284C7"), bg: Color(hex: "#0EA5E9").opacity(0.09))
+        case .gitea:              return ServiceColorSet(primary: Color(hex: "#609926"), dark: Color(hex: "#4A7A1E"), bg: Color(hex: "#609926").opacity(0.09))
+        case .nginxProxyManager:  return ServiceColorSet(primary: Color(hex: "#F15B2A"), dark: Color(hex: "#C9481F"), bg: Color(hex: "#F15B2A").opacity(0.09))
         }
     }
 }

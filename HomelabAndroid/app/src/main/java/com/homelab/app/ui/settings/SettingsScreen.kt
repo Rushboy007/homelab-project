@@ -673,7 +673,11 @@ fun ServiceSettingsSection(
                 }
             }
 
-            FilledTonalButton(onClick = onAdd, modifier = Modifier.fillMaxWidth()) {
+            FilledTonalButton(
+                onClick = onAdd,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+            ) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(R.string.settings_add_instance))
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(stringResource(R.string.settings_add_instance))
@@ -729,7 +733,9 @@ fun ServiceSettingsSection(
                         onDelete(instance)
                         pendingDelete = null
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
+                    modifier = Modifier.heightIn(min = 48.dp),
+                    contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                 ) {
                     Text(stringResource(R.string.delete))
                 }
@@ -832,21 +838,24 @@ private fun ServiceInstanceRow(
             ) {
                 OutlinedButton(
                     onClick = onEdit,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                 ) {
                     Text(stringResource(R.string.edit))
                 }
                 if (!isPreferred) {
                     FilledTonalButton(
                         onClick = onSetDefault,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                     ) {
                         Text(stringResource(R.string.settings_set_default))
                     }
                 }
                 OutlinedButton(
                     onClick = onDelete,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f).heightIn(min = 48.dp),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                 ) {
                     Text(stringResource(R.string.delete))
                 }

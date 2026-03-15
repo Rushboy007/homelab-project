@@ -16,6 +16,7 @@ val ServiceType.primaryColor: Color
         ServiceType.PIHOLE -> Color(0xFFCD2326)
         ServiceType.BESZEL -> Color(0xFF0EA5E9)
         ServiceType.GITEA -> Color(0xFF609926)
+        ServiceType.NGINX_PROXY_MANAGER -> Color(0xFFF15B2A)
         ServiceType.UNKNOWN -> if (isThemeDark()) Color.LightGray else Color.Gray
     }
 
@@ -26,6 +27,7 @@ val ServiceType.backgroundColor: Color
         ServiceType.PIHOLE -> Color(0xFFCD2326).copy(alpha = 0.12f)
         ServiceType.BESZEL -> Color(0xFF0EA5E9).copy(alpha = 0.12f)
         ServiceType.GITEA -> Color(0xFF609926).copy(alpha = 0.12f)
+        ServiceType.NGINX_PROXY_MANAGER -> Color(0xFFF15B2A).copy(alpha = 0.12f)
         ServiceType.UNKNOWN -> if (isThemeDark()) Color(0xFF334155) else Color(0xFFF1F5F9)
     }
 
@@ -35,5 +37,6 @@ val ServiceType.iconUrl: String
         ServiceType.PIHOLE -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png"
         ServiceType.BESZEL -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png"
         ServiceType.GITEA -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png"
+        ServiceType.NGINX_PROXY_MANAGER -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png"
         ServiceType.UNKNOWN -> ""
     }

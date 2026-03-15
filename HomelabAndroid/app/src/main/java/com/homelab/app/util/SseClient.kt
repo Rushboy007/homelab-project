@@ -26,6 +26,7 @@ class SseClient @Inject constructor(
                 ServiceType.PIHOLE -> "Pihole"
                 ServiceType.BESZEL -> "Beszel"
                 ServiceType.GITEA -> "Gitea"
+                ServiceType.NGINX_PROXY_MANAGER -> "NginxProxyManager"
                 ServiceType.UNKNOWN -> "Unknown"
             })
             .build()

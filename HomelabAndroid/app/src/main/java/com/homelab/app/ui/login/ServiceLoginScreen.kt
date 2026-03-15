@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -185,6 +186,7 @@ fun ServiceLoginScreen(
                 ServiceType.PORTAINER -> stringResource(R.string.login_hint_portainer_multi)
                 ServiceType.PIHOLE -> stringResource(R.string.login_hint_pihole_multi)
                 ServiceType.GITEA -> stringResource(R.string.login_hint_gitea_multi)
+                ServiceType.NGINX_PROXY_MANAGER -> stringResource(R.string.login_hint_npm)
                 else -> null
             }
 
@@ -212,6 +214,35 @@ fun ServiceLoginScreen(
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onTertiaryContainer
                         )
+                    }
+                }
+
+                if (serviceType == ServiceType.NGINX_PROXY_MANAGER) {
+                    androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 12.dp)
+                    ) {
+                        androidx.compose.foundation.layout.Row(
+                            modifier = Modifier.padding(14.dp),
+                            verticalAlignment = Alignment.Top
+                        ) {
+                            Icon(
+                                Icons.Default.Warning,
+                                contentDescription = stringResource(R.string.warning),
+                                tint = MaterialTheme.colorScheme.onErrorContainer,
+                                modifier = Modifier.size(20.dp)
+                            )
+                            androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = stringResource(R.string.login_npm_2fa_warning),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onErrorContainer
+                            )
+                        }
                     }
                 }
             }
@@ -309,14 +340,15 @@ fun ServiceLoginScreen(
                 )
             } else {
                 if (serviceType != ServiceType.PIHOLE) {
+                    val isEmailField = serviceType == ServiceType.BESZEL || serviceType == ServiceType.NGINX_PROXY_MANAGER
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
-                        label = { Text(if (serviceType == ServiceType.BESZEL) stringResource(R.string.login_email_label) else stringResource(R.string.login_username_label)) },
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = if (serviceType == ServiceType.BESZEL) stringResource(R.string.login_email_label) else stringResource(R.string.login_username_label)) },
+                        label = { Text(if (isEmailField) stringResource(R.string.login_email_label) else stringResource(R.string.login_username_label)) },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = if (isEmailField) stringResource(R.string.login_email_label) else stringResource(R.string.login_username_label)) },
                         singleLine = true,
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
-                            keyboardType = if (serviceType == ServiceType.BESZEL) KeyboardType.Email else KeyboardType.Text,
+                            keyboardType = if (isEmailField) KeyboardType.Email else KeyboardType.Text,
                             imeAction = ImeAction.Next
                         ),
                         modifier = Modifier
@@ -356,11 +388,12 @@ fun ServiceLoginScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .heightIn(min = 56.dp)
                     .padding(bottom = 24.dp),
                 interactionSource = interactionSource,
                 shape = RoundedCornerShape(14.dp),
-                enabled = !isLoading
+                enabled = !isLoading,
+                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
             ) {
                 if (isLoading) {
                     CircularProgressIndicator(

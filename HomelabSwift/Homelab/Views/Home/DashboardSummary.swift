@@ -5,17 +5,26 @@ import SwiftUI
 
 struct DashboardSummary: View {
     @Environment(ServicesStore.self) private var servicesStore
+    @Environment(SettingsStore.self) private var settingsStore
     @Environment(Localizer.self) private var localizer
 
     @State private var portainerData: PortainerSummaryData?
     @State private var piholeData: PiholeSummaryData?
     @State private var beszelData: BeszelSummaryData?
     @State private var giteaData: GiteaSummaryData?
+    @State private var npmData: NpmSummaryData?
     @State private var isLoading = false
     @State private var refreshID = UUID()
 
+    private var orderedSummaryTypes: [ServiceType] {
+        settingsStore.serviceOrder.filter {
+            !settingsStore.isServiceHidden($0) &&
+                servicesStore.preferredInstance(for: $0) != nil
+        }
+    }
+
     private var hasAnyConnection: Bool {
-        ServiceType.allCases.contains { servicesStore.preferredInstance(for: $0) != nil }
+        !orderedSummaryTypes.isEmpty
     }
 
     /// Simple hash representing which services are reachable
@@ -44,17 +53,8 @@ struct DashboardSummary: View {
                         columns: [GridItem(.flexible()), GridItem(.flexible())],
                         spacing: 12
                     ) {
-                        if servicesStore.preferredInstance(for: .portainer) != nil {
-                            portainerCard
-                        }
-                        if servicesStore.preferredInstance(for: .pihole) != nil {
-                            piholeCard
-                        }
-                        if servicesStore.preferredInstance(for: .beszel) != nil {
-                            beszelCard
-                        }
-                        if servicesStore.preferredInstance(for: .gitea) != nil {
-                            giteaCard
+                        ForEach(orderedSummaryTypes) { type in
+                            summaryCard(for: type)
                         }
                     }
                 }
@@ -76,12 +76,29 @@ struct DashboardSummary: View {
                 piholeData = nil
                 beszelData = nil
                 giteaData = nil
+                npmData = nil
                 refreshID = UUID()
             }
         }
     }
 
     // MARK: - Cards
+
+    @ViewBuilder
+    private func summaryCard(for type: ServiceType) -> some View {
+        switch type {
+        case .portainer:
+            portainerCard
+        case .pihole:
+            piholeCard
+        case .beszel:
+            beszelCard
+        case .gitea:
+            giteaCard
+        case .nginxProxyManager:
+            npmCard
+        }
+    }
 
     private var portainerCard: some View {
         SummaryCard(
@@ -125,6 +142,17 @@ struct DashboardSummary: View {
         )
     }
 
+    private var npmCard: some View {
+        SummaryCard(
+            type: .nginxProxyManager,
+            title: localizer.t.npmProxyHosts,
+            value: npmData.map { "\($0.proxyHosts)" } ?? "—",
+            subValue: npmData.map { "/ \($0.total)" },
+            isLoading: npmData == nil && isLoading,
+            isUnreachable: servicesStore.preferredReachability(for: .nginxProxyManager) == false
+        )
+    }
+
     // MARK: - Data Fetching
 
     private func fetchSummaryData() async {
@@ -144,6 +172,9 @@ struct DashboardSummary: View {
             if servicesStore.preferredInstance(for: .gitea) != nil && servicesStore.preferredReachability(for: .gitea) != false {
                 group.addTask { await fetchGitea() }
             }
+            if servicesStore.preferredInstance(for: .nginxProxyManager) != nil && servicesStore.preferredReachability(for: .nginxProxyManager) != false {
+                group.addTask { await fetchNpm() }
+            }
         }
     }
 
@@ -153,6 +184,7 @@ struct DashboardSummary: View {
         case .pihole: piholeData = nil
         case .beszel: beszelData = nil
         case .gitea: giteaData = nil
+        case .nginxProxyManager: npmData = nil
         }
     }
 
@@ -199,6 +231,16 @@ struct DashboardSummary: View {
             giteaData = GiteaSummaryData(totalRepos: repos.count)
         } catch { /* silent */ }
     }
+
+    @MainActor
+    private func fetchNpm() async {
+        do {
+            guard let instance = servicesStore.preferredInstance(for: .nginxProxyManager),
+                  let client = await servicesStore.npmClient(instanceId: instance.id) else { return }
+            let report = try await client.getHostReport()
+            npmData = NpmSummaryData(proxyHosts: report.proxy, total: report.total)
+        } catch { /* silent */ }
+    }
 }
 
 // MARK: - Summary Data Models
@@ -219,6 +261,11 @@ private struct BeszelSummaryData {
 
 private struct GiteaSummaryData {
     let totalRepos: Int
+}
+
+private struct NpmSummaryData {
+    let proxyHosts: Int
+    let total: Int
 }
 
 // MARK: - SummaryCard

@@ -171,7 +171,10 @@ fun BookmarksScreen(
                         Button(onClick = {
                             categoryToEdit = null
                             showCategoryForm = true
-                        }) {
+                        },
+                            modifier = Modifier.heightIn(min = 48.dp),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
+                        ) {
                             Text(stringResource(R.string.category_add))
                         }
                     }

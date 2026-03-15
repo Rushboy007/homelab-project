@@ -7,6 +7,7 @@ private final class ServiceClientManager {
     private var piholeClients: [UUID: PiHoleAPIClient] = [:]
     private var beszelClients: [UUID: BeszelAPIClient] = [:]
     private var giteaClients: [UUID: GiteaAPIClient] = [:]
+    private var npmClients: [UUID: NginxProxyManagerAPIClient] = [:]
 
     func portainerClient(id: UUID) -> PortainerAPIClient {
         if let client = portainerClients[id] {
@@ -44,6 +45,15 @@ private final class ServiceClientManager {
         return client
     }
 
+    func npmClient(id: UUID) -> NginxProxyManagerAPIClient {
+        if let client = npmClients[id] {
+            return client
+        }
+        let client = NginxProxyManagerAPIClient(instanceId: id)
+        npmClients[id] = client
+        return client
+    }
+
     func removeClient(id: UUID, type: ServiceType) {
         switch type {
         case .portainer:
@@ -54,6 +64,8 @@ private final class ServiceClientManager {
             beszelClients.removeValue(forKey: id)
         case .gitea:
             giteaClients.removeValue(forKey: id)
+        case .nginxProxyManager:
+            npmClients.removeValue(forKey: id)
         }
     }
 }
@@ -101,10 +113,20 @@ final class ServicesStore {
 
     func initialize() async {
         let state = KeychainService.loadServiceState()
-        instancesById = Dictionary(uniqueKeysWithValues: state.instances.map { ($0.id, $0) })
+        var didNormalize = false
+        let normalizedInstances = state.instances.map { instance in
+            let normalized = normalizedInstance(instance)
+            if normalized != instance { didNormalize = true }
+            return normalized
+        }
+        instancesById = Dictionary(uniqueKeysWithValues: normalizedInstances.map { ($0.id, $0) })
         preferredInstanceIdByType = state.preferredInstanceIdByType
 
         repairAllPreferredInstances()
+
+        if didNormalize {
+            persistState()
+        }
 
         for instance in allInstances {
             await configureClient(for: instance, refreshPiHoleAuth: true)
@@ -184,21 +206,22 @@ final class ServicesStore {
     }
 
     func saveInstance(_ instance: ServiceInstance, refreshPiHoleAuth: Bool = false) async {
-        let previous = instancesById[instance.id]
-        instancesById[instance.id] = instance
+        let normalized = normalizedInstance(instance)
+        let previous = instancesById[normalized.id]
+        instancesById[normalized.id] = normalized
 
-        if previous?.type != instance.type {
+        if previous?.type != normalized.type {
             repairPreferredInstance(for: previous?.type)
         }
-        if preferredInstanceIdByType[instance.type] == nil || preferredInstanceIdByType[instance.type] == instance.id {
-            preferredInstanceIdByType[instance.type] = instance.id
+        if preferredInstanceIdByType[normalized.type] == nil || preferredInstanceIdByType[normalized.type] == normalized.id {
+            preferredInstanceIdByType[normalized.type] = normalized.id
         }
 
         persistState()
-        await configureClient(for: instance, refreshPiHoleAuth: refreshPiHoleAuth)
+        await configureClient(for: normalized, refreshPiHoleAuth: refreshPiHoleAuth)
 
-        reachabilityByInstanceId[instance.id] = nil
-        Task { await checkReachability(for: instance.id) }
+        reachabilityByInstanceId[normalized.id] = nil
+        Task { await checkReachability(for: normalized.id) }
     }
 
     func deleteInstance(id: UUID) {
@@ -221,7 +244,13 @@ final class ServicesStore {
 
     func updateFallbackURL(instanceId: UUID, fallbackUrl: String) async {
         guard let current = instancesById[instanceId] else { return }
-        let updated = current.updating(fallbackUrl: fallbackUrl)
+        let normalizedFallback = normalizeOptionalURL(fallbackUrl)
+        let updated = normalizedInstance(
+            current.updating(
+                fallbackUrl: normalizedFallback,
+                allowSelfSigned: current.allowSelfSigned
+            )
+        )
         instancesById[instanceId] = updated
         persistState()
         await configureClient(for: updated, refreshPiHoleAuth: false)
@@ -247,6 +276,11 @@ final class ServicesStore {
         return clientManager.giteaClient(id: instance.id)
     }
 
+    func npmClient(instanceId: UUID) async -> NginxProxyManagerAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .nginxProxyManager else { return nil }
+        return clientManager.npmClient(id: instance.id)
+    }
+
     func checkReachability(for instanceId: UUID) async {
         guard let instance = instancesById[instanceId], pingingByInstanceId[instanceId] != true else { return }
 
@@ -264,6 +298,8 @@ final class ServicesStore {
             ok = await clientManager.beszelClient(id: instanceId).ping()
         case .gitea:
             ok = await clientManager.giteaClient(id: instanceId).ping()
+        case .nginxProxyManager:
+            ok = await clientManager.npmClient(id: instanceId).ping()
         }
 
         reachabilityByInstanceId[instanceId] = ok
@@ -442,6 +478,43 @@ final class ServicesStore {
         case .gitea:
             let client = clientManager.giteaClient(id: instance.id)
             await client.configure(url: instance.url, token: instance.token, fallbackUrl: instance.fallbackUrl)
+
+        case .nginxProxyManager:
+            let client = clientManager.npmClient(id: instance.id)
+            await client.configure(url: instance.url, token: instance.token, fallbackUrl: instance.fallbackUrl)
         }
+    }
+
+    // MARK: - URL Normalization
+
+    private func normalizeServiceURL(_ raw: String) -> String {
+        var clean = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trailing = CharacterSet(charactersIn: ")]},;")
+        while let last = clean.unicodeScalars.last, trailing.contains(last) {
+            clean = String(clean.dropLast())
+        }
+        if !clean.hasPrefix("http://") && !clean.hasPrefix("https://") {
+            clean = "https://" + clean
+        }
+        return clean.replacingOccurrences(of: "/+$", with: "", options: .regularExpression)
+    }
+
+    private func normalizeOptionalURL(_ raw: String?) -> String? {
+        guard let raw else { return nil }
+        let normalized = normalizeServiceURL(raw)
+        return normalized.isEmpty ? nil : normalized
+    }
+
+    private func normalizedInstance(_ instance: ServiceInstance) -> ServiceInstance {
+        let normalizedUrl = normalizeServiceURL(instance.url)
+        let normalizedFallback = normalizeOptionalURL(instance.fallbackUrl)
+        if normalizedUrl == instance.url && normalizedFallback == instance.fallbackUrl {
+            return instance
+        }
+        return instance.updating(
+            url: normalizedUrl,
+            fallbackUrl: normalizedFallback,
+            allowSelfSigned: instance.allowSelfSigned
+        )
     }
 }

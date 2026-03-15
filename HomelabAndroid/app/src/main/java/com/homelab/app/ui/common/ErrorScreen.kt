@@ -59,6 +59,7 @@ fun ErrorScreen(
         
         Button(
             onClick = onRetry,
+            modifier = Modifier.heightIn(min = 48.dp),
             contentPadding = PaddingValues(horizontal = 32.dp, vertical = 12.dp)
         ) {
             Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.retry))

@@ -20,7 +20,8 @@ data class ServiceInstance(
     val apiKey: String? = null,
     val piholePassword: String? = null,
     val piholeAuthMode: PiHoleAuthMode? = null,
-    val fallbackUrl: String? = null
+    val fallbackUrl: String? = null,
+    val allowSelfSigned: Boolean = false
 ) {
     val piHoleStoredSecret: String?
         get() = when {
@@ -47,7 +48,8 @@ data class ServiceConnection(
     val apiKey: String? = null,
     val piholePassword: String? = null,
     val piholeAuthMode: PiHoleAuthMode? = null,
-    val fallbackUrl: String? = null // Secondary URL (usually External/Cloudlare)
+    val fallbackUrl: String? = null, // Secondary URL (usually External/Cloudlare)
+    val allowSelfSigned: Boolean = false
 ) {
     val id: String get() = type.name
 
@@ -69,7 +71,8 @@ data class ServiceConnection(
             apiKey = apiKey,
             piholePassword = if (type == ServiceType.PIHOLE) piHoleStoredSecret else piholePassword,
             piholeAuthMode = piholeAuthMode,
-            fallbackUrl = fallbackUrl
+            fallbackUrl = fallbackUrl,
+            allowSelfSigned = allowSelfSigned
         )
     }
 }

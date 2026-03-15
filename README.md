@@ -17,17 +17,17 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 technologies. The UI is built around the **Liquid Glass** design system, leveraging frosted glass effects and fluid animations for a high-end feel.
 
 <div align="center">
-  <img src="foto-ios/IMG_8909.PNG" width="18%" />
-  <img src="foto-ios/IMG_8910.PNG" width="18%" />
-  <img src="foto-ios/IMG_8911.PNG" width="18%" />
-  <img src="foto-ios/IMG_8913.PNG" width="18%" />
-  <img src="foto-ios/IMG_8914.PNG" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8909.PNG" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8910.PNG" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8911.PNG" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8913.PNG" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8914.PNG" width="18%" />
   <br />
-  <img src="foto-ios/IMG_8915.PNG" width="18%" />
-  <img src="foto-ios/IMG_8916.PNG" width="18%" />
-  <img src="foto-ios/IMG_8917.jpeg" width="18%" />
-  <img src="foto-ios/IMG_8918.jpeg" width="18%" />
-  <img src="foto-ios/IMG_8919.PNG" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8915.PNG" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8916.PNG" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8917.jpeg" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8918.jpeg" width="18%" />
+  <img src="media-docs/foto-ios/IMG_8919.PNG" width="18%" />
 </div>
 
 ---
@@ -36,16 +36,16 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
 Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressive 3** design language. It focuses on dynamic color integration, haptic-rich interactions, and modern Android architecture.
 
 <div align="center">
-  <img src="foto-android/photo_1_2026-02-23_16-50-09.jpg" width="18%" />
-  <img src="foto-android/photo_2_2026-02-23_16-50-09.jpg" width="18%" />
-  <img src="foto-android/photo_3_2026-02-23_16-50-09.jpg" width="18%" />
-  <img src="foto-android/photo_4_2026-02-23_16-50-09.jpg" width="18%" />
-  <img src="foto-android/photo_5_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_1_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_2_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_3_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_4_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_5_2026-02-23_16-50-09.jpg" width="18%" />
   <br />
-  <img src="foto-android/photo_6_2026-02-23_16-50-09.jpg" width="18%" />
-  <img src="foto-android/photo_7_2026-02-23_16-50-09.jpg" width="18%" />
-  <img src="foto-android/photo_8_2026-02-23_16-50-09.jpg" width="18%" />
-  <img src="foto-android/photo_9_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_6_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_7_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_8_2026-02-23_16-50-09.jpg" width="18%" />
+  <img src="media-docs/foto-android/photo_9_2026-02-23_16-50-09.jpg" width="18%" />
 </div>
 
 ---

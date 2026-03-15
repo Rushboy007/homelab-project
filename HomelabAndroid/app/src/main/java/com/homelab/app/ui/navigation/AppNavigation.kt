@@ -70,6 +70,7 @@ private fun dashboardRoute(type: ServiceType, instanceId: String): String {
         ServiceType.PIHOLE -> "pihole/$instanceId/dashboard"
         ServiceType.BESZEL -> "beszel/$instanceId/dashboard"
         ServiceType.GITEA -> "gitea/$instanceId/dashboard"
+        ServiceType.NGINX_PROXY_MANAGER -> "nginxpm/$instanceId/dashboard"
         ServiceType.UNKNOWN -> Screen.Home.route
     }
 }
@@ -341,6 +342,23 @@ fun AppNavigation() {
                     },
                     onNavigateToRepo = { owner, repo ->
                         navController.navigate("gitea/$instanceId/repo/${Uri.encode(owner)}/${Uri.encode(repo)}")
+                    }
+                )
+            }
+
+            composable(
+                route = "nginxpm/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.nginxpm.NpmDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.NGINX_PROXY_MANAGER, newInstanceId)) {
+                                popUpTo("nginxpm/$instanceId/dashboard") { inclusive = true }
+                            }
+                        }
                     }
                 )
             }
