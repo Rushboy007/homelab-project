@@ -14,7 +14,7 @@ val ServiceType.primaryColor: Color
     get() = when (this) {
         ServiceType.PORTAINER -> Color(0xFF13B5EA)
         ServiceType.PIHOLE -> Color(0xFFCD2326)
-        ServiceType.BESZEL -> Color(0xFF0EA5E9)
+        ServiceType.BESZEL -> Color(0xFF8B5CF6)
         ServiceType.GITEA -> Color(0xFF609926)
         ServiceType.NGINX_PROXY_MANAGER -> Color(0xFFF15B2A)
         ServiceType.UNKNOWN -> if (isThemeDark()) Color.LightGray else Color.Gray
@@ -25,7 +25,7 @@ val ServiceType.backgroundColor: Color
     get() = when (this) {
         ServiceType.PORTAINER -> Color(0xFF13B5EA).copy(alpha = 0.12f)
         ServiceType.PIHOLE -> Color(0xFFCD2326).copy(alpha = 0.12f)
-        ServiceType.BESZEL -> Color(0xFF0EA5E9).copy(alpha = 0.12f)
+        ServiceType.BESZEL -> Color(0xFF8B5CF6).copy(alpha = 0.12f)
         ServiceType.GITEA -> Color(0xFF609926).copy(alpha = 0.12f)
         ServiceType.NGINX_PROXY_MANAGER -> Color(0xFFF15B2A).copy(alpha = 0.12f)
         ServiceType.UNKNOWN -> if (isThemeDark()) Color(0xFF334155) else Color(0xFFF1F5F9)

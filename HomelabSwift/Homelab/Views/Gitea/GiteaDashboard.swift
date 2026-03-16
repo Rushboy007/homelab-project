@@ -25,7 +25,7 @@ private let langColors: [String: Color] = [
 ]
 
 private let heatmapColorsDark: [Color] = [
-    Color(hex: "#161B22"), Color(hex: "#0E4429"), Color(hex: "#006D32"), Color(hex: "#26A641"), Color(hex: "#39D353"),
+    Color(hex: "#1C222B"), Color(hex: "#0F4A2D"), Color(hex: "#0D6B39"), Color(hex: "#2A8F4E"), Color(hex: "#3BBF64"),
 ]
 private let heatmapColorsLight: [Color] = [
     Color(hex: "#EBEDF0"), Color(hex: "#9BE9A8"), Color(hex: "#40C463"), Color(hex: "#30A14E"), Color(hex: "#216E39"),
@@ -46,6 +46,20 @@ struct GiteaDashboard: View {
     @State private var state: LoadableState<Void> = .idle
     @State private var sortOrder: SortOrder = .recent
     @State private var totalBranches: Int = 0
+    @State private var hasRestoredCache = false
+
+    private struct CacheEntry {
+        let user: GiteaUser?
+        let repos: [GiteaRepo]
+        let orgs: [GiteaOrg]
+        let heatmap: [GiteaHeatmapItem]
+        let totalBranches: Int
+        let sortOrder: SortOrder
+        let lastFetch: Date
+    }
+
+    private static var cache: [UUID: CacheEntry] = [:]
+    private static let cacheTtl: TimeInterval = 120
 
     private enum SortOrder {
         case recent, alpha
@@ -74,15 +88,13 @@ struct GiteaDashboard: View {
             serviceType: .gitea,
             instanceId: selectedInstanceId,
             state: state,
-            onRefresh: fetchAll
+            onRefresh: { await fetchAll(force: true) }
         ) {
             instancePicker
 
             if let user {
                 userCard(user)
             }
-
-            statsRow
 
             if !heatmap.isEmpty {
                 heatmapSection
@@ -98,7 +110,7 @@ struct GiteaDashboard: View {
         .navigationDestination(for: GiteaRepoRoute.self) { route in
             GiteaRepoDetail(instanceId: route.instanceId, owner: route.owner, repoName: route.repoName, initialPath: route.path, isFile: route.isFile, initialBranch: route.branch)
         }
-        .task(id: selectedInstanceId) { await fetchAll() }
+        .task(id: selectedInstanceId) { await loadAndRefreshIfNeeded() }
     }
 
     private var instancePicker: some View {
@@ -106,10 +118,9 @@ struct GiteaDashboard: View {
         return Group {
             if instances.count > 1 {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(localizer.t.dashboardInstances)
+                    Text(localizer.t.dashboardInstances.sentenceCased())
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(AppTheme.textMuted)
-                        .textCase(.uppercase)
 
                     ForEach(instances) { instance in
                         Button {
@@ -121,6 +132,7 @@ struct GiteaDashboard: View {
                             orgs = []
                             heatmap = []
                             totalBranches = 0
+                            hasRestoredCache = false
                         } label: {
                             HStack(spacing: 10) {
                                 Circle()
@@ -149,36 +161,36 @@ struct GiteaDashboard: View {
     // MARK: - User Card
 
     private func userCard(_ user: GiteaUser) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: "person.fill")
-                .font(.title2)
-                .foregroundStyle(giteaColor)
-                .frame(width: 52, height: 52)
-                .background(giteaColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
-                .accessibilityHidden(true)
+        VStack(spacing: 14) {
+            HStack(spacing: 14) {
+                Image(systemName: "person.fill")
+                    .font(.title2)
+                    .foregroundStyle(giteaColor)
+                    .frame(width: 52, height: 52)
+                    .background(giteaColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .accessibilityHidden(true)
 
-            VStack(alignment: .leading, spacing: 2) {
-                Text(user.full_name.isEmpty ? user.login : user.full_name)
-                    .font(.title3.bold())
-                Text("@\(user.login)")
-                    .font(.subheadline)
-                    .foregroundStyle(AppTheme.textSecondary)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(user.full_name.isEmpty ? user.login : user.full_name)
+                        .font(.title3.bold())
+                    Text("@\(user.login)")
+                        .font(.subheadline)
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+
+                Spacer()
             }
 
-            Spacer()
+            Divider()
+
+            HStack(spacing: 8) {
+                MiniStatInline(icon: "folder", iconColor: AppTheme.running, value: "\(repoStats.total)", label: localizer.t.giteaRepos)
+                MiniStatInline(icon: "star", iconColor: AppTheme.warning, value: "\(repoStats.stars)", label: localizer.t.giteaStars)
+                MiniStatInline(icon: "arrow.triangle.branch", iconColor: AppTheme.info, value: "\(totalBranches)", label: localizer.t.giteaBranches)
+            }
         }
         .padding(18)
         .glassCard()
-    }
-
-    // MARK: - Stats Row
-
-    private var statsRow: some View {
-        HStack(spacing: 10) {
-            MiniStat(icon: "folder", iconColor: AppTheme.running, value: "\(repoStats.total)", label: localizer.t.giteaRepos)
-            MiniStat(icon: "star", iconColor: AppTheme.warning, value: "\(repoStats.stars)", label: localizer.t.giteaStars)
-            MiniStat(icon: "arrow.triangle.branch", iconColor: AppTheme.info, value: "\(totalBranches)", label: localizer.t.giteaBranches)
-        }
     }
 
     // MARK: - Heatmap
@@ -188,42 +200,53 @@ struct GiteaDashboard: View {
         let colors = colorScheme == .dark ? heatmapColorsDark : heatmapColorsLight
 
         return VStack(alignment: .leading, spacing: 12) {
-            Text(localizer.t.giteaContributions)
+            Text(localizer.t.giteaContributions.sentenceCased())
                 .font(.caption.bold())
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
-                .tracking(0.8)
 
             VStack(spacing: 12) {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(alignment: .top, spacing: 2) {
-                        ForEach(Array(grid.enumerated()), id: \.offset) { _, week in
-                            VStack(spacing: 2) {
-                                ForEach(Array(week.enumerated()), id: \.offset) { _, day in
-                                    RoundedRectangle(cornerRadius: 2)
-                                        .fill(colors[day.level])
-                                        .frame(width: 11, height: 11)
+                let cellSize: CGFloat = 12
+                let cellSpacing: CGFloat = 2
+                let gridWidth = CGFloat(grid.count) * cellSize + CGFloat(max(grid.count - 1, 0)) * cellSpacing
+                let gridHeight = CGFloat(7) * cellSize + CGFloat(6) * cellSpacing
+                let legendWidth: CGFloat = 34
+
+                GeometryReader { proxy in
+                    let availableWidth = max(proxy.size.width - legendWidth - 12, 0)
+                    HStack(alignment: .top, spacing: 12) {
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(alignment: .top, spacing: cellSpacing) {
+                                ForEach(Array(grid.enumerated()), id: \.offset) { _, week in
+                                    VStack(spacing: cellSpacing) {
+                                        ForEach(Array(week.enumerated()), id: \.offset) { _, day in
+                                            RoundedRectangle(cornerRadius: 2)
+                                                .fill(colors[day.level])
+                                                .frame(width: cellSize, height: cellSize)
+                                        }
+                                    }
                                 }
                             }
+                            .frame(width: max(gridWidth, availableWidth), alignment: .center)
                         }
-                    }
-                }
+                        .frame(height: gridHeight)
+                        .frame(maxWidth: availableWidth, alignment: .leading)
 
-                // Legend
-                HStack(spacing: 4) {
-                    Spacer()
-                    Text(localizer.t.giteaLessActive)
+                        VStack(spacing: 4) {
+                            Text(localizer.t.giteaLessActive)
+                            ForEach(Array(colors.enumerated()), id: \.offset) { _, color in
+                                RoundedRectangle(cornerRadius: 2)
+                                    .fill(color)
+                                    .frame(width: 12, height: 12)
+                            }
+                            Text(localizer.t.giteaMoreActive)
+                        }
                         .font(.system(size: 10))
                         .foregroundStyle(AppTheme.textMuted)
-                    ForEach(Array(colors.enumerated()), id: \.offset) { _, color in
-                        RoundedRectangle(cornerRadius: 2)
-                            .fill(color)
-                            .frame(width: 10, height: 10)
+                        .frame(width: legendWidth)
                     }
-                    Text(localizer.t.giteaMoreActive)
-                        .font(.system(size: 10))
-                        .foregroundStyle(AppTheme.textMuted)
                 }
+                .frame(height: gridHeight)
+                .padding(.top, -4)
             }
             .padding(16)
             .glassCard()
@@ -234,11 +257,9 @@ struct GiteaDashboard: View {
 
     private var orgsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(localizer.t.giteaOrgs)
+            Text(localizer.t.giteaOrgs.sentenceCased())
                 .font(.caption.bold())
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
-                .tracking(0.8)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 8) {
@@ -265,11 +286,9 @@ struct GiteaDashboard: View {
     private var reposSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("\(localizer.t.giteaRepos) (\(repos.count))")
+                Text("\(localizer.t.giteaRepos) (\(repos.count))".sentenceCased())
                     .font(.caption.bold())
                     .foregroundStyle(AppTheme.textMuted)
-                    .textCase(.uppercase)
-                    .tracking(0.8)
 
                 Spacer()
 
@@ -364,8 +383,51 @@ struct GiteaDashboard: View {
 
     // MARK: - Fetch
 
-    private func fetchAll() async {
-        state = .loading
+    private func loadAndRefreshIfNeeded() async {
+        restoreCacheIfNeeded()
+
+        let shouldRefresh: Bool = {
+            guard let cached = Self.cache[selectedInstanceId] else { return true }
+            return Date().timeIntervalSince(cached.lastFetch) > Self.cacheTtl
+        }()
+
+        if shouldRefresh {
+            await fetchAll(force: false)
+        }
+    }
+
+    private func restoreCacheIfNeeded() {
+        guard !hasRestoredCache, let cached = Self.cache[selectedInstanceId] else { return }
+        user = cached.user
+        repos = cached.repos
+        orgs = cached.orgs
+        heatmap = cached.heatmap
+        totalBranches = cached.totalBranches
+        sortOrder = cached.sortOrder
+        state = .loaded(())
+        hasRestoredCache = true
+    }
+
+    private func updateCache() {
+        Self.cache[selectedInstanceId] = CacheEntry(
+            user: user,
+            repos: repos,
+            orgs: orgs,
+            heatmap: heatmap,
+            totalBranches: totalBranches,
+            sortOrder: sortOrder,
+            lastFetch: Date()
+        )
+    }
+
+    private func fetchAll(force: Bool) async {
+        if !force, let cached = Self.cache[selectedInstanceId], Date().timeIntervalSince(cached.lastFetch) <= Self.cacheTtl {
+            return
+        }
+        let hasContent = user != nil || !repos.isEmpty || !orgs.isEmpty || !heatmap.isEmpty
+        if !hasContent {
+            state = .loading
+        }
 
         guard let client = await servicesStore.giteaClient(instanceId: selectedInstanceId) else {
             state = .error(.notConfigured)
@@ -399,6 +461,7 @@ struct GiteaDashboard: View {
                     for await c in group { counts += c }
                 }
                 totalBranches = counts
+                updateCache()
             }
         }
 
@@ -414,6 +477,7 @@ struct GiteaDashboard: View {
         } else {
             state = .loaded(())
         }
+        updateCache()
     }
 }
 
@@ -428,9 +492,9 @@ struct GiteaRepoRoute: Hashable {
     var branch: String? = nil
 }
 
-// MARK: - Mini Stat
+// MARK: - Mini Stat Inline
 
-private struct MiniStat: View {
+private struct MiniStatInline: View {
     let icon: String
     let iconColor: Color
     let value: String
@@ -444,15 +508,16 @@ private struct MiniStat: View {
                 .accessibilityHidden(true)
             Text(value)
                 .font(.title3.bold())
-            Text(label)
+            Text(label.sentenceCased())
                 .font(.caption2.weight(.medium))
                 .foregroundStyle(AppTheme.textSecondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
-        .padding(14)
-        .glassCard()
+        .padding(.vertical, 10)
+        .padding(.horizontal, 6)
+        .glassCard(cornerRadius: 14, tint: iconColor.opacity(0.12))
     }
 }
 

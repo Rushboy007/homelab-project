@@ -165,11 +165,17 @@ fun PiholeDashboardScreen(
                         item { StatCard(icon = Icons.Default.Language, iconBg = StatusBlue, value = formatNum(stats!!.queries.unique_domains), label = stringResource(R.string.pihole_domains)) }
 
                         item(span = { GridItemSpan(maxLineSpan) }) { QueryActivitySection(stats = stats!!) }
-                        item(span = { GridItemSpan(maxLineSpan) }) { GravitySection(stats = stats!!) }
                     }
 
-                    item(span = { GridItemSpan(maxLineSpan) }) { DomainManagementLink(onClick = onNavigateToDomains) }
-                    item(span = { GridItemSpan(maxLineSpan) }) { QueryLogLink(onClick = onNavigateToQueryLog) }
+                    if (stats != null) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            PiholeToolsCard(
+                                stats = stats!!,
+                                onNavigateToDomains = onNavigateToDomains,
+                                onNavigateToQueryLog = onNavigateToQueryLog
+                            )
+                        }
+                    }
 
                     if (topBlocked.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -407,6 +413,145 @@ private fun QueryLogLink(onClick: () -> Unit) {
                 modifier = Modifier.weight(1f)
             )
             Icon(Icons.Default.ChevronRight, contentDescription = stringResource(R.string.pihole_query_log), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun PiholeToolsCard(
+    stats: com.homelab.app.data.remote.dto.pihole.PiholeStats,
+    onNavigateToDomains: () -> Unit,
+    onNavigateToQueryLog: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow
+    ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // Gravity summary
+            Row(
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = ServiceType.PIHOLE.primaryColor.copy(alpha = 0.1f),
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Storage,
+                        contentDescription = stringResource(R.string.pihole_gravity_domains),
+                        tint = ServiceType.PIHOLE.primaryColor,
+                        modifier = Modifier.padding(10.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(14.dp))
+                Column {
+                    Text(
+                        stringResource(R.string.pihole_gravity_domains),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        formatNum(stats.gravity.domains_being_blocked),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                if (stats.gravity.last_update > 0) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            Icons.Default.Schedule,
+                            contentDescription = stringResource(R.string.pihole_gravity_domains),
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        val date = Date(stats.gravity.last_update * 1000)
+                        val formatter = SimpleDateFormat("dd MMM HH:mm", Locale.getDefault())
+                        Text(
+                            formatter.format(date),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            softWrap = false
+                        )
+                    }
+                }
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            // Domain management row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToDomains() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = ServiceType.PIHOLE.primaryColor.copy(alpha = 0.1f),
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ListAlt,
+                        contentDescription = stringResource(R.string.pihole_domain_management),
+                        tint = ServiceType.PIHOLE.primaryColor,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    stringResource(R.string.pihole_domain_management),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = stringResource(R.string.pihole_domain_management),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+
+            // Query log row
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNavigateToQueryLog() }
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(10.dp),
+                    color = StatusBlue.copy(alpha = 0.1f),
+                    modifier = Modifier.size(36.dp)
+                ) {
+                    Icon(
+                        Icons.AutoMirrored.Filled.ListAlt,
+                        contentDescription = stringResource(R.string.pihole_query_log),
+                        tint = StatusBlue,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Text(
+                    stringResource(R.string.pihole_query_log),
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = stringResource(R.string.pihole_query_log),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
         }
     }
 }

@@ -14,7 +14,7 @@ public struct ServiceErrorView: View {
     @Environment(Localizer.self) private var localizer
     @State private var isRetrying = false
     
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 20) {
             Image(systemName: iconName)
                 .font(.system(size: 60))

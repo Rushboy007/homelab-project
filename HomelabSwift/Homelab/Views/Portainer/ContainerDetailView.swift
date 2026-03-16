@@ -32,15 +32,15 @@ struct ContainerDetailView: View {
     }
 
     private var containerName: String {
-        detail?.Name.replacingOccurrences(of: "^/", with: "", options: .regularExpression) ?? localizer.t.loading
+        detail?.Name?.replacingOccurrences(of: "^/", with: "", options: .regularExpression) ?? localizer.t.loading
     }
 
-    private var isRunning: Bool { detail?.State.Running ?? false }
-    private var isPaused: Bool { detail?.State.Paused ?? false }
+    private var isRunning: Bool { detail?.State?.Running ?? false }
+    private var isPaused: Bool { detail?.State?.Paused ?? false }
 
     private var matchedStack: PortainerStack? {
-        guard let detail else { return nil }
-        let projectName = detail.Config.Labels["com.docker.compose.project"]
+        guard let detail, let config = detail.Config else { return nil }
+        let projectName = config.Labels?["com.docker.compose.project"]
         guard let projectName, !projectName.isEmpty else { return nil }
         return stacks.first { $0.Name.lowercased() == projectName.lowercased() }
     }
@@ -50,11 +50,24 @@ struct ContainerDetailView: View {
             if isLoading && detail == nil {
                 VStack { Spacer(minLength: 200); ProgressView().tint(portainerColor); Spacer() }
             } else if let detail {
-                LazyVStack(spacing: 12) {
-                    headerCard(detail)
-                    actionsRow
-                    tabBar
-                    tabContent
+                LazyVStack(spacing: 16) {
+                    // Block 1: Header and Actions
+                    VStack(spacing: 0) {
+                        headerCard(detail)
+                        Divider().background(Color.white.opacity(0.1))
+                        actionsRow
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .glassCard()
+                    
+                    // Block 2: Tabs and Content
+                    VStack(spacing: 0) {
+                        tabBar
+                        Divider().background(Color.white.opacity(0.1))
+                        tabContent
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .glassCard()
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 16)
@@ -123,30 +136,31 @@ struct ContainerDetailView: View {
                     }
                 }
                 Spacer()
-                StatusBadge(status: detail.State.Status)
+                StatusBadge(status: detail.State?.Status ?? "")
             }
 
-            Text(detail.Config.Image)
+            Text(detail.Config?.Image ?? "")
                 .font(.caption)
                 .foregroundStyle(AppTheme.textMuted)
 
-            if isRunning, !detail.State.StartedAt.isEmpty {
-                Text("\(localizer.t.detailUptime): \(Formatters.formatUptime(from: detail.State.StartedAt))")
+            if isRunning, let startedAt = detail.State?.StartedAt, !startedAt.isEmpty {
+                Text("\(localizer.t.detailUptime): \(Formatters.formatUptime(from: startedAt))")
                     .font(.caption)
                     .foregroundStyle(AppTheme.textSecondary)
             }
         }
         .padding(18)
-        .glassCard()
     }
 
     // MARK: - Actions Row
 
     private var actionsRow: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 0) {
             if isRunning {
                 containerActionButton(.stop, color: AppTheme.stopped)
+                Divider().frame(height: 30).background(Color.white.opacity(0.1))
                 containerActionButton(.restart, color: AppTheme.warning)
+                Divider().frame(height: 30).background(Color.white.opacity(0.1))
                 if isPaused {
                     containerActionButton(.unpause, color: AppTheme.running)
                 } else {
@@ -154,6 +168,7 @@ struct ContainerDetailView: View {
                 }
             } else {
                 containerActionButton(.start, color: AppTheme.running)
+                Divider().frame(height: 30).background(Color.white.opacity(0.1))
                 removeButton
             }
         }
@@ -177,17 +192,17 @@ struct ContainerDetailView: View {
                 }
             }
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
                 Image(systemName: action.symbolName)
-                    .font(.caption)
+                    .font(.subheadline.bold())
                 Text(action.displayName)
                     .font(.subheadline.weight(.semibold))
             }
             .foregroundStyle(color)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(color.opacity(0.2), lineWidth: 1))
+            .padding(.vertical, 14)
+            .background(color.opacity(0.08))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
@@ -209,17 +224,17 @@ struct ContainerDetailView: View {
                 }
             }
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
                 Image(systemName: "trash.fill")
-                    .font(.caption)
+                    .font(.subheadline.bold())
                 Text(localizer.t.actionRemove)
                     .font(.subheadline.weight(.semibold))
             }
             .foregroundStyle(AppTheme.danger)
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 12)
-            .background(AppTheme.danger.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(AppTheme.danger.opacity(0.2), lineWidth: 1))
+            .padding(.vertical, 14)
+            .background(AppTheme.danger.opacity(0.08))
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }
@@ -227,35 +242,30 @@ struct ContainerDetailView: View {
     // MARK: - Tab Bar
 
     private var tabBar: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 2) {
-                ForEach(TabType.allCases, id: \.self) { tab in
-                    Button {
-                        HapticManager.light()
+        HStack(spacing: 0) {
+            ForEach(TabType.allCases, id: \.self) { tab in
+                Button {
+                    HapticManager.light()
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
                         activeTab = tab
-                    } label: {
-                        HStack(spacing: 4) {
-                            if tab == .compose {
-                                Image(systemName: "doc.text")
-                                    .font(.caption)
-                            }
-                            Text(tabLabel(tab))
-                                .font(.subheadline.weight(activeTab == tab ? .semibold : .medium))
-                        }
-                        .foregroundStyle(activeTab == tab ? portainerColor : AppTheme.textMuted)
-                        .padding(.vertical, 10)
-                        .padding(.horizontal, 16)
-                        .background(
-                            activeTab == tab ? portainerColor.opacity(0.1) : .clear,
-                            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
-                        )
                     }
-                    .buttonStyle(.plain)
+                } label: {
+                    Text(tabLabel(tab))
+                        .font(.system(size: 11, weight: .bold))
+                        .foregroundStyle(activeTab == tab ? portainerColor : AppTheme.textSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(activeTab == tab ? portainerColor.opacity(0.12) : Color.clear)
+                        .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+                
+                if tab != TabType.allCases.last {
+                    Divider().frame(height: 30).background(Color.white.opacity(0.1))
                 }
             }
-            .padding(4)
-            .glassCard(cornerRadius: 12)
         }
+        .background(Color.white.opacity(0.02))
     }
 
     private func tabLabel(_ tab: TabType) -> String {
@@ -286,98 +296,104 @@ struct ContainerDetailView: View {
     @ViewBuilder
     private var infoTab: some View {
         if let detail {
-            // Container info
-            VStack(alignment: .leading, spacing: 0) {
-                Text(localizer.t.detailContainer)
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.bottom, 4)
-                infoRow(label: localizer.t.detailId, value: String(detail.Id.prefix(12)))
-                infoRow(label: localizer.t.detailCreated, value: Formatters.formatDate(detail.Created))
-                infoRow(label: localizer.t.detailHostname, value: detail.Config.Hostname)
-                if let workDir = detail.Config.WorkingDir, !workDir.isEmpty {
-                    infoRow(label: localizer.t.detailWorkDir, value: workDir)
-                }
-                if let cmd = detail.Config.Cmd, !cmd.isEmpty {
-                    infoRow(label: localizer.t.detailCommand, value: cmd.joined(separator: " "))
-                }
-            }
-            .padding(16)
-            .glassCard()
-
-            // Network info
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 8) {
-                    Image(systemName: "network")
-                        .font(.subheadline)
+            VStack(alignment: .leading, spacing: 20) {
+                // Container info
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(localizer.t.detailContainer, systemImage: "shippingbox.fill")
+                        .font(.subheadline.bold())
                         .foregroundStyle(portainerColor)
-                    Text(localizer.t.detailNetwork)
-                        .font(.subheadline.weight(.semibold))
-                }
-                .padding(.bottom, 4)
-                infoRow(label: localizer.t.detailMode, value: detail.HostConfig.NetworkMode)
-                ForEach(Array(detail.NetworkSettings.Networks.keys.sorted()), id: \.self) { name in
-                    if let net = detail.NetworkSettings.Networks[name] {
-                        infoRow(label: name, value: net.IPAddress.isEmpty ? localizer.t.notAvailable : net.IPAddress)
+                        .padding(.bottom, 4)
+                    
+                    VStack(spacing: 0) {
+                        infoRow(label: localizer.t.detailId, value: String(detail.Id.prefix(12)))
+                        infoRow(label: localizer.t.detailCreated, value: Formatters.formatDate(detail.Created ?? ""))
+                        infoRow(label: localizer.t.detailHostname, value: detail.Config?.Hostname ?? "")
+                        if let workDir = detail.Config?.WorkingDir, !workDir.isEmpty {
+                            infoRow(label: localizer.t.detailWorkDir, value: workDir)
+                        }
+                        if let cmd = detail.Config?.Cmd, !cmd.isEmpty {
+                            infoRow(label: localizer.t.detailCommand, value: cmd.joined(separator: " "))
+                        }
                     }
                 }
-            }
-            .padding(16)
-            .glassCard()
 
-            // Mounts
-            if !detail.Mounts.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "externaldrive.fill")
-                            .font(.subheadline)
+                Divider().background(Color.white.opacity(0.05))
+
+                // Network info
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(localizer.t.detailNetwork, systemImage: "network")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(portainerColor)
+                        .padding(.bottom, 4)
+                    
+                    VStack(spacing: 0) {
+                        infoRow(label: localizer.t.detailMode, value: detail.HostConfig?.NetworkMode ?? "")
+                        if let networks = detail.NetworkSettings?.Networks {
+                            ForEach(Array(networks.keys.sorted()), id: \.self) { name in
+                                if let net = networks[name] {
+                                    infoRow(label: name, value: net.IPAddress.isEmpty ? localizer.t.notAvailable : net.IPAddress)
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if let mounts = detail.Mounts, !mounts.isEmpty {
+                    Divider().background(Color.white.opacity(0.05))
+                    
+                    // Mounts
+                    VStack(alignment: .leading, spacing: 8) {
+                        Label(localizer.t.detailMounts, systemImage: "externaldrive.fill")
+                            .font(.subheadline.bold())
                             .foregroundStyle(portainerColor)
-                        Text(localizer.t.detailMounts)
-                            .font(.subheadline.weight(.semibold))
-                    }
-                    ForEach(Array(detail.Mounts.enumerated()), id: \.offset) { _, mount in
-                        HStack(spacing: 6) {
-                            Text(mount.mountType)
-                                .font(.caption2.weight(.semibold))
-                                .foregroundStyle(AppTheme.info)
-                                .padding(.horizontal, 6)
-                                .padding(.vertical, 2)
-                                .background(AppTheme.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
-                            Text(mount.Source)
-                                .font(.caption)
-                                .foregroundStyle(AppTheme.textSecondary)
-                                .lineLimit(1)
-                            Text("→")
-                                .font(.caption)
-                                .foregroundStyle(AppTheme.textMuted)
-                            Text(mount.Destination)
-                                .font(.caption)
-                                .lineLimit(1)
-                        }
-                        .padding(.vertical, 4)
-                        if mount.Destination != detail.Mounts.last?.Destination {
-                            Divider()
+                            .padding(.bottom, 4)
+                        
+                        ForEach(Array(mounts.enumerated()), id: \.offset) { index, mount in
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack(spacing: 6) {
+                                    Text(mount.mountType)
+                                        .font(.system(size: 10, weight: .bold))
+                                        .foregroundStyle(AppTheme.info)
+                                        .padding(.horizontal, 6)
+                                        .padding(.vertical, 2)
+                                        .background(AppTheme.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                                    
+                                    Text(mount.Destination)
+                                        .font(.caption.bold())
+                                        .lineLimit(1)
+                                }
+                                
+                                Text(mount.Source)
+                                    .font(.system(size: 10))
+                                    .foregroundStyle(AppTheme.textSecondary)
+                                    .lineLimit(1)
+                            }
+                            .padding(.vertical, 4)
+                            
+                            if index < mounts.count - 1 {
+                                Divider().padding(.vertical, 2).opacity(0.3)
+                            }
                         }
                     }
                 }
-                .padding(16)
-                .glassCard()
-            }
 
-            // Restart Policy
-            VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: 8) {
-                    Image(systemName: "tag.fill")
-                        .font(.subheadline)
+                Divider().background(Color.white.opacity(0.05))
+
+                // Restart Policy
+                VStack(alignment: .leading, spacing: 4) {
+                    Label(localizer.t.detailRestartPolicy, systemImage: "arrow.clockwise.circle.fill")
+                        .font(.subheadline.bold())
                         .foregroundStyle(portainerColor)
-                    Text(localizer.t.detailRestartPolicy)
-                        .font(.subheadline.weight(.semibold))
+                        .padding(.bottom, 4)
+                    
+                    VStack(spacing: 0) {
+                        let policy = detail.HostConfig?.RestartPolicy
+                        infoRow(label: localizer.t.detailPolicy, value: (policy?.Name ?? "").isEmpty ? localizer.t.none : policy?.Name ?? "")
+                        infoRow(label: localizer.t.detailMaxRetries, value: "\(policy?.MaximumRetryCount ?? 0)")
+                    }
                 }
-                .padding(.bottom, 4)
-                infoRow(label: localizer.t.detailPolicy, value: detail.HostConfig.RestartPolicy.Name.isEmpty ? localizer.t.none : detail.HostConfig.RestartPolicy.Name)
-                infoRow(label: localizer.t.detailMaxRetries, value: "\(detail.HostConfig.RestartPolicy.MaximumRetryCount)")
             }
-            .padding(16)
-            .glassCard()
+            .padding(18)
         }
     }
 
@@ -406,101 +422,116 @@ struct ContainerDetailView: View {
                 .foregroundStyle(AppTheme.textMuted)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 30)
-        } else if let stats {
-            let cpuDelta = Double(stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage)
-            let systemDelta = Double((stats.cpu_stats.system_cpu_usage ?? 0) - (stats.precpu_stats.system_cpu_usage ?? 0))
-            let cpuPercent = Formatters.calculateCpuPercent(cpuDelta: cpuDelta, systemDelta: systemDelta, cpuCount: stats.cpu_stats.online_cpus ?? 1)
-            let memPercent = stats.memory_stats.limit > 0 ? (Double(stats.memory_stats.usage) / Double(stats.memory_stats.limit)) * 100 : 0
+        } else if let stats, let cpuStats = stats.cpu_stats, let preCpuStats = stats.precpu_stats, let memStats = stats.memory_stats {
+            let cpuDelta = Double((cpuStats.cpu_usage.total_usage) - (preCpuStats.cpu_usage.total_usage))
+            let systemDelta = Double((cpuStats.system_cpu_usage ?? 0) - (preCpuStats.system_cpu_usage ?? 0))
+            let cpuPercent = Formatters.calculateCpuPercent(cpuDelta: cpuDelta, systemDelta: systemDelta, cpuCount: cpuStats.online_cpus ?? 1)
+            let memPercent = (memStats.limit ?? 0) > 0 ? (Double(memStats.usage ?? 0) / Double(memStats.limit ?? 0)) * 100 : 0
+ 
+            VStack(spacing: 16) {
+                // CPU
+                premiumStatCard(
+                    title: localizer.t.detailCpu,
+                    value: String(format: "%.2f%%", cpuPercent),
+                    percent: cpuPercent,
+                    icon: "cpu",
+                    color: AppTheme.info
+                )
+ 
+                // Memory
+                premiumStatCard(
+                    title: localizer.t.detailMemory,
+                    value: "\(Formatters.formatBytes(Double(memStats.usage ?? 0))) / \(Formatters.formatBytes(Double(memStats.limit ?? 0)))",
+                    percent: memPercent,
+                    icon: "memorychip",
+                    color: AppTheme.warning
+                )
 
-            // CPU
-            GlassProgressCard(
-                title: localizer.t.detailCpu,
-                value: cpuPercent,
-                icon: "cpu",
-                color: AppTheme.info,
-                subtitle: String(format: "%.2f%%", cpuPercent)
-            )
-
-            // Memory
-            VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Image(systemName: "memorychip")
-                        .font(.caption.bold())
-                        .foregroundStyle(portainerColor)
-                    Text(localizer.t.detailMemory)
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.textSecondary)
-                    Spacer()
-                    Text("\(Formatters.formatBytes(Double(stats.memory_stats.usage))) / \(Formatters.formatBytes(Double(stats.memory_stats.limit)))")
-                        .font(.caption.bold())
-                        .foregroundStyle(AppTheme.textSecondary)
-                }
-                GeometryReader { geo in
-                    ZStack(alignment: .leading) {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(.white.opacity(0.1))
-                            .frame(height: 6)
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(portainerColor.gradient)
-                            .frame(width: geo.size.width * CGFloat(min(memPercent, 100)) / 100, height: 6)
-                    }
-                }
-                .frame(height: 6)
-                Text("\(String(format: "%.1f", memPercent))% \(localizer.t.detailUsed)")
-                    .font(.caption2)
-                    .foregroundStyle(AppTheme.textMuted)
-            }
-            .padding(AppTheme.innerPadding)
-            .glassCard()
-
-            // Network I/O
-            if let networks = stats.networks {
-                let rx = networks.values.reduce(0) { $0 + $1.rx_bytes }
-                let tx = networks.values.reduce(0) { $0 + $1.tx_bytes }
-                VStack(alignment: .leading, spacing: 12) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "network")
-                            .font(.caption.bold())
-                            .foregroundStyle(AppTheme.paused)
-                        Text(localizer.t.detailNetworkIO)
-                            .font(.subheadline.weight(.semibold))
-                    }
-                    HStack(spacing: 16) {
-                        HStack(spacing: 6) {
-                            Image(systemName: "arrow.down")
-                                .font(.caption)
-                                .foregroundStyle(AppTheme.running)
-                            Text(localizer.t.detailRx)
-                                .font(.caption)
-                                .foregroundStyle(AppTheme.textSecondary)
-                            Text(Formatters.formatBytes(Double(rx)))
-                                .font(.subheadline.weight(.semibold))
+                // Network I/O
+                if let networks = stats.networks {
+                    let rx = networks.values.reduce(0) { $0 + $1.rx_bytes }
+                    let tx = networks.values.reduce(0) { $0 + $1.tx_bytes }
+                    VStack(alignment: .leading, spacing: 14) {
+                        Label(localizer.t.detailNetworkIO, systemImage: "network")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(AppTheme.running)
+                        
+                        HStack(spacing: 12) {
+                            networkStatItem(
+                                label: localizer.t.detailRx,
+                                value: Formatters.formatBytes(Double(rx)),
+                                icon: "arrow.down",
+                                color: AppTheme.running
+                            )
+                            networkStatItem(
+                                label: localizer.t.detailTx,
+                                value: Formatters.formatBytes(Double(tx)),
+                                icon: "arrow.up",
+                                color: AppTheme.info
+                            )
                         }
-                        .frame(maxWidth: .infinity)
-                        .padding(12)
-                        .background(Color(.tertiarySystemFill), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-
-                        HStack(spacing: 6) {
-                            Image(systemName: "arrow.up")
-                                .font(.caption)
-                                .foregroundStyle(AppTheme.info)
-                            Text(localizer.t.detailTx)
-                                .font(.caption)
-                                .foregroundStyle(AppTheme.textSecondary)
-                            Text(Formatters.formatBytes(Double(tx)))
-                                .font(.subheadline.weight(.semibold))
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(12)
-                        .background(Color(.tertiarySystemFill), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                     }
+                    .padding(18)
+                    .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
-                .padding(AppTheme.innerPadding)
-                .glassCard()
             }
+            .padding(18)
         } else {
             ProgressView().tint(portainerColor).padding(.top, 30)
         }
+    }
+
+    private func premiumStatCard(title: String, value: String, percent: Double, icon: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Label(title, systemImage: icon)
+                    .font(.subheadline.bold())
+                    .foregroundStyle(color)
+                Spacer()
+                Text(value)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.primary)
+            }
+            
+            GeometryReader { geo in
+                ZStack(alignment: .leading) {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(color.opacity(0.1))
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(color.gradient)
+                        .frame(width: geo.size.width * CGFloat(min(max(percent / 100, 0), 1)))
+                }
+            }
+            .frame(height: 6)
+            
+            Text("\(String(format: "%.1f", percent))% \(localizer.t.detailUsed)")
+                .font(.caption2)
+                .foregroundStyle(AppTheme.textMuted)
+        }
+        .padding(18)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 15, style: .continuous))
+    }
+
+    private func networkStatItem(label: String, value: String, icon: String, color: Color) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: icon)
+                .font(.caption.bold())
+                .foregroundStyle(color)
+                .padding(6)
+                .background(color.opacity(0.1), in: Circle())
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(label)
+                    .font(.caption2)
+                    .foregroundStyle(AppTheme.textSecondary)
+                Text(value)
+                    .font(.subheadline.weight(.semibold))
+            }
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+        .padding(10)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
     }
 
     // MARK: - Logs Tab
@@ -516,16 +547,19 @@ struct ContainerDetailView: View {
                     Text(localizer.t.detailContainerLogs)
                         .font(.subheadline.weight(.semibold))
                 }
-                ScrollView(.horizontal) {
-                    Text(logs.isEmpty ? localizer.t.detailNoLogs : logs)
-                        .font(.system(.caption, design: .monospaced))
-                        .foregroundStyle(AppTheme.textSecondary)
-                        .textSelection(.enabled)
+                VStack(spacing: 0) {
+                    ScrollView(.horizontal) {
+                        Text(logs.isEmpty ? localizer.t.detailNoLogs : logs)
+                            .font(.system(size: 11, design: .monospaced))
+                            .foregroundStyle(.primary)
+                            .padding(14)
+                            .textSelection(.enabled)
+                    }
                 }
-                .frame(maxHeight: 400)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
             }
-            .padding(16)
-            .glassCard()
+            .padding(18)
         } else {
             ProgressView().tint(portainerColor).padding(.top, 30)
         }
@@ -536,30 +570,41 @@ struct ContainerDetailView: View {
     @ViewBuilder
     private var envTab: some View {
         if let detail {
-            VStack(alignment: .leading, spacing: 0) {
-                Text(localizer.t.detailEnvVars)
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.bottom, 8)
-                ForEach(Array(detail.Config.Env.enumerated()), id: \.offset) { _, env in
-                    let parts = env.split(separator: "=", maxSplits: 1)
-                    let key = String(parts.first ?? "")
-                    let val = parts.count > 1 ? String(parts[1]) : ""
-                    VStack(alignment: .leading, spacing: 3) {
-                        Text(key)
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(portainerColor)
-                        Text(val)
-                            .font(.caption)
-                            .foregroundStyle(AppTheme.textSecondary)
-                            .lineLimit(2)
+            VStack(alignment: .leading, spacing: 16) {
+                Label(localizer.t.detailEnvVars, systemImage: "key.fill")
+                    .font(.subheadline.bold())
+                    .foregroundStyle(portainerColor)
+                
+                if let envs = detail.Config?.Env {
+                    VStack(spacing: 0) {
+                        ForEach(Array(envs.enumerated()), id: \.offset) { index, env in
+                            let parts = env.split(separator: "=", maxSplits: 1)
+                            let key = String(parts.first ?? "")
+                            let val = parts.count > 1 ? String(parts[1]) : ""
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(key)
+                                    .font(.system(size: 11, weight: .bold, design: .monospaced))
+                                    .foregroundStyle(portainerColor)
+                                Text(val)
+                                    .font(.system(size: 11, design: .monospaced))
+                                    .foregroundStyle(AppTheme.textSecondary)
+                                    .lineLimit(2)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 12)
+                            
+                            if index < envs.count - 1 {
+                                Divider().background(Color.white.opacity(0.1))
+                            }
+                        }
                     }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 10)
-                    Divider()
+                    .padding(.horizontal, 16)
+                    .background(Color.primary.opacity(0.04), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
                 }
             }
-            .padding(16)
-            .glassCard()
+            .padding(18)
         }
     }
 
@@ -568,36 +613,34 @@ struct ContainerDetailView: View {
     @ViewBuilder
     private var composeTab: some View {
         if let stack = matchedStack {
-            VStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    HStack(spacing: 8) {
-                        Image(systemName: "doc.text")
-                            .font(.subheadline)
-                            .foregroundStyle(portainerColor)
-                        Text(localizer.t.detailComposeFile)
-                            .font(.subheadline.weight(.semibold))
-                    }
+                    Label(localizer.t.detailComposeFile, systemImage: "doc.text.fill")
+                        .font(.subheadline.bold())
+                        .foregroundStyle(portainerColor)
                     Spacer()
                     Text(stack.Name)
-                        .font(.caption)
-                        .foregroundStyle(AppTheme.textMuted)
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
                         .padding(.horizontal, 8)
-                        .padding(.vertical, 3)
-                        .background(Color(.tertiarySystemFill), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                        .padding(.vertical, 4)
+                        .background(portainerColor.opacity(0.2), in: Capsule())
                 }
-                .padding(16)
-
-                Divider()
-
-                TextEditor(text: $composeContent)
-                    .font(.system(.caption, design: .monospaced))
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .frame(minHeight: 300)
-                    .padding(8)
-                    .onChange(of: composeContent) { _, _ in
-                        composeEdited = true
-                    }
+                
+                VStack(spacing: 0) {
+                    TextEditor(text: $composeContent)
+                        .font(.system(size: 11, design: .monospaced))
+                        .scrollContentBackground(.hidden)
+                        .background(Color.primary.opacity(0.04))
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+                        .frame(minHeight: 400)
+                        .padding(8)
+                        .onChange(of: composeContent) { _, _ in
+                            composeEdited = true
+                        }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).stroke(Color.white.opacity(0.1), lineWidth: 1))
 
                 if composeEdited {
                     Button {
@@ -615,15 +658,13 @@ struct ContainerDetailView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
+                        .background(portainerColor.gradient, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                     }
-                    .buttonStyle(.borderedProminent)
-                    .tint(portainerColor)
-                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                    .padding(16)
+                    .buttonStyle(.plain)
                     .disabled(isSavingCompose)
                 }
             }
-            .glassCard()
+            .padding(18)
         } else if stacks.isEmpty && activeTab == .compose {
             VStack(spacing: 12) {
                 Image(systemName: "doc.text")

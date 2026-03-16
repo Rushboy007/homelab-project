@@ -39,7 +39,6 @@ import com.homelab.app.data.remote.dto.portainer.ContainerAction
 import com.homelab.app.data.remote.dto.portainer.PortainerContainer
 import com.homelab.app.ui.theme.primaryColor
 import com.homelab.app.util.ServiceType
-import com.homelab.app.util.ResourceFormatters
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -54,6 +53,7 @@ fun ContainerListScreen(
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
     val error by viewModel.error.collectAsStateWithLifecycle()
     val actionInProgress by viewModel.actionInProgress.collectAsStateWithLifecycle()
+    val containerStats by viewModel.containerStats.collectAsStateWithLifecycle()
     
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val filter by viewModel.filter.collectAsStateWithLifecycle()
@@ -167,8 +167,12 @@ fun ContainerListScreen(
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(containers, key = { it.id }) { container ->
+                        LaunchedEffect(container.id) {
+                            viewModel.fetchContainerStats(container.id)
+                        }
                         ContainerRowCard(
                             container = container,
+                            stats = containerStats[container.id],
                             actionInProgress = actionInProgress == container.id,
                             onAction = { action -> viewModel.performAction(container.id, action) },
                             onClick = { onNavigateToDetail(viewModel.endpointId, container.id) }
@@ -183,6 +187,7 @@ fun ContainerListScreen(
 @Composable
 fun ContainerRowCard(
     container: PortainerContainer,
+    stats: com.homelab.app.data.remote.dto.portainer.ContainerStats?,
     actionInProgress: Boolean,
     onAction: (ContainerAction) -> Unit,
     onClick: () -> Unit
@@ -213,7 +218,8 @@ fun ContainerRowCard(
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header
-            Row(verticalAlignment = Alignment.CenterVertically) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                StatusDot(status = container.state)
                 Text(
                     text = container.displayName,
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
@@ -221,8 +227,56 @@ fun ContainerRowCard(
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-                StatusBadge(status = container.state)
+                if (actionInProgress) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                } else {
+                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        when (container.state) {
+                            "running" -> {
+                                QuickActionIcon(
+                                    icon = Icons.Default.Stop,
+                                    color = Color(0xFFF44336),
+                                    onClick = { onAction(ContainerAction.stop) },
+                                    contentDescription = stringResource(R.string.portainer_stop)
+                                )
+                                QuickActionIcon(
+                                    icon = Icons.Default.Pause,
+                                    color = Color(0xFF2196F3),
+                                    onClick = { onAction(ContainerAction.pause) },
+                                    contentDescription = stringResource(R.string.portainer_pause)
+                                )
+                                QuickActionIcon(
+                                    icon = Icons.Default.Refresh,
+                                    color = Color(0xFFFF9800),
+                                    onClick = { onAction(ContainerAction.restart) },
+                                    contentDescription = stringResource(R.string.portainer_restart)
+                                )
+                            }
+                            "paused" -> {
+                                QuickActionIcon(
+                                    icon = Icons.Default.PlayArrow,
+                                    color = Color(0xFF4CAF50),
+                                    onClick = { onAction(ContainerAction.unpause) },
+                                    contentDescription = stringResource(R.string.portainer_resume)
+                                )
+                                QuickActionIcon(
+                                    icon = Icons.Default.Stop,
+                                    color = Color(0xFFF44336),
+                                    onClick = { onAction(ContainerAction.stop) },
+                                    contentDescription = stringResource(R.string.portainer_stop)
+                                )
+                            }
+                            else -> {
+                                QuickActionIcon(
+                                    icon = Icons.Default.PlayArrow,
+                                    color = Color(0xFF4CAF50),
+                                    onClick = { onAction(ContainerAction.start) },
+                                    contentDescription = stringResource(R.string.portainer_start)
+                                )
+                            }
+                        }
+                    }
+                }
             }
             
             Spacer(modifier = Modifier.height(6.dp))
@@ -239,13 +293,13 @@ fun ContainerRowCard(
 
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = container.status,
+                    text = container.status.ifBlank { stringResource(R.string.not_available) },
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = ResourceFormatters.formatUnixDate(container.created),
+                    text = formatUnixDateTime(container.created),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -274,60 +328,70 @@ fun ContainerRowCard(
                 }
             }
 
-            HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp), color = MaterialTheme.colorScheme.outlineVariant)
+            Spacer(modifier = Modifier.height(12.dp))
 
-            // Actions
-            if (actionInProgress) {
-                Box(modifier = Modifier.fillMaxWidth().height(36.dp), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
-                }
-            } else {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (container.state == "running") {
-                        ActionButton(action = ContainerAction.stop, icon = Icons.Default.Stop, color = Color(0xFFF44336), label = stringResource(R.string.portainer_stop)) { onAction(ContainerAction.stop) }
-                        ActionButton(action = ContainerAction.restart, icon = Icons.Default.Refresh, color = Color(0xFFFF9800), label = stringResource(R.string.portainer_restart)) { onAction(ContainerAction.restart) }
-                    } else {
-                        ActionButton(action = ContainerAction.start, icon = Icons.Default.PlayArrow, color = Color(0xFF4CAF50), label = stringResource(R.string.portainer_start)) { onAction(ContainerAction.start) }
-                    }
-                }
+            val cpuPercent = stats?.let { calculateCpuPercent(it) }
+            val memUsage = stats?.let { calculateMemUsage(it) }
+            val netBytes = stats?.let { calculateNetworkBytes(it) }
+            val pids = stats?.pids_stats?.current
+
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                MiniStatChip(
+                    icon = Icons.Default.Memory,
+                    label = stringResource(R.string.portainer_cpu_short),
+                    value = cpuPercent?.let { String.format("%.1f%%", it) } ?: stringResource(R.string.not_available),
+                    color = Color(0xFF64B5F6),
+                    modifier = Modifier.weight(1f)
+                )
+                MiniStatChip(
+                    icon = Icons.Default.Storage,
+                    label = stringResource(R.string.portainer_mem_short),
+                    value = memUsage?.let { formatIosBytes(it) } ?: stringResource(R.string.not_available),
+                    color = Color(0xFFFFB74D),
+                    modifier = Modifier.weight(1f)
+                )
+                MiniStatChip(
+                    icon = Icons.Default.Public,
+                    label = stringResource(R.string.portainer_net_short),
+                    value = netBytes?.let { formatIosBytes(it) } ?: stringResource(R.string.not_available),
+                    color = Color(0xFF81C784),
+                    modifier = Modifier.weight(1f)
+                )
+                MiniStatChip(
+                    icon = Icons.Default.FormatListNumbered,
+                    label = stringResource(R.string.portainer_pids_short),
+                    value = pids?.takeIf { it > 0 }?.toString() ?: stringResource(R.string.not_available),
+                    color = Color(0xFFB0BEC5),
+                    modifier = Modifier.weight(1f)
+                )
             }
         }
     }
 }
 
 @Composable
-fun StatusBadge(status: String) {
-    val (color, bgColor) = when (status) {
-        "running" -> Color(0xFF4CAF50) to Color(0xFFE8F5E9)
-        "exited", "dead" -> Color(0xFFF44336) to Color(0xFFFFEBEE)
-        "paused" -> Color(0xFFFF9800) to Color(0xFFFFF3E0)
-        else -> Color.Gray to Color.LightGray
+private fun StatusDot(status: String) {
+    val color = when (status) {
+        "running" -> Color(0xFF4CAF50)
+        "paused" -> Color(0xFFFFB74D)
+        "exited", "dead" -> Color(0xFFF44336)
+        else -> Color.Gray
     }
-
-    val label = when (status) {
-        "running" -> stringResource(R.string.portainer_running)
-        "exited", "dead" -> stringResource(R.string.portainer_stopped)
-        "paused" -> stringResource(R.string.pihole_status_disabled) // Or another appropriate string
-        "healthy" -> stringResource(R.string.portainer_healthy)
-        "unhealthy" -> stringResource(R.string.portainer_unhealthy)
-        else -> status.uppercase()
-    }
-
-    Surface(
-        shape = RoundedCornerShape(6.dp),
-        color = bgColor
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-            color = color,
-            modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
-        )
-    }
+    Box(
+        modifier = Modifier
+            .size(10.dp)
+            .clip(CircleShape)
+            .background(color)
+    )
 }
 
 @Composable
-fun ActionButton(action: ContainerAction, icon: androidx.compose.ui.graphics.vector.ImageVector, color: Color, label: String, onClick: () -> Unit) {
+private fun QuickActionIcon(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    color: Color,
+    onClick: () -> Unit,
+    contentDescription: String
+) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     val scale by animateFloatAsState(
@@ -338,8 +402,8 @@ fun ActionButton(action: ContainerAction, icon: androidx.compose.ui.graphics.vec
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
 
     Surface(
-        shape = RoundedCornerShape(8.dp),
-        color = color.copy(alpha = 0.1f),
+        shape = RoundedCornerShape(10.dp),
+        color = color.copy(alpha = 0.12f),
         modifier = Modifier
             .scale(scale)
             .clickable(
@@ -351,15 +415,97 @@ fun ActionButton(action: ContainerAction, icon: androidx.compose.ui.graphics.vec
                 }
             )
     ) {
-        Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        Icon(
+            icon,
+            contentDescription = contentDescription,
+            tint = color,
+            modifier = Modifier.padding(6.dp).size(16.dp)
+        )
+    }
+}
+
+@Composable
+private fun MiniStatChip(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        shape = RoundedCornerShape(10.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        modifier = modifier
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 6.dp, vertical = 6.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(14.dp))
-            Text(text = label, style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold), color = color)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                Icon(icon, contentDescription = label, tint = color, modifier = Modifier.size(14.dp))
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    softWrap = false
+                )
+            }
+            Text(
+                text = value,
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, fontSize = 12.sp),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false
+            )
         }
     }
 }
 
-// --- Formatters moved to ResourceFormatters ---
+private fun formatIosBytes(bytes: Double): String {
+    if (bytes <= 0) return "0 B"
+    val units = arrayOf("B", "KB", "MB", "GB", "TB")
+    var value = bytes
+    var unitIndex = 0
+    while (value >= 1024 && unitIndex < units.lastIndex) {
+        value /= 1024.0
+        unitIndex++
+    }
+    val format = when {
+        unitIndex == 0 -> "%.0f %s"
+        value >= 100 -> "%.0f %s"
+        value >= 10 -> "%.1f %s"
+        else -> "%.1f %s"
+    }
+    return String.format(format, value, units[unitIndex])
+}
+
+private fun calculateCpuPercent(stats: com.homelab.app.data.remote.dto.portainer.ContainerStats): Double {
+    val cpuDelta = stats.cpu_stats.cpu_usage.total_usage - stats.precpu_stats.cpu_usage.total_usage
+    val systemDelta = (stats.cpu_stats.system_cpu_usage ?: 0) - (stats.precpu_stats.system_cpu_usage ?: 0)
+    if (systemDelta <= 0 || cpuDelta <= 0) return 0.0
+    return (cpuDelta.toDouble() / systemDelta.toDouble()) * (stats.cpu_stats.online_cpus ?: 1) * 100.0
+}
+
+private fun calculateMemUsage(stats: com.homelab.app.data.remote.dto.portainer.ContainerStats): Double {
+    val cache = stats.memory_stats.stats?.cache ?: 0
+    val usage = stats.memory_stats.usage - cache
+    return usage.toDouble().coerceAtLeast(0.0)
+}
+
+private fun calculateNetworkBytes(stats: com.homelab.app.data.remote.dto.portainer.ContainerStats): Double {
+    val networks = stats.networks ?: return 0.0
+    val total = networks.values.sumOf { it.rx_bytes + it.tx_bytes }
+    return total.toDouble()
+}
+
+private fun formatUnixDateTime(unixTime: Long): String {
+    val date = java.util.Date(unixTime * 1000)
+    val formatter = java.text.SimpleDateFormat("dd/MM/yy, HH:mm", java.util.Locale.getDefault())
+    return formatter.format(date)
+}
+// --- Local formatters ---

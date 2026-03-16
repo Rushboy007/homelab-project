@@ -5,12 +5,15 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.homelab.app.data.remote.dto.beszel.BeszelContainer
+import com.homelab.app.data.remote.dto.beszel.BeszelContainerRecord
+import com.homelab.app.data.remote.dto.beszel.BeszelContainerStatsRecord
 import com.homelab.app.data.remote.dto.beszel.BeszelRecordStats
 import com.homelab.app.data.remote.dto.beszel.BeszelSmartDevice
 import com.homelab.app.data.remote.dto.beszel.BeszelSystem
 import com.homelab.app.data.remote.dto.beszel.BeszelSystemDetails
 import com.homelab.app.data.remote.dto.beszel.BeszelSystemRecord
 import com.homelab.app.data.repository.BeszelRepository
+import com.homelab.app.data.repository.LocalPreferencesRepository
 import com.homelab.app.data.repository.ServicesRepository
 import com.homelab.app.domain.model.ServiceInstance
 import com.homelab.app.util.ErrorHandler
@@ -28,13 +31,16 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class BeszelViewModel @Inject constructor(
     private val repository: BeszelRepository,
     private val servicesRepository: ServicesRepository,
-    savedStateHandle: SavedStateHandle,
+    private val preferencesRepository: LocalPreferencesRepository,
+    private val savedStateHandle: SavedStateHandle,
     @param:ApplicationContext private val context: Context
 ) : ViewModel() {
     private var systemDetailRequestToken: Long = 0
@@ -151,6 +157,140 @@ class BeszelViewModel @Inject constructor(
                 _systemDetailState.value = UiState.Error(message, retryAction = { fetchSystemDetail(systemId) })
             }
         }
+    }
+
+    // MARK: - Container list screen
+
+    private val _containerRecordsState = MutableStateFlow<UiState<List<BeszelContainerRecord>>>(UiState.Idle)
+    val containerRecordsState: StateFlow<UiState<List<BeszelContainerRecord>>> = _containerRecordsState
+
+    private val _containerStats = MutableStateFlow<List<BeszelContainerStatsRecord>>(emptyList())
+    val containerStats: StateFlow<List<BeszelContainerStatsRecord>> = _containerStats
+
+    private val _containerStatsLoading = MutableStateFlow(false)
+    val containerStatsLoading: StateFlow<Boolean> = _containerStatsLoading
+
+    data class ContainerChartsVisibility(
+        val cpu: Boolean = true,
+        val memory: Boolean = true,
+        val network: Boolean = true
+    )
+
+    val containerChartsVisibility: StateFlow<ContainerChartsVisibility> = combine(
+        preferencesRepository.beszelShowCpu,
+        preferencesRepository.beszelShowMemory,
+        preferencesRepository.beszelShowNetwork
+    ) { cpu, memory, network ->
+        ContainerChartsVisibility(cpu = cpu, memory = memory, network = network)
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ContainerChartsVisibility())
+
+    fun updateContainerChartsVisibility(update: (ContainerChartsVisibility) -> ContainerChartsVisibility) {
+        val next = update(containerChartsVisibility.value)
+        viewModelScope.launch {
+            preferencesRepository.setBeszelShowCpu(next.cpu)
+            preferencesRepository.setBeszelShowMemory(next.memory)
+            preferencesRepository.setBeszelShowNetwork(next.network)
+        }
+    }
+
+    private val _containerLogs = MutableStateFlow<UiState<String>>(UiState.Idle)
+    val containerLogs: StateFlow<UiState<String>> = _containerLogs
+
+    private val _containerInfo = MutableStateFlow<UiState<String>>(UiState.Idle)
+    val containerInfo: StateFlow<UiState<String>> = _containerInfo
+
+    fun fetchContainers(systemId: String) {
+        viewModelScope.launch {
+            _containerRecordsState.value = UiState.Loading
+            _containerStatsLoading.value = true
+            try {
+                coroutineScope {
+                    val recordsDeferred = async { repository.getContainers(instanceId, systemId) }
+                    val statsDeferred = async {
+                        try {
+                            repository.getContainerStats(instanceId, systemId, limit = 240)
+                        } catch (_: Exception) {
+                            emptyList()
+                        }
+                    }
+
+                    val records = recordsDeferred.await()
+                    _containerRecordsState.value = UiState.Success(
+                        records.sortedBy { it.name.lowercase() }
+                    )
+
+                    val stats = statsDeferred.await()
+                    _containerStats.value = stats
+
+                    if (stats.isEmpty()) {
+                        try {
+                            val fallback = repository.getSystemRecords(instanceId, systemId, limit = 60)
+                            _records.value = fallback.sortedBy { it.created }
+                        } catch (_: Exception) {
+                            _records.value = emptyList()
+                        }
+                    }
+                }
+            } catch (error: Exception) {
+                val message = ErrorHandler.getMessage(context, error)
+                _containerRecordsState.value = UiState.Error(message, retryAction = { fetchContainers(systemId) })
+            } finally {
+                _containerStatsLoading.value = false
+            }
+        }
+    }
+
+    fun fetchContainerLogs(systemId: String, containerId: String, containerName: String? = null) {
+        viewModelScope.launch {
+            _containerLogs.value = UiState.Loading
+            try {
+                val instance = servicesRepository.getInstance(instanceId)
+                val token = instance?.token?.takeIf { it.isNotBlank() } ?: throw Exception("No token")
+                val logs = try {
+                    repository.getContainerLogs(instanceId, token, systemId, containerId)
+                } catch (error: Exception) {
+                    val http = error as? retrofit2.HttpException
+                    if (http?.code() == 400 && !containerName.isNullOrBlank()) {
+                        repository.getContainerLogs(instanceId, token, systemId, containerName)
+                    } else {
+                        throw error
+                    }
+                }
+                _containerLogs.value = UiState.Success(logs)
+            } catch (error: Exception) {
+                val message = ErrorHandler.getMessage(context, error)
+                _containerLogs.value = UiState.Error(message)
+            }
+        }
+    }
+
+    fun fetchContainerInfo(systemId: String, containerId: String, containerName: String? = null) {
+        viewModelScope.launch {
+            _containerInfo.value = UiState.Loading
+            try {
+                val instance = servicesRepository.getInstance(instanceId)
+                val token = instance?.token?.takeIf { it.isNotBlank() } ?: throw Exception("No token")
+                val info = try {
+                    repository.getContainerInfo(instanceId, token, systemId, containerId)
+                } catch (error: Exception) {
+                    val http = error as? retrofit2.HttpException
+                    if (http?.code() == 400 && !containerName.isNullOrBlank()) {
+                        repository.getContainerInfo(instanceId, token, systemId, containerName)
+                    } else {
+                        throw error
+                    }
+                }
+                _containerInfo.value = UiState.Success(info)
+            } catch (error: Exception) {
+                val message = ErrorHandler.getMessage(context, error)
+                _containerInfo.value = UiState.Error(message)
+            }
+        }
+    }
+
+    fun resetContainerDetail() {
+        _containerLogs.value = UiState.Idle
+        _containerInfo.value = UiState.Idle
     }
 
     fun setPreferredInstance(newInstanceId: String) {

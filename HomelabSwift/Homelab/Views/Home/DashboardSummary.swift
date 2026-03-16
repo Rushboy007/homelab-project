@@ -327,7 +327,7 @@ private struct SummaryCard: View {
 
             Spacer(minLength: 4)
 
-            Text(title)
+            Text(title.sentenceCased())
                 .font(.caption)
                 .foregroundStyle(AppTheme.textMuted)
                 .lineLimit(1)

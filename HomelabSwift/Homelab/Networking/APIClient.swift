@@ -165,8 +165,10 @@ final class BaseNetworkEngine: Sendable {
         }
         req.httpBody = body
 
+        logRequest(req)
         let (data, response) = try await urlSession.data(for: req)
-        try interceptResponse(response)
+        logResponse(response, data: data)
+        try interceptResponse(response, data: data)
 
         let decoder = JSONDecoder()
         do {
@@ -194,8 +196,10 @@ final class BaseNetworkEngine: Sendable {
         }
         req.httpBody = body
 
+        logRequest(req)
         let (data, response) = try await urlSession.data(for: req)
-        try interceptResponse(response)
+        logResponse(response, data: data)
+        try interceptResponse(response, data: data)
 
         return String(data: data, encoding: .utf8) ?? ""
     }
@@ -218,8 +222,10 @@ final class BaseNetworkEngine: Sendable {
         }
         req.httpBody = body
 
-        let (_, response) = try await urlSession.data(for: req)
-        try interceptResponse(response)
+        logRequest(req)
+        let (data, response) = try await urlSession.data(for: req)
+        logResponse(response, data: data)
+        try interceptResponse(response, data: data)
     }
 
     private func performDataRequest(
@@ -238,13 +244,41 @@ final class BaseNetworkEngine: Sendable {
             req.setValue(value, forHTTPHeaderField: key)
         }
 
+        req.httpBody = nil
+
+        logRequest(req)
         let (data, response) = try await urlSession.data(for: req)
+        logResponse(response, data: data)
         try interceptResponse(response)
         return data
     }
 
-    private func interceptResponse(_ response: URLResponse) throws {
+    private func logRequest(_ request: URLRequest) {
+        let url = request.url?.absoluteString ?? "unknown"
+        let method = request.httpMethod ?? "GET"
+        AppLogger.shared.network("--> \(method) \(url)")
+    }
+
+    private func logResponse(_ response: URLResponse, data: Data?) {
         guard let http = response as? HTTPURLResponse else { return }
+        let url = response.url?.absoluteString ?? "unknown"
+        let status = http.statusCode
+        let size = data?.count ?? 0
+        AppLogger.shared.network("<-- \(status) \(url) (\(size) bytes)")
+    }
+
+    private func interceptResponse(_ response: URLResponse, data: Data? = nil) throws {
+        guard let http = response as? HTTPURLResponse else { return }
+
+        // Detection of HTML when expecting JSON (likely a redirect to a login page)
+        if let contentType = http.value(forHTTPHeaderField: "Content-Type"),
+           contentType.contains("text/html") {
+            // Check if this is a known HTML error or a potential login page
+            let bodySnippet = data.flatMap { String(data: $0.prefix(500), encoding: .utf8) } ?? ""
+            if bodySnippet.lowercased().contains("<html") {
+                 throw APIError.custom("Received an HTML response instead of JSON. This often happens when the service is behind a login page or proxy (OAuth/SSO). Please check your configuration.")
+            }
+        }
 
         if http.statusCode == 401 {
             let type = serviceType
@@ -263,7 +297,8 @@ final class BaseNetworkEngine: Sendable {
         }
 
         if http.statusCode >= 400 {
-            throw APIError.httpError(statusCode: http.statusCode, body: "")
+            let body = data.flatMap { String(data: $0, encoding: .utf8) } ?? ""
+            throw APIError.httpError(statusCode: http.statusCode, body: body)
         }
     }
 }

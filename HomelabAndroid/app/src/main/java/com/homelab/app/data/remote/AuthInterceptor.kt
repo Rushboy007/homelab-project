@@ -1,5 +1,6 @@
 package com.homelab.app.data.remote
 
+import com.homelab.app.data.repository.BeszelRepository
 import com.homelab.app.data.repository.ServiceInstancesRepository
 import com.homelab.app.util.GlobalEventBus
 import com.homelab.app.domain.model.PiHoleAuthMode
@@ -13,11 +14,12 @@ import javax.inject.Singleton
 @Singleton
 class AuthInterceptor @Inject constructor(
     private val globalEventBus: GlobalEventBus,
-    private val serviceInstancesRepository: ServiceInstancesRepository
+    private val serviceInstancesRepository: ServiceInstancesRepository,
+    private val beszelRepository: dagger.Lazy<BeszelRepository>
 ) : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
         var request = chain.request()
-        
+
         val instanceIdHeader = request.header("X-Homelab-Instance-Id")
         val bypassHeader = request.header("X-Homelab-Bypass")
 
@@ -41,45 +43,43 @@ class AuthInterceptor @Inject constructor(
         }
 
         if (instance != null) {
-            when (instance.type) {
-                ServiceType.PORTAINER -> {
-                    if (!instance.apiKey.isNullOrBlank()) {
-                        requestBuilder.addHeader("X-API-Key", instance.apiKey)
-                    } else if (instance.token.isNotBlank()) {
-                        requestBuilder.addHeader("Authorization", "Bearer ${instance.token}")
-                    }
-                }
-                ServiceType.PIHOLE -> {
-                    if (instance.token.isNotBlank() && instance.piholeAuthMode != PiHoleAuthMode.LEGACY) {
-                        requestBuilder.addHeader("X-FTL-SID", instance.token)
-                    }
-                }
-                ServiceType.BESZEL -> {
-                    if (instance.token.isNotBlank()) {
-                        requestBuilder.addHeader("Authorization", instance.token)
-                    }
-                }
-                ServiceType.GITEA -> {
-                    if (instance.token.isNotBlank()) {
-                        if (instance.token.startsWith("basic:")) {
-                            val credentials = instance.token.removePrefix("basic:")
-                            requestBuilder.addHeader("Authorization", "Basic $credentials")
-                        } else {
-                            requestBuilder.addHeader("Authorization", "token ${instance.token}")
-                        }
-                    }
-                }
-                ServiceType.NGINX_PROXY_MANAGER -> {
-                    if (instance.token.isNotBlank()) {
-                        requestBuilder.addHeader("Authorization", "Bearer ${instance.token}")
-                    }
-                }
-                else -> {}
-            }
+            val hasAuthorization = request.header("Authorization") != null
+            addAuthHeaders(requestBuilder, instance, hasAuthorization)
         }
 
         request = requestBuilder.build()
-        val response = chain.proceed(request)
+        var response = chain.proceed(request)
+
+        // Auto-retry for Beszel on auth failure (401 or 400 for PocketBase)
+        if (instance != null &&
+            instance.type == ServiceType.BESZEL &&
+            (response.code == 401 || response.code == 400) &&
+            bypassHeader != "true" &&
+            !instance.username.isNullOrBlank() &&
+            !instance.password.isNullOrBlank()
+        ) {
+            val newToken = try {
+                runBlocking {
+                    beszelRepository.get().authenticate(instance.url, instance.username, instance.password)
+                }
+            } catch (_: Exception) { null }
+
+            if (newToken != null) {
+                // Persist the refreshed token
+                runBlocking {
+                    serviceInstancesRepository.saveInstance(instance.copy(token = newToken))
+                }
+
+                // Retry with new token
+                response.close()
+                val retryBuilder = request.newBuilder()
+                    .removeHeader("Authorization")
+                    .addHeader("Authorization", "Bearer $newToken")
+                response = chain.proceed(retryBuilder.build())
+
+                return response
+            }
+        }
 
         if (response.code == 401 &&
             bypassHeader != "true" &&
@@ -91,5 +91,47 @@ class AuthInterceptor @Inject constructor(
         }
 
         return response
+    }
+
+    private fun addAuthHeaders(
+        builder: okhttp3.Request.Builder,
+        instance: com.homelab.app.domain.model.ServiceInstance,
+        hasAuthorization: Boolean
+    ) {
+        when (instance.type) {
+            ServiceType.PORTAINER -> {
+                if (!instance.apiKey.isNullOrBlank()) {
+                    builder.addHeader("X-API-Key", instance.apiKey)
+                } else if (!hasAuthorization && instance.token.isNotBlank()) {
+                    builder.addHeader("Authorization", "Bearer ${instance.token}")
+                }
+            }
+            ServiceType.PIHOLE -> {
+                if (instance.token.isNotBlank() && instance.piholeAuthMode != PiHoleAuthMode.LEGACY) {
+                    builder.addHeader("X-FTL-SID", instance.token)
+                }
+            }
+            ServiceType.BESZEL -> {
+                if (!hasAuthorization && instance.token.isNotBlank()) {
+                    builder.addHeader("Authorization", "Bearer ${instance.token}")
+                }
+            }
+            ServiceType.GITEA -> {
+                if (!hasAuthorization && instance.token.isNotBlank()) {
+                    if (instance.token.startsWith("basic:")) {
+                        val credentials = instance.token.removePrefix("basic:")
+                        builder.addHeader("Authorization", "Basic $credentials")
+                    } else {
+                        builder.addHeader("Authorization", "token ${instance.token}")
+                    }
+                }
+            }
+            ServiceType.NGINX_PROXY_MANAGER -> {
+                if (!hasAuthorization && instance.token.isNotBlank()) {
+                    builder.addHeader("Authorization", "Bearer ${instance.token}")
+                }
+            }
+            else -> {}
+        }
     }
 }

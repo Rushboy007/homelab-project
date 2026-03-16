@@ -2,6 +2,8 @@ package com.homelab.app.util
 
 import android.content.Context
 import com.homelab.app.R
+import com.homelab.app.data.remote.HtmlResponseException
+import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 import java.io.IOException
 import java.net.ConnectException
@@ -10,9 +12,12 @@ import java.net.UnknownHostException
 
 object ErrorHandler {
     fun getMessage(context: Context, error: Throwable?): String {
+        Logger.e("ErrorHandler", "Handling error", error)
         return when (error) {
+            is HtmlResponseException -> context.getString(R.string.error_html_response)
             is ConnectException, is UnknownHostException -> context.getString(R.string.error_server_unreachable) // We'll need to add string resources
             is SocketTimeoutException -> context.getString(R.string.error_timeout)
+            is SerializationException -> context.getString(R.string.error_parsing)
             is IOException -> context.getString(R.string.error_network)
             is HttpException -> {
                 when (error.code()) {

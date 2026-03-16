@@ -2,6 +2,8 @@ package com.homelab.app.di
 
 import com.homelab.app.BuildConfig
 import com.homelab.app.data.remote.AuthInterceptor
+import com.homelab.app.data.remote.DebugLoggingInterceptor
+import com.homelab.app.data.remote.HtmlDetectionInterceptor
 import com.homelab.app.data.remote.SmartFallbackInterceptor
 import dagger.Module
 import dagger.Provides
@@ -38,7 +40,9 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(
         smartFallbackInterceptor: SmartFallbackInterceptor,
-        authInterceptor: AuthInterceptor
+        authInterceptor: AuthInterceptor,
+        debugLoggingInterceptor: DebugLoggingInterceptor,
+        htmlDetectionInterceptor: HtmlDetectionInterceptor
     ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
@@ -67,6 +71,8 @@ object NetworkModule {
             .writeTimeout(15, TimeUnit.SECONDS)
             .addInterceptor(smartFallbackInterceptor)
             .addInterceptor(authInterceptor)
+            .addInterceptor(debugLoggingInterceptor)
+            .addInterceptor(htmlDetectionInterceptor)
             .addInterceptor(loggingInterceptor)
             .sslSocketFactory(sslSocketFactory, trustManager)
             .hostnameVerifier { _, _ -> true }
@@ -78,7 +84,9 @@ object NetworkModule {
     @Named("insecure")
     fun provideInsecureOkHttpClient(
         smartFallbackInterceptor: SmartFallbackInterceptor,
-        authInterceptor: AuthInterceptor
+        authInterceptor: AuthInterceptor,
+        debugLoggingInterceptor: DebugLoggingInterceptor,
+        htmlDetectionInterceptor: HtmlDetectionInterceptor
     ): OkHttpClient {
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) {
@@ -107,6 +115,8 @@ object NetworkModule {
             .writeTimeout(15, TimeUnit.SECONDS)
             .addInterceptor(smartFallbackInterceptor)
             .addInterceptor(authInterceptor)
+            .addInterceptor(debugLoggingInterceptor)
+            .addInterceptor(htmlDetectionInterceptor)
             .addInterceptor(loggingInterceptor)
             .sslSocketFactory(sslSocketFactory, trustManager)
             .hostnameVerifier { _, _ -> true }

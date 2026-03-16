@@ -14,9 +14,7 @@ struct NpmAccessListCard: View {
 
                 Spacer()
 
-                Image(systemName: "chevron.right")
-                    .font(.caption2.weight(.semibold))
-                    .foregroundStyle(AppTheme.textMuted.opacity(0.5))
+                Spacer(minLength: 0)
             }
 
             let usersCount = accessList.items?.count ?? 0

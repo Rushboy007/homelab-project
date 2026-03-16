@@ -1,6 +1,8 @@
 package com.homelab.app.data.repository
 
 import com.homelab.app.data.remote.api.BeszelApi
+import com.homelab.app.data.remote.dto.beszel.BeszelContainerRecord
+import com.homelab.app.data.remote.dto.beszel.BeszelContainerStatsRecord
 import com.homelab.app.data.remote.dto.beszel.BeszelSystem
 import com.homelab.app.data.remote.dto.beszel.BeszelSystemDetails
 import com.homelab.app.data.remote.dto.beszel.BeszelSystemRecord
@@ -54,5 +56,62 @@ class BeszelRepository @Inject constructor(
         val filter = "system='$systemId'"
         val response = api.getSmartDevices(instanceId = instanceId, filter = filter, limit = limit)
         return response.items
+    }
+
+    suspend fun getContainers(instanceId: String, systemId: String): List<BeszelContainerRecord> {
+        val filter = "system='$systemId'"
+        val response = api.getContainers(instanceId = instanceId, filter = filter)
+        return response.items
+    }
+
+    suspend fun getContainerStats(instanceId: String, systemId: String, limit: Int = 240): List<BeszelContainerStatsRecord> {
+        val filter = "system='$systemId'"
+        val response = api.getContainerStats(instanceId = instanceId, filter = filter, limit = limit)
+        return response.items
+    }
+
+    suspend fun getContainerLogs(instanceId: String, token: String, systemId: String, containerId: String): String {
+        val response = api.getContainerLogs(
+            instanceId = instanceId,
+            authorization = "Bearer $token",
+            systemId = systemId,
+            containerId = containerId
+        )
+        val raw = response.string()
+        return formatLogs(raw)
+    }
+
+    suspend fun getContainerInfo(instanceId: String, token: String, systemId: String, containerId: String): String {
+        val response = api.getContainerInfo(
+            instanceId = instanceId,
+            authorization = "Bearer $token",
+            systemId = systemId,
+            containerId = containerId
+        )
+        val raw = response.string()
+        return try {
+            val json = org.json.JSONObject(raw)
+            json.toString(2)
+        } catch (_: Exception) {
+            raw
+        }
+    }
+
+    private fun formatLogs(raw: String): String {
+        return try {
+            val json = org.json.JSONObject(raw)
+            val logs = json.optString("logs", "")
+            if (logs.isNotEmpty()) {
+                logs
+                    .replace("\\n", "\n")
+                    .replace("\\t", "\t")
+                    .replace("\\\"", "\"")
+                    .replace("\\/", "/")
+            } else {
+                json.toString(2)
+            }
+        } catch (_: Exception) {
+            raw
+        }
     }
 }

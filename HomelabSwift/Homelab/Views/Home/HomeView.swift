@@ -9,6 +9,11 @@ struct HomeView: View {
     @State private var showLogin: ServiceType? = nil
     @State private var showingServiceOrder = false
 
+    // Summary data (integrated into cards), keyed by instance UUID
+    @State private var summaryData: [UUID: ServiceSummaryInfo] = [:]
+    @State private var summaryLoading = false
+    @State private var summaryRefreshID = UUID()
+
     private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
 
     private var visibleTypes: [ServiceType] {
@@ -25,6 +30,20 @@ struct HomeView: View {
             .contains { servicesStore.reachability(for: $0.id) == false }
     }
 
+    private var reachabilityHash: String {
+        ServiceType.allCases.map { type in
+            let r = servicesStore.isReachable(type)
+            return "\(type.rawValue):\(r.map { $0 ? "1" : "0" } ?? "?")"
+        }.joined(separator: ",")
+    }
+
+    private var preferredSelectionHash: String {
+        ServiceType.allCases.map { type in
+            let instanceId = servicesStore.preferredInstance(for: type)?.id.uuidString ?? "none"
+            return "\(type.rawValue):\(instanceId)"
+        }.joined(separator: ",")
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -34,7 +53,6 @@ struct HomeView: View {
                         tailscaleSection
                     }
                     serviceGrid
-                    DashboardSummary()
                     footerSection
                 }
                 .padding(.horizontal, 16)
@@ -49,6 +67,21 @@ struct HomeView: View {
             }
             .navigationDestination(for: HomeServiceRoute.self) { route in
                 serviceDestination(for: route)
+            }
+            .task(id: summaryRefreshID) { await fetchAllSummaryData() }
+            .onChange(of: reachabilityHash) { _, _ in
+                summaryRefreshID = UUID()
+                for type in ServiceType.allCases {
+                    for instance in servicesStore.instances(for: type) {
+                        if servicesStore.reachability(for: instance.id) == false {
+                            summaryData.removeValue(forKey: instance.id)
+                        }
+                    }
+                }
+            }
+            .onChange(of: preferredSelectionHash) { _, _ in
+                summaryData = [:]
+                summaryRefreshID = UUID()
             }
         }
     }
@@ -173,20 +206,25 @@ struct HomeView: View {
                                 isPreferred: false,
                                 reachable: nil,
                                 isPinging: false,
+                                summary: nil,
+                                isSummaryLoading: false,
                                 t: localizer.t
                             )
                         }
                         .buttonStyle(.plain)
                     } else {
                         ForEach(instances) { instance in
+                            let isPreferred = servicesStore.preferredInstance(for: type)?.id == instance.id
                             NavigationLink(value: HomeServiceRoute(type: type, instanceId: instance.id)) {
                                 ServiceCardContent(
                                     type: type,
                                     label: instance.displayLabel,
                                     isConnected: true,
-                                    isPreferred: servicesStore.preferredInstance(for: type)?.id == instance.id,
+                                    isPreferred: isPreferred,
                                     reachable: servicesStore.reachability(for: instance.id),
                                     isPinging: servicesStore.isPinging(instanceId: instance.id),
+                                    summary: summaryData[instance.id],
+                                    isSummaryLoading: summaryData[instance.id] == nil && summaryLoading,
                                     t: localizer.t
                                 ) {
                                     Task { await servicesStore.checkReachability(for: instance.id) }
@@ -201,7 +239,7 @@ struct HomeView: View {
     }
 
     private var footerSection: some View {
-        Text("\(localizer.t.launcherServices) • \(servicesStore.connectedCount) \(localizer.t.launcherConnected.lowercased())")
+        Text("\(localizer.t.launcherServices) • \(servicesStore.connectedCount) \(localizer.t.launcherConnected.sentenceCased())")
             .font(.caption)
             .foregroundStyle(AppTheme.textMuted)
             .frame(maxWidth: .infinity)
@@ -219,11 +257,76 @@ struct HomeView: View {
         case .nginxProxyManager: NpmDashboard(instanceId: route.instanceId)
         }
     }
+
+    // MARK: - Summary Data Fetching
+
+    private func fetchAllSummaryData() async {
+        summaryLoading = true
+        defer { summaryLoading = false }
+
+        await withTaskGroup(of: (UUID, ServiceSummaryInfo?).self) { group in
+            for type in ServiceType.allCases {
+                for instance in servicesStore.instances(for: type) {
+                    guard servicesStore.reachability(for: instance.id) != false else { continue }
+                    group.addTask { await (instance.id, self.fetchSummary(instanceId: instance.id, type: type)) }
+                }
+            }
+            for await (id, info) in group {
+                if let info { summaryData[id] = info }
+            }
+        }
+    }
+
+    @MainActor
+    private func fetchSummary(instanceId: UUID, type: ServiceType) async -> ServiceSummaryInfo? {
+        do {
+            switch type {
+            case .portainer:
+                guard let client = await servicesStore.portainerClient(instanceId: instanceId) else { return nil }
+                let endpoints = try await client.getEndpoints()
+                guard let first = endpoints.first else { return nil }
+                let containers = try await client.getContainers(endpointId: first.Id)
+                let running = containers.filter { $0.State == "running" }.count
+                return ServiceSummaryInfo(value: "\(running)", subValue: "/ \(containers.count)", label: localizer.t.portainerContainers)
+            case .pihole:
+                guard let client = await servicesStore.piholeClient(instanceId: instanceId) else { return nil }
+                let stats = try await client.getStats()
+                return ServiceSummaryInfo(value: Formatters.formatNumber(stats.queries.total), label: localizer.t.summaryQueryTotal)
+            case .beszel:
+                guard let client = await servicesStore.beszelClient(instanceId: instanceId) else { return nil }
+                let response = try await client.getSystems()
+                let online = response.items.filter { $0.isOnline }.count
+                return ServiceSummaryInfo(value: "\(online)", subValue: "/ \(response.items.count)", label: localizer.t.summarySystemsOnline)
+            case .gitea:
+                guard let client = await servicesStore.giteaClient(instanceId: instanceId) else { return nil }
+                let repos = try await client.getUserRepos(page: 1, limit: 100)
+                return ServiceSummaryInfo(value: "\(repos.count)", label: localizer.t.giteaRepos)
+            case .nginxProxyManager:
+                guard let client = await servicesStore.npmClient(instanceId: instanceId) else { return nil }
+                let report = try await client.getHostReport()
+                return ServiceSummaryInfo(value: "\(report.proxy)", subValue: "/ \(report.total)", label: localizer.t.npmProxyHosts)
+            }
+        } catch {
+            return nil
+        }
+    }
 }
 
 private struct HomeServiceRoute: Hashable {
     let type: ServiceType
     let instanceId: UUID
+}
+
+struct ServiceSummaryInfo {
+    let value: String
+    let subValue: String?
+    let label: String
+
+    init(value: String, subValue: String? = nil, label: String) {
+        self.value = value
+        self.subValue = subValue
+        self.label = label
+    }
 }
 
 private struct ServiceOrderSheet: View {
@@ -281,12 +384,21 @@ private struct ServiceCardContent: View {
     let isPreferred: Bool
     let reachable: Bool?
     let isPinging: Bool
+    let summary: ServiceSummaryInfo?
+    let isSummaryLoading: Bool
     let t: Translations
     var onRefresh: (() -> Void)? = nil
+    
+    private var cardTint: Color? {
+        if isConnected && reachable == false {
+            return type.colors.primary.opacity(0.06)
+        }
+        return nil
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            HStack {
+            HStack(alignment: .top) {
                 AsyncImage(url: URL(string: type.iconUrl)) { phase in
                     if let image = phase.image {
                         image.resizable().scaledToFit()
@@ -301,9 +413,35 @@ private struct ServiceCardContent: View {
                 .background(type.colors.bg, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 .accessibilityHidden(true)
 
-                Spacer()
+                Spacer(minLength: 6)
 
-                if isConnected && reachable == false, let onRefresh {
+                if isConnected && reachable == true, let summary {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        HStack(alignment: .firstTextBaseline, spacing: 3) {
+                            Text(summary.value)
+                                .font(.system(size: 20, weight: .bold, design: .rounded))
+                                .foregroundStyle(type.colors.primary)
+                            if let sub = summary.subValue {
+                                Text(sub)
+                                    .font(.caption)
+                                    .foregroundStyle(AppTheme.textSecondary)
+                            }
+                        }
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+
+                        Text(summary.label.sentenceCased())
+                            .font(.caption2)
+                            .foregroundStyle(AppTheme.textMuted)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .frame(maxWidth: 110, alignment: .trailing)
+                } else if isConnected && reachable == true && isSummaryLoading {
+                    SkeletonLoader(height: 16, cornerRadius: 4)
+                        .frame(width: 60)
+                } else if isConnected && reachable == false, let onRefresh {
                     Button(action: onRefresh) {
                         Image(systemName: "arrow.clockwise")
                             .font(.subheadline.bold())
@@ -328,25 +466,25 @@ private struct ServiceCardContent: View {
                 .foregroundStyle(.primary)
                 .lineLimit(1)
 
-            Spacer(minLength: 8)
+            Spacer(minLength: 6)
 
             HStack(spacing: 6) {
                 statusBadge
+
                 if isPreferred {
-                    Text(t.badgeDefault)
-                        .font(.caption2.bold())
+                    Image(systemName: "star.fill")
+                        .font(.system(size: 9, weight: .bold))
                         .foregroundStyle(type.colors.primary)
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 3)
-                        .background(type.colors.primary.opacity(0.12), in: Capsule())
-                        .lineLimit(1)
+                        .padding(5)
+                        .background(type.colors.primary.opacity(0.12), in: Circle())
+                        .accessibilityLabel(t.badgeDefault)
                 }
             }
         }
         .frame(maxWidth: .infinity, minHeight: 140, alignment: .leading)
         .padding(14)
         .contentShape(Rectangle())
-        .glassCard()
+        .glassCard(tint: cardTint)
         .task {
             if isConnected, reachable == nil, !isPinging {
                 onRefresh?()
@@ -371,24 +509,24 @@ private struct ServiceCardContent: View {
             .background(.gray.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         } else if reachable == false {
             HStack(spacing: 5) {
-                Circle().fill(AppTheme.warning).frame(width: 6, height: 6)
+                Circle().fill(type.colors.primary).frame(width: 6, height: 6)
                 Text(t.statusUnreachable)
                     .font(.caption2.bold())
-                    .foregroundStyle(AppTheme.warning)
+                    .foregroundStyle(type.colors.primary)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(AppTheme.warning.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(type.colors.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         } else if reachable == true {
             HStack(spacing: 5) {
-                Circle().fill(AppTheme.running).frame(width: 6, height: 6)
+                Circle().fill(type.colors.primary).frame(width: 6, height: 6)
                 Text(t.statusOnline)
                     .font(.caption2.bold())
-                    .foregroundStyle(AppTheme.running)
+                    .foregroundStyle(type.colors.primary)
             }
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
-            .background(AppTheme.running.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .background(type.colors.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         } else {
             HStack(spacing: 5) {
                 Circle().fill(AppTheme.info).frame(width: 6, height: 6)

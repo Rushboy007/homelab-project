@@ -44,6 +44,7 @@ import com.homelab.app.util.UiState
 fun BeszelSystemDetailScreen(
     systemId: String,
     onNavigateBack: () -> Unit,
+    onNavigateToContainers: () -> Unit = {},
     viewModel: BeszelViewModel = hiltViewModel()
 ) {
     val systemDetailState by viewModel.systemDetailState.collectAsStateWithLifecycle()
@@ -114,7 +115,7 @@ fun BeszelSystemDetailScreen(
 
             is UiState.Success -> {
                 detailUiModel?.let { model ->
-                    BeszelSystemDetailContent(model = model, paddingValues = paddingValues)
+                    BeszelSystemDetailContent(model = model, paddingValues = paddingValues, onNavigateToContainers = onNavigateToContainers)
                 }
             }
         }
@@ -124,7 +125,8 @@ fun BeszelSystemDetailScreen(
 @Composable
 private fun BeszelSystemDetailContent(
     model: BeszelSystemDetailUiModel,
-    paddingValues: PaddingValues
+    paddingValues: PaddingValues,
+    onNavigateToContainers: () -> Unit = {}
 ) {
     val info = model.system.info
     val expandedMetric = remember { mutableStateOf<ExtraMetricType?>(null) }
@@ -142,12 +144,10 @@ private fun BeszelSystemDetailContent(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         item {
-            BeszelHeaderCard(model.system)
-        }
-
-        if (info != null || model.systemDetails != null) {
-            item {
-                SystemInfoSection(info = info, details = model.systemDetails)
+            if (info != null || model.systemDetails != null) {
+                CombinedHeaderCard(system = model.system, info = info, details = model.systemDetails)
+            } else {
+                BeszelHeaderCard(model.system)
             }
         }
 
@@ -200,7 +200,7 @@ private fun BeszelSystemDetailContent(
 
             if (model.containers.isNotEmpty()) {
                 item {
-                    ContainersSection(containers = model.containers)
+                    ContainersSection(containers = model.containers, onNavigateToContainers = onNavigateToContainers)
                 }
             }
 
@@ -222,6 +222,10 @@ private fun BeszelSystemDetailContent(
                     )
                 }
             }
+        }
+
+        item {
+            ContainersNavigationCard(onNavigateToContainers = onNavigateToContainers)
         }
     }
 

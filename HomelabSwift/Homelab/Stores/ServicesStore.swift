@@ -433,6 +433,15 @@ final class ServicesStore {
             }
         }
 
+        // Beszel/Gitea/NPM: auto-refresh handled by client retry logic — don't delete
+        if current.type == .beszel || current.type == .gitea || current.type == .nginxProxyManager {
+            if let username = current.username, !username.isEmpty,
+               let password = current.password, !password.isEmpty {
+                // Credentials exist — client retry will handle re-auth
+                return
+            }
+        }
+
         deleteInstance(id: instanceId)
     }
 
@@ -473,7 +482,16 @@ final class ServicesStore {
 
         case .beszel:
             let client = clientManager.beszelClient(id: instance.id)
-            await client.configure(url: instance.url, token: instance.token, fallbackUrl: instance.fallbackUrl)
+            await client.configure(url: instance.url, token: instance.token, fallbackUrl: instance.fallbackUrl, email: instance.username, password: instance.password)
+            let instanceId = instance.id
+            await client.setTokenRefreshCallback { [weak self] newToken in
+                Task { @MainActor in
+                    guard let self, var current = self.instancesById[instanceId] else { return }
+                    current.token = newToken
+                    self.instancesById[instanceId] = current
+                    self.persistState()
+                }
+            }
 
         case .gitea:
             let client = clientManager.giteaClient(id: instance.id)

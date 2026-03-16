@@ -7,6 +7,9 @@ import com.homelab.app.data.remote.dto.beszel.BeszelSystemDetailsResponse
 import com.homelab.app.data.remote.dto.beszel.BeszelSystemsResponse
 import com.homelab.app.data.remote.dto.beszel.BeszelSmartDevicesResponse
 import com.homelab.app.data.remote.dto.beszel.BeszelSmartDevice
+import com.homelab.app.data.remote.dto.beszel.BeszelContainerRecordsResponse
+import com.homelab.app.data.remote.dto.beszel.BeszelContainerStatsResponse
+import okhttp3.ResponseBody
 import retrofit2.http.*
 
 interface BeszelApi {
@@ -59,4 +62,38 @@ interface BeszelApi {
         @Query("filter", encoded = true) filter: String,
         @Query("perPage") limit: Int = 10
     ): BeszelSmartDevicesResponse
+
+    @GET("api/collections/containers/records")
+    suspend fun getContainers(
+        @Header("X-Homelab-Service") service: String = "Beszel",
+        @Header("X-Homelab-Instance-Id") instanceId: String,
+        @Query("filter", encoded = true) filter: String,
+        @Query("perPage") limit: Int = 200
+    ): BeszelContainerRecordsResponse
+
+    @GET("api/collections/container_stats/records?sort=-created")
+    suspend fun getContainerStats(
+        @Header("X-Homelab-Service") service: String = "Beszel",
+        @Header("X-Homelab-Instance-Id") instanceId: String,
+        @Query("filter", encoded = true) filter: String,
+        @Query("perPage") limit: Int = 240
+    ): BeszelContainerStatsResponse
+
+    @GET("api/beszel/containers/logs")
+    suspend fun getContainerLogs(
+        @Header("X-Homelab-Service") service: String = "Beszel",
+        @Header("X-Homelab-Instance-Id") instanceId: String,
+        @Header("Authorization") authorization: String,
+        @Query("system") systemId: String,
+        @Query("container") containerId: String
+    ): ResponseBody
+
+    @GET("api/beszel/containers/info")
+    suspend fun getContainerInfo(
+        @Header("X-Homelab-Service") service: String = "Beszel",
+        @Header("X-Homelab-Instance-Id") instanceId: String,
+        @Header("Authorization") authorization: String,
+        @Query("system") systemId: String,
+        @Query("container") containerId: String
+    ): ResponseBody
 }

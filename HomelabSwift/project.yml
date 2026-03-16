@@ -11,7 +11,6 @@ settings:
     SWIFT_VERSION: "6.0"
     TARGETED_DEVICE_FAMILY: "1"
     IPHONEOS_DEPLOYMENT_TARGET: "26.0"
-    DEVELOPMENT_TEAM: ""
 
 targets:
   Homelab:
@@ -21,9 +20,11 @@ targets:
       - path: Homelab
         excludes:
           - "**/.DS_Store"
+    configFiles:
+      Debug: Config/Signing.xcconfig
+      Release: Config/Signing.xcconfig
     settings:
       base:
-        PRODUCT_BUNDLE_IDENTIFIER: com.homelab.homelab
         INFOPLIST_FILE: Homelab/Info.plist
         CODE_SIGN_ENTITLEMENTS: Homelab/Homelab.entitlements
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

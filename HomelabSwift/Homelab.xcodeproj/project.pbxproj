@@ -3,88 +3,95 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		001FA6007779556F8CF2BDC5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B518BC3D0A31F29612A69B75 /* Assets.xcassets */; };
-		05DD4EC182A77678B0C43757 /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3822176D6B136AD005C258B2 /* EditCategoryView.swift */; };
+		0223089E3590C557B1077BC3 /* BookmarksStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27E1B9D98BB24CE9CC7DD66 /* BookmarksStore.swift */; };
+		03B92E43E53FDB090D96A183 /* NpmProxyHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2913EA81E6CCF74EFC883C /* NpmProxyHostForm.swift */; };
+		05260E0A1A5781AC8EAE7011 /* EditBookmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB770E60C2FE5FB6640BE98 /* EditBookmarkView.swift */; };
 		0E5566DAE01FB0E9F10E98C8 /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B6FAE42892F4BEB3097FD /* StatusBadge.swift */; };
 		0F634D9389BDB5467A64C25E /* GlassStatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735477DB04233B4FDA23469D /* GlassStatCard.swift */; };
 		1694BCD702C988AAF0F99127 /* BeszelModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88B51084F8D0D0D7C999B8C3 /* BeszelModels.swift */; };
+		199E011A5729053006D89E55 /* BeszelContainersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64BA80A727F9A71D30277F9E /* BeszelContainersView.swift */; };
 		1C4457681E0F071045A8132C /* PiHoleDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = FE7A7BFF374B6DE9CE7384EE /* PiHoleDashboard.swift */; };
+		1FEB8EB133A5749EBE928E1C /* BookmarkFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3565C63ADD375B1D9773CF8B /* BookmarkFormView.swift */; };
 		21BAB7FCB0AECC7133D55F6F /* ServiceConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 334BAFC4A25FD83F52E9CDD0 /* ServiceConnection.swift */; };
+		21E7233E678C07EF2FA629B5 /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F887B97554253C51BDFD167F /* EditCategoryView.swift */; };
 		253B46BF21904B59477F2E8E /* GiteaDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3491FAD0D71DDB3C25D9D90 /* GiteaDashboard.swift */; };
+		29C9BD1512C814A8ED65D53A /* NpmDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB742A0C436A83F92CC1FED /* NpmDashboard.swift */; };
 		2BCD4D6ACDA7D4CEA00AFEBA /* BeszelAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E1E8A717351D5E42B2696F1 /* BeszelAPIClient.swift */; };
 		2DEE79E0C15D816F7170E110 /* AppTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3AD1D644D530DE462BB79AA2 /* AppTheme.swift */; };
 		366228A5C9000FF822E289FB /* HapticManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EF6E7AF1CDC6676B7421A7B /* HapticManager.swift */; };
+		3D3519C51168694146FB2672 /* BeszelLineGraph.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0D0F063C9B955AB9794F2AF /* BeszelLineGraph.swift */; };
+		44002C75F703B805378EE7E0 /* NpmAccessListForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04940FAEDE28A509EB1E0EEB /* NpmAccessListForm.swift */; };
 		45563EB6F51F8EF1867CF1DC /* BeszelSystemDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141E9B530530A0BF0D52A289 /* BeszelSystemDetail.swift */; };
+		4CA71DBAD3D27E419ED0A10F /* NpmStreamForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3C99077201F337CAC332D8 /* NpmStreamForm.swift */; };
 		60845D39E8A2BD7753B767BB /* PortainerDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569655DA5311D77756775472 /* PortainerDashboard.swift */; };
-		6238B2607191C4FC8FABBBEA /* BookmarksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 852311D2C00078388E8075CC /* BookmarksView.swift */; };
+		62EF5383568C38878FAB5623 /* BookmarkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA8931C718CFC9019DCFF462 /* BookmarkManager.swift */; };
 		63A39B89AC9B8F48B3BC3147 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF389260911EADF7079A97B /* APIClient.swift */; };
+		654B246C79458CB80AEC15D8 /* CategoryFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4834BF58C4F9B1399553F78 /* CategoryFormView.swift */; };
 		6B883FF0F9673181B59F8C83 /* KeychainService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85D0D2A2905370C31F3A8ADE /* KeychainService.swift */; };
-		70068F8317C6647517AA6BB2 /* BookmarksStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C63BBF84BF49669B1B6CD224 /* BookmarksStore.swift */; };
+		6F0B15FC2525EA13C63611B5 /* PinSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6C61051F7EA9F32A6342570D /* PinSetupView.swift */; };
 		703D6379BB37D3F83B0C21D5 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D1604CF631BC4DC369A42A5 /* HomeView.swift */; };
+		760733612460236D15FEC7F5 /* BeszelDetailComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = DFCAD7944220A8EA3DDFC3A6 /* BeszelDetailComponents.swift */; };
+		7870DA23D2B10D1CCAC08453 /* BeszelDetailTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0CFC214C2A851C7033ABE815 /* BeszelDetailTypes.swift */; };
+		7DB62BE1D28FBF60B6BED884 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1BF1197F8BB03BE213E2995 /* Logger.swift */; };
+		7DD0E2200FD122417D07E97F /* NpmCertificateForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1432776545071E3C10F37827 /* NpmCertificateForm.swift */; };
 		7E78EE55701AD004992579EF /* Formatters.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1EBFFF57A15B47F78E81D04 /* Formatters.swift */; };
+		7E7FBBDCDE4E1CAE6CC714D9 /* NpmDeadHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFB66029D52483B7F25F83F /* NpmDeadHostCard.swift */; };
 		7E861F79CA67DDAD2078A333 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DB66F8274714A001051F1BE /* SettingsView.swift */; };
 		7EBB5603EC5B23E166D98E33 /* SettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 151F3E3C716170F5B65A688F /* SettingsStore.swift */; };
 		7EF18D092660634150160E03 /* Translations+English.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F7AE0005466E2FF260B000 /* Translations+English.swift */; };
+		7FAEE452C0F73043A465DF53 /* NpmRedirectionHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9F233D9CF75937405674EEE4 /* NpmRedirectionHostCard.swift */; };
 		81457E8BF989BFB2851CDC66 /* Translations+OtherLanguages.swift in Sources */ = {isa = PBXBuildFile; fileRef = B1CB48124608D3A220C3A444 /* Translations+OtherLanguages.swift */; };
 		826BA16B6B4D4F31C3CC2B5C /* HomelabApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19F58DFAF2218D934F936D17 /* HomelabApp.swift */; };
 		8BE00328A6AC68DF3E40F05B /* Translations+Italian.swift in Sources */ = {isa = PBXBuildFile; fileRef = 64D8F0162AE327AA60600505 /* Translations+Italian.swift */; };
 		8EADC34444DEB43F553D0513 /* SkeletonLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC9947203975F8072646659 /* SkeletonLoader.swift */; };
 		8FC5C2BF6FC7CBC21BFF6696 /* ServiceDashboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7432B8C8ACBE47BDF26570DC /* ServiceDashboardLayout.swift */; };
+		95AC663AE4D3962BC2F4BB2A /* NpmDeadHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BAF0C299F88C7BE7B562D3 /* NpmDeadHostForm.swift */; };
+		97C25FD08421A32F71C2B3BD /* NginxProxyManagerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D740E72A36FA4EDBFEE8A195 /* NginxProxyManagerAPIClient.swift */; };
 		991F9F57CF5DAD5FA3AD929B /* DashboardSummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1776C03666E80A17285732D /* DashboardSummary.swift */; };
+		9A986ED771EA2DC52308E756 /* NpmAccessListCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34DDAD2C4F4522B5980306ED /* NpmAccessListCard.swift */; };
 		9F77F33FFB5F27A3D1A8109E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE0A64E52150CEEA94E249D7 /* ContentView.swift */; };
+		A1B0DB1FF6B1CB2BEB21B2CE /* KeychainServiceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCD7BB9B1065930082265D21 /* KeychainServiceTests.swift */; };
 		A283181CEA487B0C8346D967 /* PiHoleAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B236EC8434642BB311F3E1A8 /* PiHoleAPIClient.swift */; };
-		A2876BD7C97769D9E9DAF926 /* BookmarkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8051B73F27173CD3955D0069 /* BookmarkManager.swift */; };
 		A3E3BAB096611E807728CA89 /* ContainerListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3116D5544353B573C4C2B0B /* ContainerListView.swift */; };
 		AAA9BC382610A55D8E374C95 /* Translations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7692F78990DA606D426BA429 /* Translations.swift */; };
-		AABADDC9AFDE85DD54AAB3E3 /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = F66269A42B77821CF87E7B8D /* Bookmark.swift */; };
+		ABCECDC5B2772BE727043AA3 /* BeszelDetailSheets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E3E6D321C7DB682436A5607 /* BeszelDetailSheets.swift */; };
 		AD2F16BDA6D33B25BA1DD4B7 /* GiteaModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44F6D851F1B957C876FD6F0B /* GiteaModels.swift */; };
 		B51871199ACBFB2987E2C165 /* PortainerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24ACF7FA86699161F1FFB10E /* PortainerModels.swift */; };
 		B52CC2ACDDD34ADB9ECCF77B /* GiteaRepoDetail.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBA3D966E73220F618CD9038 /* GiteaRepoDetail.swift */; };
+		B6F34400E4C7BC4A5F752049 /* NpmProxyHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8569FC25F0824870C9BFD6A2 /* NpmProxyHostCard.swift */; };
 		B75BA3C1B775D95298E0933B /* SyntaxHighlighter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AD5A40912505AFD774ED713 /* SyntaxHighlighter.swift */; };
-		B87D64DB234A0C1802FA4530 /* PiholeDomainListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1F8DFB70C52B49F7759D445F /* PiholeDomainListView.swift */; };
 		BAA4219103CC83A339C434BD /* ServicesStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 258507E3A00D686FDEF7E9CE /* ServicesStore.swift */; };
 		C18B23568F81455E4164835D /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E817863BA2B5DA5318488 /* GlassCard.swift */; };
-		C4BEDD3B0A910698966DE2F9 /* CategoryFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11BC11450A84ABB9378A1152 /* CategoryFormView.swift */; };
+		C462B63CC5FE35CD624ADFCD /* NpmStreamCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8904009FE0CC197DE3B1492A /* NpmStreamCard.swift */; };
 		C86FF5E6A543278A18B16E9B /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB95F4E19C7D3082B4D6484C /* APIError.swift */; };
+		CE78DBCA639D954A7CCB26D3 /* ServiceErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB688D017EE8175FB27EC7D /* ServiceErrorView.swift */; };
 		CF0124025064FF55FAD14233 /* BeszelDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408F0E514FDE46F6A78D0A58 /* BeszelDashboard.swift */; };
+		CFCDE90DDC7DCF5CB7F4A3A6 /* NpmUserForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A1C1112D8A8BF86BB78353D /* NpmUserForm.swift */; };
 		CFFCFA6F071D0F46DECAB36B /* ContainerDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC89D463559422B61BC300AF /* ContainerDetailView.swift */; };
-		D525E48BA3068E8CED44C2D5 /* PiholeDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B5C4C40E64220DEFF15C7B1 /* PiholeDomain.swift */; };
+		D3AEBA845A23CC41E37074AE /* NpmCertificateCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4589116BA4857CFFC0687E1 /* NpmCertificateCard.swift */; };
 		D76DF8769FE2AE2032847D05 /* FormattersTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DB311F83CBAAC39C90D50E6D /* FormattersTests.swift */; };
 		D84F9D353E2953087A1E5F7D /* ModelDecodingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 94D7A0C04FD3A10D46F836A9 /* ModelDecodingTests.swift */; };
 		D99466C32D977BCE5D9A029E /* GiteaAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15D7F6591D7ABB7E8CB96944 /* GiteaAPIClient.swift */; };
+		DF86CB1FB4E3E32A79142588 /* BookmarksView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7BCDF60E05C067D5675AB59F /* BookmarksView.swift */; };
 		E5242DCA4ACD2835153FBB96 /* ServiceLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F1F09E5D4D69F8311840E4F /* ServiceLoginView.swift */; };
 		E6E04DD8242F5252CD32CCAB /* ServiceType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7E6FEE939313E58D34CE4BDB /* ServiceType.swift */; };
 		E75752B2EF79FC31623F21A3 /* ServicesStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57CF72E451CED741576C2F4D /* ServicesStoreTests.swift */; };
 		EAD085672E3D6DD29C4F51D1 /* OfflineBanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB7A6237B741BF62F16D9F8B /* OfflineBanner.swift */; };
-		EAD2BFA167A908127589739B /* BookmarkFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F3CDD98D8B34D601F2231E2 /* BookmarkFormView.swift */; };
+		EAE1E1F928E990C7105F76A1 /* LoadableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 95AC46B2418C37382FC7EAB9 /* LoadableState.swift */; };
+		EC4B786896FFFE3F57218338 /* NpmRedirectionHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF0A029C7F3CF79994A268B /* NpmRedirectionHostForm.swift */; };
 		EC9F7C6B42D988E3D6D1E8BB /* PiHoleModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 30BCF4718684D1491D028063 /* PiHoleModels.swift */; };
-		F0000001 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000011 /* LockScreenView.swift */; };
-		F0000002 /* PinEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000012 /* PinEntryView.swift */; };
-		F0000003 /* PinSetupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000013 /* PinSetupView.swift */; };
-		F0000004 /* EditBookmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 926A6BFB721AB80FE1A8F795 /* EditBookmarkView.swift */; };
-		F0000101 /* LoadableState.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000103 /* LoadableState.swift */; };
-		F0000102 /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0000104 /* Logger.swift */; };
-		F1000001 /* NginxProxyManagerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000003 /* NginxProxyManagerAPIClient.swift */; };
-		F1000002 /* NginxProxyManagerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000004 /* NginxProxyManagerModels.swift */; };
-		F1000101 /* NpmDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000201 /* NpmDashboard.swift */; };
-		F1000102 /* NpmProxyHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000202 /* NpmProxyHostCard.swift */; };
-		F1000103 /* NpmRedirectionHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000203 /* NpmRedirectionHostCard.swift */; };
-		F1000104 /* NpmStreamCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000204 /* NpmStreamCard.swift */; };
-		F1000105 /* NpmDeadHostCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000205 /* NpmDeadHostCard.swift */; };
-		F1000106 /* NpmCertificateCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000206 /* NpmCertificateCard.swift */; };
-		F1000107 /* NpmProxyHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000207 /* NpmProxyHostForm.swift */; };
-		F1000108 /* NpmRedirectionHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000208 /* NpmRedirectionHostForm.swift */; };
-		F1000109 /* NpmStreamForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000209 /* NpmStreamForm.swift */; };
-		F1000110 /* NpmDeadHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000210 /* NpmDeadHostForm.swift */; };
-		F1000111 /* NpmCertificateForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000211 /* NpmCertificateForm.swift */; };
-		F1000112 /* NpmAccessListCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000212 /* NpmAccessListCard.swift */; };
-		F1000113 /* NpmAccessListForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000213 /* NpmAccessListForm.swift */; };
-		F1000114 /* NpmUserForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1000214 /* NpmUserForm.swift */; };
+		EDFF65DD1D2A1F388BF64B2F /* NginxProxyManagerModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A69EDC601F02DCA97FEBAC18 /* NginxProxyManagerModels.swift */; };
+		F08A9289C496B8D4A6810332 /* Bookmark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 773865BCB947A8885DA8DF37 /* Bookmark.swift */; };
 		F5EF663AA6770602771BD2F2 /* PortainerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A576049FF063B4EC98E28D9 /* PortainerAPIClient.swift */; };
+		FCBBD24B21419227C44FCC60 /* LockScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 31E3BE5DA5D18FB8959F7C8C /* LockScreenView.swift */; };
+		FCD41D6BE7DB010018902C63 /* PinEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 465DB3CC355F5F7FDDF6DE00 /* PinEntryView.swift */; };
+		FD2293CC8607CE165F202493 /* PiholeDomainListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9D702ABD0D754FC3DEF8A7B4 /* PiholeDomainListView.swift */; };
+		FDB0C4600B5089FA648DEE0C /* PiholeDomain.swift in Sources */ = {isa = PBXBuildFile; fileRef = C226A2E333FD0452D26FF967 /* PiholeDomain.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,87 +105,95 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		04940FAEDE28A509EB1E0EEB /* NpmAccessListForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmAccessListForm.swift; sourceTree = "<group>"; };
+		0CFC214C2A851C7033ABE815 /* BeszelDetailTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelDetailTypes.swift; sourceTree = "<group>"; };
 		0DB66F8274714A001051F1BE /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
-		11BC11450A84ABB9378A1152 /* CategoryFormView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = CategoryFormView.swift; path = Bookmarks/CategoryFormView.swift; sourceTree = "<group>"; };
 		141E9B530530A0BF0D52A289 /* BeszelSystemDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelSystemDetail.swift; sourceTree = "<group>"; };
+		1432776545071E3C10F37827 /* NpmCertificateForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmCertificateForm.swift; sourceTree = "<group>"; };
 		151F3E3C716170F5B65A688F /* SettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsStore.swift; sourceTree = "<group>"; };
 		15D7F6591D7ABB7E8CB96944 /* GiteaAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaAPIClient.swift; sourceTree = "<group>"; };
 		19F58DFAF2218D934F936D17 /* HomelabApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomelabApp.swift; sourceTree = "<group>"; };
-		1F8DFB70C52B49F7759D445F /* PiholeDomainListView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = PiholeDomainListView.swift; path = PiHole/PiholeDomainListView.swift; sourceTree = "<group>"; };
 		24ACF7FA86699161F1FFB10E /* PortainerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortainerModels.swift; sourceTree = "<group>"; };
 		258507E3A00D686FDEF7E9CE /* ServicesStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesStore.swift; sourceTree = "<group>"; };
-		2B5C4C40E64220DEFF15C7B1 /* PiholeDomain.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PiholeDomain.swift; sourceTree = "<group>"; };
+		2CB742A0C436A83F92CC1FED /* NpmDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDashboard.swift; sourceTree = "<group>"; };
 		30BCF4718684D1491D028063 /* PiHoleModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiHoleModels.swift; sourceTree = "<group>"; };
+		31E3BE5DA5D18FB8959F7C8C /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
 		334BAFC4A25FD83F52E9CDD0 /* ServiceConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceConnection.swift; sourceTree = "<group>"; };
-		3822176D6B136AD005C258B2 /* EditCategoryView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EditCategoryView.swift; path = Bookmarks/EditCategoryView.swift; sourceTree = "<group>"; };
+		34DDAD2C4F4522B5980306ED /* NpmAccessListCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmAccessListCard.swift; sourceTree = "<group>"; };
+		3565C63ADD375B1D9773CF8B /* BookmarkFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkFormView.swift; sourceTree = "<group>"; };
 		38F7AE0005466E2FF260B000 /* Translations+English.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+English.swift"; sourceTree = "<group>"; };
-		3A088F5140A5297EA91E3821 /* Homelab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Homelab.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A088F5140A5297EA91E3821 /* Homelab.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Homelab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AD1D644D530DE462BB79AA2 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
 		3CC9947203975F8072646659 /* SkeletonLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonLoader.swift; sourceTree = "<group>"; };
 		3F5B6FAE42892F4BEB3097FD /* StatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBadge.swift; sourceTree = "<group>"; };
 		408F0E514FDE46F6A78D0A58 /* BeszelDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelDashboard.swift; sourceTree = "<group>"; };
 		44F6D851F1B957C876FD6F0B /* GiteaModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaModels.swift; sourceTree = "<group>"; };
+		465DB3CC355F5F7FDDF6DE00 /* PinEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinEntryView.swift; sourceTree = "<group>"; };
 		486E817863BA2B5DA5318488 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
-		4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = HomelabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomelabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E1E8A717351D5E42B2696F1 /* BeszelAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelAPIClient.swift; sourceTree = "<group>"; };
+		4F2913EA81E6CCF74EFC883C /* NpmProxyHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmProxyHostForm.swift; sourceTree = "<group>"; };
+		53BAF0C299F88C7BE7B562D3 /* NpmDeadHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDeadHostForm.swift; sourceTree = "<group>"; };
 		569655DA5311D77756775472 /* PortainerDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortainerDashboard.swift; sourceTree = "<group>"; };
 		57CF72E451CED741576C2F4D /* ServicesStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServicesStoreTests.swift; sourceTree = "<group>"; };
 		5F1F09E5D4D69F8311840E4F /* ServiceLoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceLoginView.swift; sourceTree = "<group>"; };
-		5F3CDD98D8B34D601F2231E2 /* BookmarkFormView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BookmarkFormView.swift; path = Bookmarks/BookmarkFormView.swift; sourceTree = "<group>"; };
+		64BA80A727F9A71D30277F9E /* BeszelContainersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelContainersView.swift; sourceTree = "<group>"; };
 		64D8F0162AE327AA60600505 /* Translations+Italian.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+Italian.swift"; sourceTree = "<group>"; };
 		6A576049FF063B4EC98E28D9 /* PortainerAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PortainerAPIClient.swift; sourceTree = "<group>"; };
 		6AD5A40912505AFD774ED713 /* SyntaxHighlighter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyntaxHighlighter.swift; sourceTree = "<group>"; };
+		6C61051F7EA9F32A6342570D /* PinSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinSetupView.swift; sourceTree = "<group>"; };
 		6EF6E7AF1CDC6676B7421A7B /* HapticManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HapticManager.swift; sourceTree = "<group>"; };
 		735477DB04233B4FDA23469D /* GlassStatCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassStatCard.swift; sourceTree = "<group>"; };
 		7432B8C8ACBE47BDF26570DC /* ServiceDashboardLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceDashboardLayout.swift; sourceTree = "<group>"; };
 		7692F78990DA606D426BA429 /* Translations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Translations.swift; sourceTree = "<group>"; };
+		773865BCB947A8885DA8DF37 /* Bookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
+		7BCDF60E05C067D5675AB59F /* BookmarksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarksView.swift; sourceTree = "<group>"; };
 		7E6FEE939313E58D34CE4BDB /* ServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceType.swift; sourceTree = "<group>"; };
-		8051B73F27173CD3955D0069 /* BookmarkManager.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BookmarkManager.swift; path = Store/BookmarkManager.swift; sourceTree = "<group>"; };
-		852311D2C00078388E8075CC /* BookmarksView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = BookmarksView.swift; path = Bookmarks/BookmarksView.swift; sourceTree = "<group>"; };
+		8569FC25F0824870C9BFD6A2 /* NpmProxyHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmProxyHostCard.swift; sourceTree = "<group>"; };
 		85D0D2A2905370C31F3A8ADE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		88B51084F8D0D0D7C999B8C3 /* BeszelModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelModels.swift; sourceTree = "<group>"; };
+		8904009FE0CC197DE3B1492A /* NpmStreamCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmStreamCard.swift; sourceTree = "<group>"; };
 		8D1604CF631BC4DC369A42A5 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		926A6BFB721AB80FE1A8F795 /* EditBookmarkView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EditBookmarkView.swift; path = Bookmarks/EditBookmarkView.swift; sourceTree = "<group>"; };
 		94D7A0C04FD3A10D46F836A9 /* ModelDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDecodingTests.swift; sourceTree = "<group>"; };
+		95AC46B2418C37382FC7EAB9 /* LoadableState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableState.swift; sourceTree = "<group>"; };
+		9A1C1112D8A8BF86BB78353D /* NpmUserForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmUserForm.swift; sourceTree = "<group>"; };
+		9CB770E60C2FE5FB6640BE98 /* EditBookmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookmarkView.swift; sourceTree = "<group>"; };
+		9D702ABD0D754FC3DEF8A7B4 /* PiholeDomainListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiholeDomainListView.swift; sourceTree = "<group>"; };
+		9E3E6D321C7DB682436A5607 /* BeszelDetailSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelDetailSheets.swift; sourceTree = "<group>"; };
+		9F233D9CF75937405674EEE4 /* NpmRedirectionHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmRedirectionHostCard.swift; sourceTree = "<group>"; };
 		A1776C03666E80A17285732D /* DashboardSummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardSummary.swift; sourceTree = "<group>"; };
+		A1BF1197F8BB03BE213E2995 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		A27E1B9D98BB24CE9CC7DD66 /* BookmarksStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarksStore.swift; sourceTree = "<group>"; };
 		A3491FAD0D71DDB3C25D9D90 /* GiteaDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaDashboard.swift; sourceTree = "<group>"; };
+		A4589116BA4857CFFC0687E1 /* NpmCertificateCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmCertificateCard.swift; sourceTree = "<group>"; };
+		A69EDC601F02DCA97FEBAC18 /* NginxProxyManagerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NginxProxyManagerModels.swift; sourceTree = "<group>"; };
 		AB95F4E19C7D3082B4D6484C /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
 		B1CB48124608D3A220C3A444 /* Translations+OtherLanguages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+OtherLanguages.swift"; sourceTree = "<group>"; };
 		B1EBFFF57A15B47F78E81D04 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
 		B236EC8434642BB311F3E1A8 /* PiHoleAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiHoleAPIClient.swift; sourceTree = "<group>"; };
 		B518BC3D0A31F29612A69B75 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		BA8931C718CFC9019DCFF462 /* BookmarkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkManager.swift; sourceTree = "<group>"; };
 		BB7A6237B741BF62F16D9F8B /* OfflineBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineBanner.swift; sourceTree = "<group>"; };
 		BE0A64E52150CEEA94E249D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		C63BBF84BF49669B1B6CD224 /* BookmarksStore.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = BookmarksStore.swift; sourceTree = "<group>"; };
+		C226A2E333FD0452D26FF967 /* PiholeDomain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiholeDomain.swift; sourceTree = "<group>"; };
+		C4834BF58C4F9B1399553F78 /* CategoryFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryFormView.swift; sourceTree = "<group>"; };
+		C7F560D9B1083811461B4B44 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
 		CBA3D966E73220F618CD9038 /* GiteaRepoDetail.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaRepoDetail.swift; sourceTree = "<group>"; };
+		D740E72A36FA4EDBFEE8A195 /* NginxProxyManagerAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NginxProxyManagerAPIClient.swift; sourceTree = "<group>"; };
 		D7A7931FCA8BA5A9AA1BD3E6 /* Homelab.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Homelab.entitlements; sourceTree = "<group>"; };
+		DA3C99077201F337CAC332D8 /* NpmStreamForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmStreamForm.swift; sourceTree = "<group>"; };
 		DB311F83CBAAC39C90D50E6D /* FormattersTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormattersTests.swift; sourceTree = "<group>"; };
 		DB56E3990A5DE62509F3F7C4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
-		F0000011 /* LockScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LockScreenView.swift; sourceTree = "<group>"; };
-		F0000012 /* PinEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinEntryView.swift; sourceTree = "<group>"; };
-		F0000013 /* PinSetupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinSetupView.swift; sourceTree = "<group>"; };
-		F0000103 /* LoadableState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableState.swift; sourceTree = "<group>"; };
-		F0000104 /* Logger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
-		F1000003 /* NginxProxyManagerAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NginxProxyManagerAPIClient.swift; sourceTree = "<group>"; };
-		F1000004 /* NginxProxyManagerModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NginxProxyManagerModels.swift; sourceTree = "<group>"; };
-		F1000201 /* NpmDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDashboard.swift; sourceTree = "<group>"; };
-		F1000202 /* NpmProxyHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmProxyHostCard.swift; sourceTree = "<group>"; };
-		F1000203 /* NpmRedirectionHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmRedirectionHostCard.swift; sourceTree = "<group>"; };
-		F1000204 /* NpmStreamCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmStreamCard.swift; sourceTree = "<group>"; };
-		F1000205 /* NpmDeadHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDeadHostCard.swift; sourceTree = "<group>"; };
-		F1000206 /* NpmCertificateCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmCertificateCard.swift; sourceTree = "<group>"; };
-		F1000207 /* NpmProxyHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmProxyHostForm.swift; sourceTree = "<group>"; };
-		F1000208 /* NpmRedirectionHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmRedirectionHostForm.swift; sourceTree = "<group>"; };
-		F1000209 /* NpmStreamForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmStreamForm.swift; sourceTree = "<group>"; };
-		F1000210 /* NpmDeadHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDeadHostForm.swift; sourceTree = "<group>"; };
-		F1000211 /* NpmCertificateForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmCertificateForm.swift; sourceTree = "<group>"; };
-		F1000212 /* NpmAccessListCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmAccessListCard.swift; sourceTree = "<group>"; };
-		F1000213 /* NpmAccessListForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmAccessListForm.swift; sourceTree = "<group>"; };
-		F1000214 /* NpmUserForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmUserForm.swift; sourceTree = "<group>"; };
+		DBB688D017EE8175FB27EC7D /* ServiceErrorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceErrorView.swift; sourceTree = "<group>"; };
+		DDFB66029D52483B7F25F83F /* NpmDeadHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmDeadHostCard.swift; sourceTree = "<group>"; };
+		DFCAD7944220A8EA3DDFC3A6 /* BeszelDetailComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelDetailComponents.swift; sourceTree = "<group>"; };
+		E0D0F063C9B955AB9794F2AF /* BeszelLineGraph.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelLineGraph.swift; sourceTree = "<group>"; };
 		F3116D5544353B573C4C2B0B /* ContainerListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerListView.swift; sourceTree = "<group>"; };
-		F66269A42B77821CF87E7B8D /* Bookmark.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
+		F887B97554253C51BDFD167F /* EditCategoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditCategoryView.swift; sourceTree = "<group>"; };
 		FC89D463559422B61BC300AF /* ContainerDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContainerDetailView.swift; sourceTree = "<group>"; };
+		FCD7BB9B1065930082265D21 /* KeychainServiceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainServiceTests.swift; sourceTree = "<group>"; };
 		FE7A7BFF374B6DE9CE7384EE /* PiHoleDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiHoleDashboard.swift; sourceTree = "<group>"; };
+		FEF0A029C7F3CF79994A268B /* NpmRedirectionHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmRedirectionHostForm.swift; sourceTree = "<group>"; };
 		FEF389260911EADF7079A97B /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -189,6 +204,16 @@
 				0DB66F8274714A001051F1BE /* SettingsView.swift */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		092E6DA6764D5AD6F0361A22 /* Security */ = {
+			isa = PBXGroup;
+			children = (
+				31E3BE5DA5D18FB8959F7C8C /* LockScreenView.swift */,
+				465DB3CC355F5F7FDDF6DE00 /* PinEntryView.swift */,
+				6C61051F7EA9F32A6342570D /* PinSetupView.swift */,
+			);
+			path = Security;
 			sourceTree = "<group>";
 		};
 		104688BC1276270D85B7AC3F /* Homelab */ = {
@@ -203,25 +228,13 @@
 				4DB668936609CB6CD5BA7CAF /* Models */,
 				DB674F5C3563F5D1A5D15342 /* Networking */,
 				9F580510490E095DDA1A63B9 /* Services */,
+				34CF45919C322CA4B3EF1E3B /* Store */,
 				7DAFCB2BF30198F989D7E950 /* Stores */,
 				BD0DD51259101D7C7FCE5917 /* Theme */,
 				EB0C2E8A1FE201A265D4FC4A /* Utilities */,
 				B95B7C501526C761049BD34F /* Views */,
-				65862C61FE1E7555BD59B821 /* Store */,
 			);
 			path = Homelab;
-			sourceTree = "<group>";
-		};
-		12F56B41C1D2A1E1450A4A8E /* Bookmarks */ = {
-			isa = PBXGroup;
-			children = (
-				852311D2C00078388E8075CC /* BookmarksView.swift */,
-				5F3CDD98D8B34D601F2231E2 /* BookmarkFormView.swift */,
-				11BC11450A84ABB9378A1152 /* CategoryFormView.swift */,
-				3822176D6B136AD005C258B2 /* EditCategoryView.swift */,
-				926A6BFB721AB80FE1A8F795 /* EditBookmarkView.swift */,
-			);
-			name = Bookmarks;
 			sourceTree = "<group>";
 		};
 		1E866E8511A219B4C76B9235 /* Portainer */ = {
@@ -232,12 +245,28 @@
 			path = Portainer;
 			sourceTree = "<group>";
 		};
+		23AB1F8E0947D3598E65C623 /* NginxProxyManager */ = {
+			isa = PBXGroup;
+			children = (
+				D740E72A36FA4EDBFEE8A195 /* NginxProxyManagerAPIClient.swift */,
+			);
+			path = NginxProxyManager;
+			sourceTree = "<group>";
+		};
 		289C5939524BACC32CDCCF25 /* Gitea */ = {
 			isa = PBXGroup;
 			children = (
 				15D7F6591D7ABB7E8CB96944 /* GiteaAPIClient.swift */,
 			);
 			path = Gitea;
+			sourceTree = "<group>";
+		};
+		34CF45919C322CA4B3EF1E3B /* Store */ = {
+			isa = PBXGroup;
+			children = (
+				BA8931C718CFC9019DCFF462 /* BookmarkManager.swift */,
+			);
+			path = Store;
 			sourceTree = "<group>";
 		};
 		3B0F0ED088E1700C927989C0 /* Portainer */ = {
@@ -260,16 +289,16 @@
 		4DB668936609CB6CD5BA7CAF /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				773865BCB947A8885DA8DF37 /* Bookmark.swift */,
+				95AC46B2418C37382FC7EAB9 /* LoadableState.swift */,
+				C226A2E333FD0452D26FF967 /* PiholeDomain.swift */,
 				334BAFC4A25FD83F52E9CDD0 /* ServiceConnection.swift */,
 				7E6FEE939313E58D34CE4BDB /* ServiceType.swift */,
-				F0000103 /* LoadableState.swift */,
 				9C3998846D55F959084051D2 /* Beszel */,
 				981FC3E8A73DC27EF4792684 /* Gitea */,
+				F3AB0740CCD7B809F06B451A /* NginxProxyManager */,
 				F2BD8B68C5C78ECC6C3C024A /* PiHole */,
 				1E866E8511A219B4C76B9235 /* Portainer */,
-				F1000006 /* NginxProxyManager */,
-				F66269A42B77821CF87E7B8D /* Bookmark.swift */,
-				2B5C4C40E64220DEFF15C7B1 /* PiholeDomain.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -282,29 +311,51 @@
 			path = ServiceLogin;
 			sourceTree = "<group>";
 		};
+		5A93214C3BDCB9BEC5FCCD73 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				DBB688D017EE8175FB27EC7D /* ServiceErrorView.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
 		5A9E1D3A67703C812006DFAC = {
 			isa = PBXGroup;
 			children = (
+				C9F6FE4041AA55D79004BC56 /* Config */,
 				104688BC1276270D85B7AC3F /* Homelab */,
 				E403C416C1CD9D360CB4369E /* HomelabTests */,
 				E163496F466E06D0E015E1FD /* Products */,
 			);
 			sourceTree = "<group>";
 		};
-		65862C61FE1E7555BD59B821 /* Store */ = {
+		710B37A9B027F4C732FAA0E0 /* NginxProxyManager */ = {
 			isa = PBXGroup;
 			children = (
-				8051B73F27173CD3955D0069 /* BookmarkManager.swift */,
+				34DDAD2C4F4522B5980306ED /* NpmAccessListCard.swift */,
+				04940FAEDE28A509EB1E0EEB /* NpmAccessListForm.swift */,
+				A4589116BA4857CFFC0687E1 /* NpmCertificateCard.swift */,
+				1432776545071E3C10F37827 /* NpmCertificateForm.swift */,
+				2CB742A0C436A83F92CC1FED /* NpmDashboard.swift */,
+				DDFB66029D52483B7F25F83F /* NpmDeadHostCard.swift */,
+				53BAF0C299F88C7BE7B562D3 /* NpmDeadHostForm.swift */,
+				8569FC25F0824870C9BFD6A2 /* NpmProxyHostCard.swift */,
+				4F2913EA81E6CCF74EFC883C /* NpmProxyHostForm.swift */,
+				9F233D9CF75937405674EEE4 /* NpmRedirectionHostCard.swift */,
+				FEF0A029C7F3CF79994A268B /* NpmRedirectionHostForm.swift */,
+				8904009FE0CC197DE3B1492A /* NpmStreamCard.swift */,
+				DA3C99077201F337CAC332D8 /* NpmStreamForm.swift */,
+				9A1C1112D8A8BF86BB78353D /* NpmUserForm.swift */,
 			);
-			name = Store;
+			path = NginxProxyManager;
 			sourceTree = "<group>";
 		};
 		7DAFCB2BF30198F989D7E950 /* Stores */ = {
 			isa = PBXGroup;
 			children = (
+				A27E1B9D98BB24CE9CC7DD66 /* BookmarksStore.swift */,
 				258507E3A00D686FDEF7E9CE /* ServicesStore.swift */,
 				151F3E3C716170F5B65A688F /* SettingsStore.swift */,
-				C63BBF84BF49669B1B6CD224 /* BookmarksStore.swift */,
 			);
 			path = Stores;
 			sourceTree = "<group>";
@@ -335,6 +386,7 @@
 			isa = PBXGroup;
 			children = (
 				FE7A7BFF374B6DE9CE7384EE /* PiHoleDashboard.swift */,
+				9D702ABD0D754FC3DEF8A7B4 /* PiholeDomainListView.swift */,
 			);
 			path = PiHole;
 			sourceTree = "<group>";
@@ -379,16 +431,16 @@
 			children = (
 				BE0A64E52150CEEA94E249D7 /* ContentView.swift */,
 				F1265188363BF5B5C00056A5 /* Beszel */,
+				ECAF9E33BDB4EE0FFFF630D0 /* Bookmarks */,
+				5A93214C3BDCB9BEC5FCCD73 /* Components */,
 				48AAFFAA1096205CCB4685B8 /* Gitea */,
 				873F7F23714AC880CCFDA5BF /* Home */,
+				710B37A9B027F4C732FAA0E0 /* NginxProxyManager */,
 				92577B05F8B135054A9B86B6 /* PiHole */,
 				EB0D5A2B9725AD26C768879F /* Portainer */,
+				092E6DA6764D5AD6F0361A22 /* Security */,
 				58F8A8040064B68291A0616F /* ServiceLogin */,
 				0484D4BF357548D950ABB56C /* Settings */,
-				12F56B41C1D2A1E1450A4A8E /* Bookmarks */,
-				CEE88851734FA609F64E149B /* Pihole */,
-				F0000020 /* Security */,
-				F1000301 /* NginxProxyManager */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -401,12 +453,12 @@
 			path = Theme;
 			sourceTree = "<group>";
 		};
-		CEE88851734FA609F64E149B /* Pihole */ = {
+		C9F6FE4041AA55D79004BC56 /* Config */ = {
 			isa = PBXGroup;
 			children = (
-				1F8DFB70C52B49F7759D445F /* PiholeDomainListView.swift */,
+				C7F560D9B1083811461B4B44 /* Signing.xcconfig */,
 			);
-			name = Pihole;
+			path = Config;
 			sourceTree = "<group>";
 		};
 		D43D23351242B6BFC6E743DC /* PiHole */ = {
@@ -432,9 +484,9 @@
 				AB95F4E19C7D3082B4D6484C /* APIError.swift */,
 				D5B24EF44902FCBD35F6D145 /* Beszel */,
 				289C5939524BACC32CDCCF25 /* Gitea */,
+				23AB1F8E0947D3598E65C623 /* NginxProxyManager */,
 				D43D23351242B6BFC6E743DC /* PiHole */,
 				3B0F0ED088E1700C927989C0 /* Portainer */,
-				F1000005 /* NginxProxyManager */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -452,6 +504,7 @@
 			isa = PBXGroup;
 			children = (
 				DB311F83CBAAC39C90D50E6D /* FormattersTests.swift */,
+				FCD7BB9B1065930082265D21 /* KeychainServiceTests.swift */,
 				94D7A0C04FD3A10D46F836A9 /* ModelDecodingTests.swift */,
 				57CF72E451CED741576C2F4D /* ServicesStoreTests.swift */,
 			);
@@ -463,7 +516,7 @@
 			children = (
 				B1EBFFF57A15B47F78E81D04 /* Formatters.swift */,
 				6EF6E7AF1CDC6676B7421A7B /* HapticManager.swift */,
-				F0000104 /* Logger.swift */,
+				A1BF1197F8BB03BE213E2995 /* Logger.swift */,
 				6AD5A40912505AFD774ED713 /* SyntaxHighlighter.swift */,
 			);
 			path = Utilities;
@@ -479,57 +532,27 @@
 			path = Portainer;
 			sourceTree = "<group>";
 		};
-		F0000020 /* Security */ = {
+		ECAF9E33BDB4EE0FFFF630D0 /* Bookmarks */ = {
 			isa = PBXGroup;
 			children = (
-				F0000011 /* LockScreenView.swift */,
-				F0000012 /* PinEntryView.swift */,
-				F0000013 /* PinSetupView.swift */,
+				3565C63ADD375B1D9773CF8B /* BookmarkFormView.swift */,
+				7BCDF60E05C067D5675AB59F /* BookmarksView.swift */,
+				C4834BF58C4F9B1399553F78 /* CategoryFormView.swift */,
+				9CB770E60C2FE5FB6640BE98 /* EditBookmarkView.swift */,
+				F887B97554253C51BDFD167F /* EditCategoryView.swift */,
 			);
-			path = Security;
-			sourceTree = "<group>";
-		};
-		F1000005 /* NginxProxyManager */ = {
-			isa = PBXGroup;
-			children = (
-				F1000003 /* NginxProxyManagerAPIClient.swift */,
-			);
-			path = NginxProxyManager;
-			sourceTree = "<group>";
-		};
-		F1000006 /* NginxProxyManager */ = {
-			isa = PBXGroup;
-			children = (
-				F1000004 /* NginxProxyManagerModels.swift */,
-			);
-			path = NginxProxyManager;
-			sourceTree = "<group>";
-		};
-		F1000301 /* NginxProxyManager */ = {
-			isa = PBXGroup;
-			children = (
-				F1000201 /* NpmDashboard.swift */,
-				F1000202 /* NpmProxyHostCard.swift */,
-				F1000203 /* NpmRedirectionHostCard.swift */,
-				F1000204 /* NpmStreamCard.swift */,
-				F1000205 /* NpmDeadHostCard.swift */,
-				F1000206 /* NpmCertificateCard.swift */,
-				F1000207 /* NpmProxyHostForm.swift */,
-				F1000208 /* NpmRedirectionHostForm.swift */,
-				F1000209 /* NpmStreamForm.swift */,
-				F1000210 /* NpmDeadHostForm.swift */,
-				F1000211 /* NpmCertificateForm.swift */,
-				F1000212 /* NpmAccessListCard.swift */,
-				F1000213 /* NpmAccessListForm.swift */,
-				F1000214 /* NpmUserForm.swift */,
-			);
-			path = NginxProxyManager;
+			path = Bookmarks;
 			sourceTree = "<group>";
 		};
 		F1265188363BF5B5C00056A5 /* Beszel */ = {
 			isa = PBXGroup;
 			children = (
+				64BA80A727F9A71D30277F9E /* BeszelContainersView.swift */,
 				408F0E514FDE46F6A78D0A58 /* BeszelDashboard.swift */,
+				DFCAD7944220A8EA3DDFC3A6 /* BeszelDetailComponents.swift */,
+				9E3E6D321C7DB682436A5607 /* BeszelDetailSheets.swift */,
+				0CFC214C2A851C7033ABE815 /* BeszelDetailTypes.swift */,
+				E0D0F063C9B955AB9794F2AF /* BeszelLineGraph.swift */,
 				141E9B530530A0BF0D52A289 /* BeszelSystemDetail.swift */,
 			);
 			path = Beszel;
@@ -541,6 +564,14 @@
 				30BCF4718684D1491D028063 /* PiHoleModels.swift */,
 			);
 			path = PiHole;
+			sourceTree = "<group>";
+		};
+		F3AB0740CCD7B809F06B451A /* NginxProxyManager */ = {
+			isa = PBXGroup;
+			children = (
+				A69EDC601F02DCA97FEBAC18 /* NginxProxyManagerModels.swift */,
+			);
+			path = NginxProxyManager;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -558,6 +589,8 @@
 				E751A0FDF492AD0D856EB483 /* PBXTargetDependency */,
 			);
 			name = HomelabTests;
+			packageProductDependencies = (
+			);
 			productName = HomelabTests;
 			productReference = 4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -574,6 +607,8 @@
 			dependencies = (
 			);
 			name = Homelab;
+			packageProductDependencies = (
+			);
 			productName = Homelab;
 			productReference = 3A088F5140A5297EA91E3821 /* Homelab.app */;
 			productType = "com.apple.product-type.application";
@@ -585,10 +620,11 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2630;
+				LastUpgradeCheck = 2600;
 				TargetAttributes = {
-					0346621FC90669A18B22EFE8 = {
-						DevelopmentTeam = "";
+					F030701E1A7DE1C00D08FE68 = {
+						DevelopmentTeam = 74584D6P85;
+						ProvisioningStyle = Automatic;
 					};
 				};
 			};
@@ -602,7 +638,7 @@
 			);
 			mainGroup = 5A9E1D3A67703C812006DFAC;
 			minimizedProjectReferenceProxies = 1;
-			productRefGroup = E163496F466E06D0E015E1FD /* Products */;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -632,13 +668,26 @@
 				C86FF5E6A543278A18B16E9B /* APIError.swift in Sources */,
 				2DEE79E0C15D816F7170E110 /* AppTheme.swift in Sources */,
 				2BCD4D6ACDA7D4CEA00AFEBA /* BeszelAPIClient.swift in Sources */,
+				199E011A5729053006D89E55 /* BeszelContainersView.swift in Sources */,
 				CF0124025064FF55FAD14233 /* BeszelDashboard.swift in Sources */,
+				760733612460236D15FEC7F5 /* BeszelDetailComponents.swift in Sources */,
+				ABCECDC5B2772BE727043AA3 /* BeszelDetailSheets.swift in Sources */,
+				7870DA23D2B10D1CCAC08453 /* BeszelDetailTypes.swift in Sources */,
+				3D3519C51168694146FB2672 /* BeszelLineGraph.swift in Sources */,
 				1694BCD702C988AAF0F99127 /* BeszelModels.swift in Sources */,
 				45563EB6F51F8EF1867CF1DC /* BeszelSystemDetail.swift in Sources */,
+				F08A9289C496B8D4A6810332 /* Bookmark.swift in Sources */,
+				1FEB8EB133A5749EBE928E1C /* BookmarkFormView.swift in Sources */,
+				62EF5383568C38878FAB5623 /* BookmarkManager.swift in Sources */,
+				0223089E3590C557B1077BC3 /* BookmarksStore.swift in Sources */,
+				DF86CB1FB4E3E32A79142588 /* BookmarksView.swift in Sources */,
+				654B246C79458CB80AEC15D8 /* CategoryFormView.swift in Sources */,
 				CFFCFA6F071D0F46DECAB36B /* ContainerDetailView.swift in Sources */,
 				A3E3BAB096611E807728CA89 /* ContainerListView.swift in Sources */,
 				9F77F33FFB5F27A3D1A8109E /* ContentView.swift in Sources */,
 				991F9F57CF5DAD5FA3AD929B /* DashboardSummary.swift in Sources */,
+				05260E0A1A5781AC8EAE7011 /* EditBookmarkView.swift in Sources */,
+				21E7233E678C07EF2FA629B5 /* EditCategoryView.swift in Sources */,
 				7E78EE55701AD004992579EF /* Formatters.swift in Sources */,
 				D99466C32D977BCE5D9A029E /* GiteaAPIClient.swift in Sources */,
 				253B46BF21904B59477F2E8E /* GiteaDashboard.swift in Sources */,
@@ -650,17 +699,39 @@
 				703D6379BB37D3F83B0C21D5 /* HomeView.swift in Sources */,
 				826BA16B6B4D4F31C3CC2B5C /* HomelabApp.swift in Sources */,
 				6B883FF0F9673181B59F8C83 /* KeychainService.swift in Sources */,
-				F0000101 /* LoadableState.swift in Sources */,
-				F0000102 /* Logger.swift in Sources */,
+				EAE1E1F928E990C7105F76A1 /* LoadableState.swift in Sources */,
+				FCBBD24B21419227C44FCC60 /* LockScreenView.swift in Sources */,
+				7DB62BE1D28FBF60B6BED884 /* Logger.swift in Sources */,
+				97C25FD08421A32F71C2B3BD /* NginxProxyManagerAPIClient.swift in Sources */,
+				EDFF65DD1D2A1F388BF64B2F /* NginxProxyManagerModels.swift in Sources */,
+				9A986ED771EA2DC52308E756 /* NpmAccessListCard.swift in Sources */,
+				44002C75F703B805378EE7E0 /* NpmAccessListForm.swift in Sources */,
+				D3AEBA845A23CC41E37074AE /* NpmCertificateCard.swift in Sources */,
+				7DD0E2200FD122417D07E97F /* NpmCertificateForm.swift in Sources */,
+				29C9BD1512C814A8ED65D53A /* NpmDashboard.swift in Sources */,
+				7E7FBBDCDE4E1CAE6CC714D9 /* NpmDeadHostCard.swift in Sources */,
+				95AC663AE4D3962BC2F4BB2A /* NpmDeadHostForm.swift in Sources */,
+				B6F34400E4C7BC4A5F752049 /* NpmProxyHostCard.swift in Sources */,
+				03B92E43E53FDB090D96A183 /* NpmProxyHostForm.swift in Sources */,
+				7FAEE452C0F73043A465DF53 /* NpmRedirectionHostCard.swift in Sources */,
+				EC4B786896FFFE3F57218338 /* NpmRedirectionHostForm.swift in Sources */,
+				C462B63CC5FE35CD624ADFCD /* NpmStreamCard.swift in Sources */,
+				4CA71DBAD3D27E419ED0A10F /* NpmStreamForm.swift in Sources */,
+				CFCDE90DDC7DCF5CB7F4A3A6 /* NpmUserForm.swift in Sources */,
 				EAD085672E3D6DD29C4F51D1 /* OfflineBanner.swift in Sources */,
 				A283181CEA487B0C8346D967 /* PiHoleAPIClient.swift in Sources */,
 				1C4457681E0F071045A8132C /* PiHoleDashboard.swift in Sources */,
 				EC9F7C6B42D988E3D6D1E8BB /* PiHoleModels.swift in Sources */,
+				FDB0C4600B5089FA648DEE0C /* PiholeDomain.swift in Sources */,
+				FD2293CC8607CE165F202493 /* PiholeDomainListView.swift in Sources */,
+				FCD41D6BE7DB010018902C63 /* PinEntryView.swift in Sources */,
+				6F0B15FC2525EA13C63611B5 /* PinSetupView.swift in Sources */,
 				F5EF663AA6770602771BD2F2 /* PortainerAPIClient.swift in Sources */,
 				60845D39E8A2BD7753B767BB /* PortainerDashboard.swift in Sources */,
 				B51871199ACBFB2987E2C165 /* PortainerModels.swift in Sources */,
 				21BAB7FCB0AECC7133D55F6F /* ServiceConnection.swift in Sources */,
 				8FC5C2BF6FC7CBC21BFF6696 /* ServiceDashboardLayout.swift in Sources */,
+				CE78DBCA639D954A7CCB26D3 /* ServiceErrorView.swift in Sources */,
 				E5242DCA4ACD2835153FBB96 /* ServiceLoginView.swift in Sources */,
 				E6E04DD8242F5252CD32CCAB /* ServiceType.swift in Sources */,
 				BAA4219103CC83A339C434BD /* ServicesStore.swift in Sources */,
@@ -673,35 +744,6 @@
 				8BE00328A6AC68DF3E40F05B /* Translations+Italian.swift in Sources */,
 				81457E8BF989BFB2851CDC66 /* Translations+OtherLanguages.swift in Sources */,
 				AAA9BC382610A55D8E374C95 /* Translations.swift in Sources */,
-				6238B2607191C4FC8FABBBEA /* BookmarksView.swift in Sources */,
-				EAD2BFA167A908127589739B /* BookmarkFormView.swift in Sources */,
-				C4BEDD3B0A910698966DE2F9 /* CategoryFormView.swift in Sources */,
-				70068F8317C6647517AA6BB2 /* BookmarksStore.swift in Sources */,
-				AABADDC9AFDE85DD54AAB3E3 /* Bookmark.swift in Sources */,
-				D525E48BA3068E8CED44C2D5 /* PiholeDomain.swift in Sources */,
-				B87D64DB234A0C1802FA4530 /* PiholeDomainListView.swift in Sources */,
-				A2876BD7C97769D9E9DAF926 /* BookmarkManager.swift in Sources */,
-				05DD4EC182A77678B0C43757 /* EditCategoryView.swift in Sources */,
-				F0000004 /* EditBookmarkView.swift in Sources */,
-				F0000001 /* LockScreenView.swift in Sources */,
-				F0000002 /* PinEntryView.swift in Sources */,
-				F0000003 /* PinSetupView.swift in Sources */,
-				F1000001 /* NginxProxyManagerAPIClient.swift in Sources */,
-				F1000002 /* NginxProxyManagerModels.swift in Sources */,
-				F1000101 /* NpmDashboard.swift in Sources */,
-				F1000102 /* NpmProxyHostCard.swift in Sources */,
-				F1000103 /* NpmRedirectionHostCard.swift in Sources */,
-				F1000104 /* NpmStreamCard.swift in Sources */,
-				F1000105 /* NpmDeadHostCard.swift in Sources */,
-				F1000106 /* NpmCertificateCard.swift in Sources */,
-				F1000107 /* NpmProxyHostForm.swift in Sources */,
-				F1000108 /* NpmRedirectionHostForm.swift in Sources */,
-				F1000109 /* NpmStreamForm.swift in Sources */,
-				F1000110 /* NpmDeadHostForm.swift in Sources */,
-				F1000111 /* NpmCertificateForm.swift in Sources */,
-				F1000112 /* NpmAccessListCard.swift in Sources */,
-				F1000113 /* NpmAccessListForm.swift in Sources */,
-				F1000114 /* NpmUserForm.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -710,6 +752,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D76DF8769FE2AE2032847D05 /* FormattersTests.swift in Sources */,
+				A1B0DB1FF6B1CB2BEB21B2CE /* KeychainServiceTests.swift in Sources */,
 				D84F9D353E2953087A1E5F7D /* ModelDecodingTests.swift in Sources */,
 				E75752B2EF79FC31623F21A3 /* ServicesStoreTests.swift in Sources */,
 			);
@@ -728,18 +771,17 @@
 /* Begin XCBuildConfiguration section */
 		1A75E2C9352A8381D39BAF1B /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C7F560D9B1083811461B4B44 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Homelab/Homelab.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 74584D6P85;
 				INFOPLIST_FILE = Homelab/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = homelab.foreverhomelab;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -749,7 +791,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -764,18 +805,17 @@
 		};
 		35D08FC62C1C9E3C8E77050A /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = C7F560D9B1083811461B4B44 /* Signing.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Homelab/Homelab.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = 74584D6P85;
 				INFOPLIST_FILE = Homelab/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = homelab.foreverhomelab;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -785,7 +825,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				GENERATE_INFOPLIST_FILE = YES;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -833,10 +872,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = "";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -850,7 +887,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 6.0;
@@ -893,10 +929,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = "";
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -917,7 +951,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 6.0;

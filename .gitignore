@@ -53,6 +53,7 @@ HomelabSwift/.build/
 HomelabSwift/.swiftpm/
 HomelabSwift/Packages/
 HomelabSwift/**/*.resolved
+HomelabSwift/Config/Signing.xcconfig
 
 # ----------------------------
 # Android / Kotlin (HomelabAndroid)
@@ -65,7 +66,7 @@ HomelabAndroid/build/
 HomelabAndroid/.externalNativeBuild/
 HomelabAndroid/.cxx/
 HomelabAndroid/captures/
-HomelabAndroid/local.properties
+HomelabAndroid/**/local.properties
 HomelabAndroid/.idea/
 HomelabAndroid/**/*.iml
 HomelabAndroid/.kotlin/

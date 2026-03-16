@@ -17,6 +17,7 @@ struct SettingsView: View {
     @State private var currentPinInput = ""
     @State private var newPinInput = ""
     @State private var changePinError: String? = nil
+    @State private var showDebugLogs = false
     private let cryptoAddress = "0x649641868e6876c2c1f04584a95679e01c1aaf0d"
 
     var body: some View {
@@ -39,6 +40,7 @@ struct SettingsView: View {
                             themeSection
                             languageSection
                             securitySection
+                            debugSection
                             servicesSection
                             contactsSection
                         }
@@ -61,6 +63,9 @@ struct SettingsView: View {
         }
         .sheet(item: $showInstanceEditor) { context in
             ServiceLoginView(serviceType: context.serviceType, existingInstanceId: context.instanceId)
+        }
+        .sheet(isPresented: $showDebugLogs) {
+            DebugLogsView()
         }
         .overlay(alignment: .bottom) {
             if showCopiedToast {
@@ -100,7 +105,7 @@ struct SettingsView: View {
                         .font(.system(.subheadline, design: .monospaced))
                         .foregroundStyle(AppTheme.accent)
                     Spacer()
-                    Text(localizer.t.copy.uppercased())
+                    Text(localizer.t.copy.sentenceCased())
                         .font(.caption)
                         .fontWeight(.bold)
                         .foregroundStyle(AppTheme.accent)
@@ -117,7 +122,7 @@ struct SettingsView: View {
 
     private var themeSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(localizer.t.settingsTheme.uppercased())
+            Text(localizer.t.settingsTheme.sentenceCased())
                 .font(.caption2)
                 .fontWeight(.bold)
                 .foregroundStyle(AppTheme.accent)
@@ -134,19 +139,25 @@ struct SettingsView: View {
                             .fontWeight(settingsStore.theme == mode ? .bold : .regular)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
-                            .background(settingsStore.theme == mode ? AppTheme.accent.opacity(0.2) : Color.clear)
+                            .padding(.horizontal, 4)
+                            .background(
+                                settingsStore.theme == mode ? AppTheme.accent.opacity(0.2) : Color.clear,
+                                in: RoundedRectangle(cornerRadius: 8, style: .continuous)
+                            )
                             .foregroundStyle(settingsStore.theme == mode ? AppTheme.accent : .primary)
                     }
                     .buttonStyle(.plain)
                 }
             }
+            .padding(4)
             .glassCard(cornerRadius: 12)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
     }
 
     private var languageSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(localizer.t.settingsLanguage.uppercased())
+            Text(localizer.t.settingsLanguage.sentenceCased())
                 .font(.caption2)
                 .fontWeight(.bold)
                 .foregroundStyle(AppTheme.accent)
@@ -164,18 +175,27 @@ struct SettingsView: View {
                             .frame(width: 56, height: 56)
                             .background(settingsStore.language == lang ? AppTheme.accent.opacity(0.2) : Color(.tertiarySystemFill))
                             .clipShape(Circle())
-                            .opacity(settingsStore.language == lang ? 1.0 : 0.5)
+                            .overlay(
+                                Circle()
+                                    .stroke(
+                                        settingsStore.language == lang ? AppTheme.accent.opacity(0.35) : .clear,
+                                        lineWidth: 1
+                                    )
+                            )
+                            .opacity(settingsStore.language == lang ? 1.0 : 0.6)
                     }
                     .buttonStyle(.plain)
                 }
             }
             .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .glassCard(cornerRadius: 16)
         }
     }
 
     private var servicesSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(localizer.t.settingsServices.uppercased())
+            Text(localizer.t.settingsServices.sentenceCased())
                 .font(.caption2)
                 .fontWeight(.bold)
                 .foregroundStyle(AppTheme.accent)
@@ -213,7 +233,7 @@ struct SettingsView: View {
 
     private var contactsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(localizer.t.settingsContacts.uppercased())
+            Text(localizer.t.settingsContacts.sentenceCased())
                 .font(.caption2)
                 .fontWeight(.bold)
                 .foregroundStyle(AppTheme.accent)
@@ -221,13 +241,73 @@ struct SettingsView: View {
                 .padding(.top, 16)
 
             VStack(spacing: 0) {
-                ContactRow(title: localizer.t.settingsContactTelegram, icon: "paperplane.fill", url: "https://t.me/finalyxre", color: Color(hex: "#26A5E4"))
+                ContactRow(
+                    title: localizer.t.settingsContactTelegram,
+                    iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/telegram.png",
+                    fallbackSystemName: "paperplane.fill",
+                    url: "https://t.me/finalyxre",
+                    color: Color(hex: "#26A5E4")
+                )
                 Divider().padding(.horizontal, 16)
-                ContactRow(title: localizer.t.settingsContactReddit, icon: "bubble.left.and.bubble.right.fill", url: "https://www.reddit.com/user/finalyxre/", color: Color(hex: "#FF4500"))
+                ContactRow(
+                    title: localizer.t.settingsContactReddit,
+                    iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/reddit.png",
+                    fallbackSystemName: "bubble.left.and.bubble.right.fill",
+                    url: "https://www.reddit.com/user/finalyxre/",
+                    color: Color(hex: "#FF4500")
+                )
                 Divider().padding(.horizontal, 16)
-                ContactRow(title: localizer.t.settingsContactGithub, icon: "terminal.fill", url: "https://github.com/JohnnWi/homelab-project", color: .primary)
+                ContactRow(
+                    title: localizer.t.settingsContactGithub,
+                    iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/github.png",
+                    fallbackSystemName: "terminal.fill",
+                    url: "https://github.com/JohnnWi/homelab-project",
+                    color: .primary
+                )
             }
             .glassCard()
+        }
+    }
+
+
+    private var debugSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(localizer.t.settingsDebug.sentenceCased())
+                .font(.caption2)
+                .fontWeight(.bold)
+                .foregroundStyle(AppTheme.accent)
+                .padding(.leading, 8)
+                .padding(.top, 16)
+
+            VStack(spacing: 0) {
+                Button {
+                    showDebugLogs = true
+                } label: {
+                    HStack(spacing: 16) {
+                        Image(systemName: "terminal.fill")
+                            .font(.title3)
+                            .foregroundStyle(AppTheme.accent)
+                            .frame(width: 40, height: 40)
+                            .background(AppTheme.accent.opacity(0.1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                        Text(localizer.t.settingsDebugLogs)
+                            .font(.body.weight(.medium))
+                            .foregroundStyle(.primary)
+
+                        Spacer()
+
+                        Image(systemName: "chevron.right")
+                            .font(.caption.bold())
+                            .foregroundStyle(AppTheme.textMuted)
+                            .accessibilityHidden(true)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                    .contentShape(Rectangle())
+                }
+                .buttonStyle(.plain)
+            }
+            .glassCard(tint: AppTheme.accent.opacity(0.05))
         }
     }
 
@@ -236,7 +316,7 @@ struct SettingsView: View {
 
     private var securitySection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(localizer.t.securityTitle.uppercased())
+            Text(localizer.t.securityTitle.sentenceCased())
                 .font(.caption2)
                 .fontWeight(.bold)
                 .foregroundStyle(AppTheme.accent)
@@ -334,20 +414,36 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                 } else {
                     // No PIN set — offer to set up
-                    HStack {
-                        Image(systemName: "lock.open.fill")
-                            .font(.title3)
-                            .foregroundStyle(.secondary)
-                            .frame(width: 32, height: 32)
-                            .accessibilityHidden(true)
+                    Button {
+                        changePinStep = .newPin
+                        currentPinInput = ""
+                        newPinInput = ""
+                        changePinError = nil
+                        showChangePinFlow = true
+                        HapticManager.light()
+                    } label: {
+                        HStack {
+                            Image(systemName: "lock.open.fill")
+                                .font(.title3)
+                                .foregroundStyle(AppTheme.accent)
+                                .frame(width: 32, height: 32)
+                                .accessibilityHidden(true)
 
-                        Text(localizer.t.securityNotConfigured)
-                            .font(.body)
-                            .foregroundStyle(.secondary)
+                            Text(localizer.t.securitySetupPin)
+                                .font(.body.weight(.medium))
+                                .foregroundStyle(.primary)
 
-                        Spacer()
+                            Spacer()
+
+                            Image(systemName: "chevron.right")
+                                .font(.caption.bold())
+                                .foregroundStyle(AppTheme.textMuted)
+                                .accessibilityHidden(true)
+                        }
+                        .padding(16)
+                        .contentShape(Rectangle())
                     }
-                    .padding(16)
+                    .buttonStyle(.plain)
                 }
             }
             .glassCard()
@@ -681,9 +777,43 @@ private struct ServiceEditorContext: Identifiable {
 
 struct ContactRow: View {
     let title: String
-    let icon: String
+    let iconUrl: String
+    let fallbackSystemName: String
     let url: String
     let color: Color
+
+    private var iconAsset: some View {
+        guard let url = URL(string: iconUrl) else {
+            return AnyView(
+                Image(systemName: fallbackSystemName)
+                    .font(.title3)
+                    .foregroundStyle(color)
+            )
+        }
+
+        return AnyView(
+            AsyncImage(url: url) { phase in
+                switch phase {
+                case .empty:
+                    ProgressView()
+                        .tint(color)
+                case .success(let image):
+                    image
+                        .resizable()
+                        .renderingMode(.original)
+                        .scaledToFit()
+                case .failure:
+                    Image(systemName: fallbackSystemName)
+                        .font(.title3)
+                        .foregroundStyle(color)
+                @unknown default:
+                    Image(systemName: fallbackSystemName)
+                        .font(.title3)
+                        .foregroundStyle(color)
+                }
+            }
+        )
+    }
 
     var body: some View {
         Button {
@@ -693,11 +823,13 @@ struct ContactRow: View {
             }
         } label: {
             HStack(spacing: 16) {
-                Image(systemName: icon)
-                    .font(.title3)
-                    .foregroundStyle(color)
-                    .frame(width: 40, height: 40)
-                    .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                ZStack {
+                    RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        .fill(color.opacity(0.1))
+                    iconAsset
+                        .frame(width: 22, height: 22)
+                }
+                .frame(width: 40, height: 40)
 
                 Text(title)
                     .font(.body.weight(.medium))
@@ -732,5 +864,133 @@ struct ToastView: View {
             .clipShape(Capsule())
             .padding(.bottom, 24)
             .shadow(radius: 10)
+    }
+}
+
+// MARK: - Debug Log View
+
+struct DebugLogsView: View {
+    @Environment(\.dismiss) private var dismiss
+    @State private var logStore = LogStore.shared
+    @State private var showCopiedBanner = false
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppTheme.premiumGradient().ignoresSafeArea()
+                
+                VStack(spacing: 0) {
+                    ScrollViewReader { proxy in
+                        List {
+                            ForEach(logStore.entries) { entry in
+                                logRow(entry)
+                                    .listRowBackground(Color.clear)
+                                    .listRowSeparator(.hidden)
+                                    .id(entry.id)
+                            }
+                        }
+                        .listStyle(.plain)
+                        .background(Color.clear)
+                        .onChange(of: logStore.entries.count) { oldVal, newVal in
+                            if let last = logStore.entries.last {
+                                withAnimation {
+                                    proxy.scrollTo(last.id, anchor: .bottom)
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                if showCopiedBanner {
+                    VStack {
+                        Spacer()
+                        Text("Logs Copied to Clipboard")
+                            .font(.subheadline.bold())
+                            .foregroundStyle(.white)
+                            .padding(.vertical, 12)
+                            .padding(.horizontal, 24)
+                            .background(AppTheme.accent.opacity(0.9), in: Capsule())
+                            .shadow(radius: 10)
+                            .padding(.bottom, 40)
+                            .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                    .ignoresSafeArea()
+                    .zIndex(1)
+                }
+            }
+            .navigationTitle("Debug Logs")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button("Close") { dismiss() }
+                }
+                
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack {
+                        Button {
+                            logStore.clear()
+                            HapticManager.light()
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        
+                        Button {
+                            copyLogs()
+                        } label: {
+                            Image(systemName: "doc.on.doc")
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func logRow(_ entry: LogStore.LogEntry) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack {
+                Image(systemName: entry.level.icon)
+                    .font(.caption2)
+                    .foregroundStyle(colorForLevel(entry.level))
+                
+                Text(entry.formattedTime)
+                    .font(.system(.caption2, design: .monospaced))
+                    .foregroundStyle(.secondary)
+                
+                Text(entry.level.rawValue)
+                    .font(.system(.caption2, design: .monospaced, weight: .bold))
+                    .foregroundStyle(colorForLevel(entry.level))
+            }
+            
+            Text(entry.message)
+                .font(.system(.caption, design: .monospaced))
+                .foregroundStyle(.primary)
+                .textSelection(.enabled)
+        }
+        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal, 8)
+    }
+    
+    private func colorForLevel(_ level: LogStore.LogLevel) -> Color {
+        switch level {
+        case .debug: return .secondary
+        case .info: return .blue
+        case .error: return .red
+        case .network: return .purple
+        }
+    }
+    
+    private func copyLogs() {
+        UIPasteboard.general.string = logStore.export()
+        HapticManager.success()
+        withAnimation {
+            showCopiedBanner = true
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            withAnimation {
+                showCopiedBanner = false
+            }
+        }
     }
 }

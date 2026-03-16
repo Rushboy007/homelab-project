@@ -248,7 +248,7 @@ struct ServiceLoginView: View {
         fallbackUrl = existing.fallbackUrl ?? ""
         username = existing.username ?? ""
         apiKey = existing.apiKey ?? ""
-        password = existing.piholePassword ?? ""
+        password = existing.piholePassword ?? existing.password ?? ""
         didPrefill = true
     }
 
@@ -342,11 +342,14 @@ struct ServiceLoginView: View {
                 throw APIError.custom(localizer.t.loginErrorPasswordRequired)
             }
             let token: String
+            let storedPassword: String?
             if let secret, !secret.isEmpty {
                 let client = BeszelAPIClient(instanceId: existingInstanceId ?? UUID())
                 token = try await client.authenticate(url: url, email: identity, password: secret)
+                storedPassword = secret
             } else if let existingToken = existingInstance?.token, !existingToken.isEmpty {
                 token = existingToken
+                storedPassword = existingInstance?.password
             } else {
                 throw APIError.custom(localizer.t.loginErrorCredentials)
             }
@@ -357,7 +360,8 @@ struct ServiceLoginView: View {
                 url: url,
                 token: token,
                 username: identity,
-                fallbackUrl: fallbackUrl
+                fallbackUrl: fallbackUrl,
+                password: storedPassword
             )
 
         case .gitea:
@@ -371,14 +375,17 @@ struct ServiceLoginView: View {
             }
             let token: String
             let resolvedUsername: String
+            let storedPassword: String?
             if let secret, !secret.isEmpty {
                 let client = GiteaAPIClient(instanceId: existingInstanceId ?? UUID())
                 let result = try await client.authenticate(url: url, username: identity, password: secret)
                 token = result.token
                 resolvedUsername = result.username
+                storedPassword = secret
             } else if let existing = existingInstance, !existing.token.isEmpty {
                 token = existing.token
                 resolvedUsername = existing.username ?? identity
+                storedPassword = existing.password
             } else {
                 throw APIError.custom(localizer.t.loginErrorCredentials)
             }
@@ -389,7 +396,8 @@ struct ServiceLoginView: View {
                 url: url,
                 token: token,
                 username: resolvedUsername,
-                fallbackUrl: fallbackUrl
+                fallbackUrl: fallbackUrl,
+                password: storedPassword
             )
 
         case .nginxProxyManager:
@@ -402,11 +410,14 @@ struct ServiceLoginView: View {
                 throw APIError.custom(localizer.t.loginErrorPasswordRequired)
             }
             let token: String
+            let storedPassword: String?
             if let secret, !secret.isEmpty {
                 let client = NginxProxyManagerAPIClient(instanceId: existingInstanceId ?? UUID())
                 token = try await client.authenticate(url: url, email: identity, password: secret)
+                storedPassword = secret
             } else if let existingToken = existingInstance?.token, !existingToken.isEmpty {
                 token = existingToken
+                storedPassword = existingInstance?.password
             } else {
                 throw APIError.custom(localizer.t.loginErrorCredentials)
             }
@@ -417,7 +428,8 @@ struct ServiceLoginView: View {
                 url: url,
                 token: token,
                 username: identity,
-                fallbackUrl: fallbackUrl
+                fallbackUrl: fallbackUrl,
+                password: storedPassword
             )
         }
     }

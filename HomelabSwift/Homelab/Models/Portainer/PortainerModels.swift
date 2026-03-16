@@ -11,9 +11,9 @@ struct PortainerAuthResponse: Codable {
 struct PortainerEndpoint: Codable, Identifiable {
     let Id: Int
     let Name: String
-    let endpointType: Int
-    let URL: String
-    let Status: Int
+    let endpointType: Int?
+    let URL: String?
+    let Status: Int?
     let Snapshots: [EndpointSnapshot]?
     let PublicURL: String?
     let GroupId: Int?
@@ -31,60 +31,61 @@ struct PortainerEndpoint: Codable, Identifiable {
 
 struct EndpointSnapshot: Codable {
     let DockerVersion: String?
-    let TotalCPU: Int
-    let TotalMemory: Int
-    let RunningContainerCount: Int
-    let StoppedContainerCount: Int
-    let HealthyContainerCount: Int
-    let UnhealthyContainerCount: Int
-    let VolumeCount: Int
-    let ImageCount: Int
-    let ServiceCount: Int
-    let StackCount: Int
+    let TotalCPU: Int?
+    let TotalMemory: Int?
+    let RunningContainerCount: Int?
+    let StoppedContainerCount: Int?
+    let HealthyContainerCount: Int?
+    let UnhealthyContainerCount: Int?
+    let VolumeCount: Int?
+    let ImageCount: Int?
+    let ServiceCount: Int?
+    let StackCount: Int?
     let NodeCount: Int?
-    let Time: Int
+    let Time: Int?
     let DockerSnapshotRaw: DockerSnapshotRaw?
 }
 
 struct DockerSnapshotRaw: Codable {
-    let Containers: Int?
-    let ContainersRunning: Int?
-    let ContainersPaused: Int?
-    let ContainersStopped: Int?
-    let Images: Int?
-    let NCPU: Int?
-    let MemTotal: Int?
-    let OperatingSystem: String?
-    let Architecture: String?
-    let KernelVersion: String?
-    let ServerVersion: String?
+    /// Portainer's DockerSnapshotRaw schema varies across versions:
+    /// it can be a lightweight summary OR a full docker info payload (with containers array).
+    /// We only need the host name, so keep a minimal, tolerant model.
     let Name: String?
+    let Info: DockerInfo?
+
+    struct DockerInfo: Codable {
+        let Name: String?
+    }
+
+    var hostName: String? {
+        return Name ?? Info?.Name
+    }
 }
 
 // MARK: - Container
 
 struct PortainerContainer: Codable, Identifiable {
     let Id: String
-    let Names: [String]
-    let Image: String
-    let ImageID: String
-    let Command: String
-    let Created: Int
-    let State: String
-    let Status: String
-    let Ports: [ContainerPort]
-    let Labels: [String: String]
+    let Names: [String]?
+    let Image: String?
+    let ImageID: String?
+    let Command: String?
+    let Created: Int?
+    let State: String?
+    let Status: String?
+    let Ports: [ContainerPort]?
+    let Labels: [String: String]?
     let SizeRw: Int?
     let SizeRootFs: Int?
-    let HostConfig: ContainerHostConfig
-    let NetworkSettings: ContainerNetworkSettings
-    let Mounts: [ContainerMount]
+    let HostConfig: ContainerHostConfig?
+    let NetworkSettings: ContainerNetworkSettings?
+    let Mounts: [ContainerMount]?
 
     var id: String { Id }
 
     var displayName: String {
-        guard !Names.isEmpty else { return "Unknown" }
-        return Names[0].replacingOccurrences(of: "^/", with: "", options: .regularExpression)
+        guard let names = Names, !names.isEmpty else { return "Unknown" }
+        return names[0].replacingOccurrences(of: "^/", with: "", options: .regularExpression)
     }
 }
 
@@ -139,46 +140,46 @@ struct ContainerMount: Codable {
 
 struct ContainerDetail: Codable {
     let Id: String
-    let Name: String
-    let Created: String
-    let State: ContainerState
-    let Image: String
-    let Config: ContainerConfig
-    let HostConfig: ContainerDetailHostConfig
-    let NetworkSettings: ContainerDetailNetworkSettings
-    let Mounts: [ContainerMount]
+    let Name: String?
+    let Created: String?
+    let State: ContainerState?
+    let Image: String?
+    let Config: ContainerConfig?
+    let HostConfig: ContainerDetailHostConfig?
+    let NetworkSettings: ContainerDetailNetworkSettings?
+    let Mounts: [ContainerMount]?
 }
 
 struct ContainerState: Codable {
-    let Status: String
-    let Running: Bool
-    let Paused: Bool
-    let Restarting: Bool
-    let OOMKilled: Bool
-    let Dead: Bool
-    let Pid: Int
-    let ExitCode: Int
-    let Error: String
-    let StartedAt: String
-    let FinishedAt: String
+    let Status: String?
+    let Running: Bool?
+    let Paused: Bool?
+    let Restarting: Bool?
+    let OOMKilled: Bool?
+    let Dead: Bool?
+    let Pid: Int?
+    let ExitCode: Int?
+    let Error: String?
+    let StartedAt: String?
+    let FinishedAt: String?
 }
 
 struct ContainerConfig: Codable {
-    let Hostname: String
-    let Env: [String]
-    let Image: String
-    let Labels: [String: String]
+    let Hostname: String?
+    let Env: [String]?
+    let Image: String?
+    let Labels: [String: String]?
     let Cmd: [String]?
     let Entrypoint: [String]?
     let WorkingDir: String?
 }
 
 struct ContainerDetailHostConfig: Codable {
-    let NetworkMode: String
-    let RestartPolicy: RestartPolicy
-    let Memory: Int
-    let NanoCpus: Int
-    let CpuShares: Int
+    let NetworkMode: String?
+    let RestartPolicy: RestartPolicy?
+    let Memory: Int?
+    let NanoCpus: Int?
+    let CpuShares: Int?
     let Binds: [String]?
 }
 
@@ -189,11 +190,16 @@ struct ContainerDetailNetworkSettings: Codable {
 // MARK: - Container Stats
 
 struct ContainerStats: Codable {
-    let cpu_stats: CpuStats
-    let precpu_stats: CpuStats
-    let memory_stats: MemoryStats
+    let cpu_stats: CpuStats?
+    let precpu_stats: CpuStats?
+    let memory_stats: MemoryStats?
     let networks: [String: NetworkStats]?
     let blkio_stats: BlkioStats?
+    let pids_stats: PidsStats?
+}
+
+struct PidsStats: Codable {
+    let current: Int?
 }
 
 struct CpuStats: Codable {
@@ -208,8 +214,8 @@ struct CpuUsage: Codable {
 }
 
 struct MemoryStats: Codable {
-    let usage: Int
-    let limit: Int
+    let usage: Int?
+    let limit: Int?
     let stats: MemoryCacheStats?
 }
 

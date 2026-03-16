@@ -50,7 +50,11 @@ internal fun SmoothLineGraph(
     selectedIndex: Int? = null,
     onSelectedIndexChange: ((Int?) -> Unit)? = null,
     labelFormatter: ((Double) -> String)? = null,
-    secondaryLabelFormatter: ((Double) -> String)? = null
+    secondaryLabelFormatter: ((Double) -> String)? = null,
+    gridlines: List<Double>? = null,
+    minValueOverride: Double? = null,
+    maxValueOverride: Double? = null,
+    heightDp: androidx.compose.ui.unit.Dp = 48.dp
 ) {
     if (data.size < 2) return
 
@@ -59,8 +63,8 @@ internal fun SmoothLineGraph(
     val combinedMax = secondaryData?.maxOrNull()?.let { maxOf(primaryMax, it) } ?: primaryMax
     val combinedMin = secondaryData?.minOrNull()?.let { minOf(primaryMin, it) } ?: primaryMin
 
-    val maxVal = combinedMax.coerceAtLeast(1.0)
-    val minVal = combinedMin.coerceAtMost(maxVal - 0.1)
+    val maxVal = (maxValueOverride ?: combinedMax).coerceAtLeast(1.0)
+    val minVal = (minValueOverride ?: combinedMin).coerceAtMost(maxVal - 0.1)
     val range = (maxVal - minVal).coerceAtLeast(0.1)
 
     val animationProgress by animateFloatAsState(
@@ -72,6 +76,7 @@ internal fun SmoothLineGraph(
     val haptic = LocalHapticFeedback.current
     var dragX by remember(data.size) { mutableStateOf(0f) }
     var graphWidthPx by remember(data.size) { mutableStateOf(1f) }
+    val gridColor = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
 
     Column(modifier = Modifier.fillMaxWidth().padding(top = 12.dp)) {
         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant, thickness = 0.5.dp)
@@ -80,7 +85,7 @@ internal fun SmoothLineGraph(
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(48.dp)
+                .height(heightDp)
                 .onSizeChanged { graphWidthPx = it.width.toFloat().coerceAtLeast(1f) }
                 .pointerInput(enableScrub, data.size, selectedIndex) {
                     if (!enableScrub || onSelectedIndexChange == null || data.isEmpty()) return@pointerInput
@@ -131,6 +136,16 @@ internal fun SmoothLineGraph(
             val width = size.width
             val height = size.height
             val stepX = width / (data.size - 1).coerceAtLeast(1)
+            gridlines?.forEach { value ->
+                val clamped = ((value - minVal) / range).coerceIn(0.0, 1.0)
+                val y = height - (clamped * height).toFloat()
+                drawLine(
+                    if (value == 0.0) gridColor.copy(alpha = 0.7f) else gridColor,
+                    start = Offset(0f, y),
+                    end = Offset(width, y),
+                    strokeWidth = if (value == 0.0) 1.6.dp.toPx() else 1.dp.toPx()
+                )
+            }
 
             val path = Path()
             val fillPath = Path()
@@ -303,4 +318,3 @@ internal fun SmoothLineGraph(
         }
     }
 }
-

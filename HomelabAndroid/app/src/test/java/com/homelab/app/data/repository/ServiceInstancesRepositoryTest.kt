@@ -154,6 +154,8 @@ private fun ServiceInstance.toEntity(): ServiceInstanceEntity {
         apiKey = apiKey,
         piholePassword = piholePassword,
         piholeAuthMode = piholeAuthMode?.name,
-        fallbackUrl = fallbackUrl
+        fallbackUrl = fallbackUrl,
+        allowSelfSigned = allowSelfSigned,
+        password = password
     )
 }

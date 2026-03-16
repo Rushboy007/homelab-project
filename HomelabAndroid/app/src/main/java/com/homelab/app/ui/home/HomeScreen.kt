@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -45,6 +46,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Source
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.CircularProgressIndicator
@@ -114,11 +116,8 @@ fun HomeScreen(
     val serviceOrder by viewModel.serviceOrder.collectAsStateWithLifecycle()
     val instancesByType by viewModel.instancesByType.collectAsStateWithLifecycle()
     val preferredInstanceIds by viewModel.preferredInstanceIdByType.collectAsStateWithLifecycle()
-    val portainerSummary by viewModel.portainerSummary.collectAsStateWithLifecycle()
-    val piholeSummary by viewModel.piholeSummary.collectAsStateWithLifecycle()
-    val beszelSummary by viewModel.beszelSummary.collectAsStateWithLifecycle()
-    val giteaSummary by viewModel.giteaSummary.collectAsStateWithLifecycle()
-    val npmSummary by viewModel.npmSummary.collectAsStateWithLifecycle()
+    val instanceSummaries by viewModel.instanceSummaries.collectAsStateWithLifecycle()
+    val summaryLoading by viewModel.summaryLoading.collectAsStateWithLifecycle()
     var showReorderDialog by rememberSaveable { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -149,8 +148,8 @@ fun HomeScreen(
     }
 
     val visibleTypes = serviceOrder.filter { !hiddenServices.contains(it.name) }
-    val hasUnreachableInstance = instancesByType.values.flatten().any { instance ->
-        reachability[instance.id] == false
+    val hasTailscaleInstance = instancesByType.values.flatten().any { instance ->
+        isLikelyTailscaleUrl(instance.url)
     }
 
     Scaffold(
@@ -209,7 +208,7 @@ fun HomeScreen(
                 }
             }
 
-            if (hasUnreachableInstance || isTailscaleConnected) {
+            if (isTailscaleConnected || hasTailscaleInstance) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     TailscaleCard(isConnected = isTailscaleConnected)
                 }
@@ -230,22 +229,13 @@ fun HomeScreen(
                             isPreferred = instance.id == preferredInstanceIds[type],
                             isReachable = reachability[instance.id],
                             isPinging = pinging[instance.id] == true,
+                            summary = instanceSummaries[instance.id],
+                            isSummaryLoading = instanceSummaries[instance.id] == null && summaryLoading,
                             onOpen = { onNavigateToService(type, instance.id) },
                             onRefresh = { viewModel.checkReachability(instance.id) }
                         )
                     }
                 }
-            }
-
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                DashboardSummary(
-                    serviceOrder = serviceOrder,
-                    portainer = portainerSummary,
-                    pihole = piholeSummary,
-                    beszel = beszelSummary,
-                    gitea = giteaSummary,
-                    npm = npmSummary
-                )
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
@@ -279,18 +269,42 @@ private fun InstanceCard(
     isPreferred: Boolean,
     isReachable: Boolean?,
     isPinging: Boolean,
+    summary: HomeViewModel.InstanceSummary?,
+    isSummaryLoading: Boolean,
     onOpen: () -> Unit,
     onRefresh: () -> Unit
 ) {
-    val statusColor = when (isReachable) {
-        true -> StatusGreen
-        false -> MaterialTheme.colorScheme.error
-        null -> MaterialTheme.colorScheme.onSurfaceVariant
+    val resolvedReachable = when {
+        summary != null -> true
+        isReachable == false && (isSummaryLoading || isPinging) -> null
+        isReachable == true -> true
+        isReachable == false -> false
+        else -> null
     }
-    val statusLabel = when (isReachable) {
+    val statusAccent = when (resolvedReachable) {
+        null -> MaterialTheme.colorScheme.onSurfaceVariant
+        else -> type.primaryColor
+    }
+    val statusBackground = when (resolvedReachable) {
+        null -> MaterialTheme.colorScheme.surfaceVariant
+        else -> type.primaryColor.copy(alpha = 0.15f)
+    }
+    val statusLabel = when (resolvedReachable) {
         true -> stringResource(R.string.home_status_online)
         false -> stringResource(R.string.home_status_offline)
         null -> stringResource(R.string.home_verifying)
+    }
+
+    // Resolve label key to localized string
+    val summaryLabel = summary?.let { s ->
+        when (s.label) {
+            "containers" -> stringResource(R.string.portainer_containers)
+            "total_queries" -> stringResource(R.string.pihole_total_queries)
+            "systems_online" -> stringResource(R.string.beszel_systems_online)
+            "repos" -> stringResource(R.string.gitea_repos)
+            "proxy_hosts" -> stringResource(R.string.npm_proxy_hosts)
+            else -> s.label
+        }.lowercase()
     }
 
     Surface(
@@ -305,7 +319,7 @@ private fun InstanceCard(
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Surface(
                     shape = RoundedCornerShape(14.dp),
@@ -321,10 +335,57 @@ private fun InstanceCard(
                         )
                     }
                 }
-                
+
                 Spacer(modifier = Modifier.weight(1f))
-                
-                if (isReachable == false) {
+
+                if (resolvedReachable == true && summary != null) {
+                    // Inline summary stats (right of icon)
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        modifier = Modifier.widthIn(max = 110.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.Bottom,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Text(
+                                text = summary.value,
+                                style = MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.Bold
+                                ),
+                                color = type.primaryColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                softWrap = false,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                            if (summary.subValue != null) {
+                                Text(
+                                    text = summary.subValue,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(bottom = 2.dp)
+                                )
+                            }
+                        }
+                        Text(
+                            text = summaryLabel ?: "",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    }
+                } else if (resolvedReachable == true && isSummaryLoading) {
+                    // Skeleton placeholder
+                    Surface(
+                        shape = RoundedCornerShape(6.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        modifier = Modifier.size(width = 60.dp, height = 16.dp)
+                    ) {}
+                } else if (resolvedReachable == false) {
                     Surface(
                         shape = CircleShape,
                         color = type.primaryColor.copy(alpha = 0.1f),
@@ -344,6 +405,12 @@ private fun InstanceCard(
                             )
                         }
                     }
+                } else if (resolvedReachable == null) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        strokeWidth = 2.dp,
+                        color = type.primaryColor
+                    )
                 }
             }
 
@@ -362,7 +429,7 @@ private fun InstanceCard(
             ) {
                 Surface(
                     shape = RoundedCornerShape(8.dp),
-                    color = statusColor.copy(alpha = 0.15f)
+                    color = statusBackground
                 ) {
                     Row(
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -372,35 +439,43 @@ private fun InstanceCard(
                         Box(
                             modifier = Modifier
                                 .size(6.dp)
-                                .background(statusColor, CircleShape)
+                                .background(statusAccent, CircleShape)
                         )
                         Text(
                             text = statusLabel,
                             style = MaterialTheme.typography.labelSmall,
-                            color = statusColor,
+                            color = statusAccent,
                             fontWeight = FontWeight.Bold
                         )
                     }
                 }
                 if (isPreferred) {
                     Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        shape = CircleShape,
+                        color = type.primaryColor.copy(alpha = 0.12f),
+                        modifier = Modifier.size(22.dp)
                     ) {
-                        Text(
-                            text = stringResource(R.string.home_default_badge),
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                            fontWeight = FontWeight.Bold,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
+                        Box(contentAlignment = Alignment.Center) {
+                            Icon(
+                                imageVector = Icons.Default.Star,
+                                contentDescription = stringResource(R.string.home_default_badge),
+                                tint = type.primaryColor,
+                                modifier = Modifier.size(12.dp)
+                            )
+                        }
                     }
                 }
             }
         }
     }
+}
+
+private fun isLikelyTailscaleUrl(url: String): Boolean {
+    if (url.isBlank()) return false
+    return runCatching {
+        val host = Uri.parse(url).host?.lowercase().orEmpty()
+        host.endsWith(".ts.net") || host.startsWith("100.")
+    }.getOrDefault(false)
 }
 
 @Composable
@@ -938,7 +1013,7 @@ private fun DashboardSummaryCard(
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Surface(
                 shape = RoundedCornerShape(14.dp),
@@ -955,17 +1030,17 @@ private fun DashboardSummaryCard(
                 }
             }
 
-            Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 Text(
                     text = value,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
                     text = label,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
+                    maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
             }

@@ -17,5 +17,6 @@ data class ServiceInstanceEntity(
     val piholeAuthMode: String?,
     val fallbackUrl: String?,
     @ColumnInfo(defaultValue = "0")
-    val allowSelfSigned: Boolean
+    val allowSelfSigned: Boolean,
+    val password: String? = null
 )

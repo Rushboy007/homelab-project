@@ -128,16 +128,7 @@ fun BeszelDashboardScreen(
                         OverviewCard(systems = systems)
                     }
 
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(6.dp)
-                        ) {
-                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh), modifier = Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(stringResource(R.string.beszel_background_update_info), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        }
-                    }
+                    // Removed standalone settings icon for a more compact layout.
 
                     if (systems.isEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {

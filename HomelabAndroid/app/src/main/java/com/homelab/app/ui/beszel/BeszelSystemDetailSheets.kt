@@ -28,6 +28,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.homelab.app.R
@@ -151,11 +153,7 @@ private fun MetricHistoryBlock(
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     } else {
-        Text(
-            text = stringResource(R.string.beszel_background_update_info),
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        // No-op: background update info removed.
     }
 }
 
@@ -541,51 +539,66 @@ internal fun SmartDetailsSheet(
             fontWeight = FontWeight.SemiBold
         )
 
-        if (device.attributes.isEmpty()) {
-            Text(
-                text = stringResource(R.string.beszel_background_update_info),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        } else {
+        if (device.attributes.isNotEmpty()) {
             Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                 device.attributes.forEach { attr ->
                     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                        val rawText = attr.rawString ?: attr.rawValue?.toString().orEmpty()
+                        val summaryText = if (attr.value == null && attr.worst == null && attr.threshold == null) {
+                            ""
+                        } else {
+                            val valueText = attr.value?.let { "Value $it" } ?: ""
+                            val worstText = attr.worst?.let { "Worst $it" } ?: ""
+                            val thresholdText = attr.threshold?.let { "Th $it" } ?: ""
+                            listOf(valueText, worstText, thresholdText)
+                                .filter { it.isNotEmpty() }
+                                .joinToString(" • ")
+                        }
+
                         Row(
                             modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            verticalAlignment = Alignment.Top,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            Text(
-                                text = (attr.id?.let { "$it " } ?: "") + attr.name,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-
-                            val summaryText = if (attr.value == null && attr.worst == null && attr.threshold == null) {
-                                attr.rawString ?: attr.rawValue?.toString().orEmpty()
-                            } else {
-                                val valueText = attr.value?.let { "Value $it" } ?: ""
-                                val worstText = attr.worst?.let { "Worst $it" } ?: ""
-                                val thresholdText = attr.threshold?.let { "Th $it" } ?: ""
-                                listOf(valueText, worstText, thresholdText)
-                                    .filter { it.isNotEmpty() }
-                                    .joinToString(" • ")
-                            }
-
-                            if (summaryText.isNotEmpty()) {
+                            Column(
+                                modifier = Modifier.weight(0.55f),
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
                                 Text(
-                                    text = summaryText,
+                                    text = (attr.id?.let { "$it " } ?: "") + attr.name,
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
+                                if (summaryText.isNotEmpty() && rawText.isNotEmpty()) {
+                                    Text(
+                                        text = rawText,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
                             }
-                        }
-                        attr.rawString?.let {
-                            Text(
-                                text = it,
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+
+                            Column(
+                                modifier = Modifier.weight(0.45f),
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
+                                val rightText = if (summaryText.isNotEmpty()) summaryText else rawText
+                                if (rightText.isNotEmpty()) {
+                                    Text(
+                                        text = rightText,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 2,
+                                        overflow = TextOverflow.Ellipsis,
+                                        textAlign = TextAlign.End
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -744,4 +757,3 @@ internal fun DualMetricDetailsSheet(
         )
     }
 }
-

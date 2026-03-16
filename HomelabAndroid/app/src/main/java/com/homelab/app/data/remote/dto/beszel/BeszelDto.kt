@@ -344,6 +344,77 @@ data class BeszelSmartDevice(
     val attributes: List<BeszelSmartAttribute> = emptyList()
 )
 
+// MARK: - Container Records (individual container info)
+
+@Serializable
+data class BeszelContainerRecord(
+    val id: String,
+    val collectionId: String? = null,
+    val collectionName: String? = null,
+    val name: String,
+    val cpu: Double? = null,
+    val memory: Double? = null,
+    val net: Double? = null,
+    val health: Int? = null,
+    val status: String? = null,
+    val image: String? = null,
+    val system: String? = null,
+    val updated: Long? = null
+) {
+    val cpuValue: Double get() = cpu ?: 0.0
+    val memoryValue: Double get() = memory ?: 0.0
+    val netValue: Double get() = net ?: 0.0
+
+    val healthEnum: BeszelContainerHealth
+        get() = BeszelContainerHealth.entries.firstOrNull { it.value == (health ?: 0) }
+            ?: BeszelContainerHealth.NONE
+}
+
+enum class BeszelContainerHealth(val value: Int) {
+    NONE(0), STARTING(1), HEALTHY(2), UNHEALTHY(3)
+}
+
+@Serializable
+data class BeszelContainerRecordsResponse(
+    val items: List<BeszelContainerRecord>,
+    val totalItems: Int? = null,
+    val page: Int? = null,
+    val perPage: Int? = null
+)
+
+// MARK: - Container Stats (time series)
+
+@Serializable
+data class BeszelContainerStatsRecord(
+    val id: String,
+    val system: String? = null,
+    val stats: List<BeszelContainerStat>,
+    val created: String? = null
+)
+
+@Serializable
+data class BeszelContainerStat(
+    val n: String,
+    val c: Double,
+    val m: Double,
+    val ns: Double? = null,
+    val nr: Double? = null
+) {
+    val name: String get() = n
+    val cpuValue: Double get() = c
+    val memoryValue: Double get() = m
+    val netSent: Double get() = ns ?: 0.0
+    val netReceived: Double get() = nr ?: 0.0
+}
+
+@Serializable
+data class BeszelContainerStatsResponse(
+    val items: List<BeszelContainerStatsRecord>,
+    val totalItems: Int? = null,
+    val page: Int? = null,
+    val perPage: Int? = null
+)
+
 @Serializable
 data class BeszelSmartDevicesResponse(
     val items: List<BeszelSmartDevice>,

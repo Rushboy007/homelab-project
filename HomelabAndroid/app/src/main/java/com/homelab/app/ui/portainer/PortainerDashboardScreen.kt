@@ -156,9 +156,9 @@ fun PortainerDashboardScreen(
 
                     if (selectedEndpoint != null) {
                         val raw = selectedEndpoint?.snapshots?.firstOrNull()?.dockerSnapshotRaw
-                        val hasInfo = (raw?.operatingSystem?.isNotBlank() == true && raw.operatingSystem != "N/A") ||
-                                      (raw?.serverVersion?.isNotBlank() == true && raw.serverVersion != "N/A") ||
-                                      (raw?.architecture?.isNotBlank() == true && raw.architecture != "N/A")
+                        val hasInfo = (raw?.resolvedOperatingSystem?.isNotBlank() == true && raw.resolvedOperatingSystem != "N/A") ||
+                                      (raw?.resolvedServerVersion?.isNotBlank() == true && raw.resolvedServerVersion != "N/A") ||
+                                      (raw?.resolvedArchitecture?.isNotBlank() == true && raw.resolvedArchitecture != "N/A")
 
                         if (hasInfo) {
                             item(span = { GridItemSpan(maxLineSpan) }) {
@@ -176,7 +176,6 @@ fun PortainerDashboardScreen(
                         val total = containers.size
                         val running = containers.count { it.state == "running" }
                         val stopped = containers.count { it.state == "exited" || it.state == "dead" }
-                        val paused = containers.count { it.state == "paused" }
                         val stackCount = snapshot?.stackCount ?: 0
 
                         item(span = { GridItemSpan(maxLineSpan) }) {
@@ -187,36 +186,12 @@ fun PortainerDashboardScreen(
                             )
                         }
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Box(modifier = Modifier.weight(1f)) {
-                                    MiniStatCard(label = stringResource(R.string.portainer_total), value = total, color = MaterialTheme.colorScheme.primary)
-                                }
-                                Box(modifier = Modifier.weight(1f)) {
-                                    MiniStatCard(label = stringResource(R.string.portainer_running), value = running, color = Color(0xFF4CAF50))
-                                }
-                                Box(modifier = Modifier.weight(1f)) {
-                                    MiniStatCard(label = stringResource(R.string.portainer_stopped), value = stopped, color = Color(0xFFF44336))
-                                }
-                                Box(modifier = Modifier.weight(1f)) {
-                                    MiniStatCard(label = stringResource(R.string.portainer_stacks), value = stackCount, color = ServiceType.PORTAINER.primaryColor)
-                                }
-                            }
-                        }
-
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            ContainerStatusBar(total = total, running = running, paused = paused, stopped = stopped)
-                        }
-
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            M3ExpressiveButtonCard(
-                                text = stringResource(R.string.portainer_all_containers),
-                                icon = Icons.Default.ChevronRight,
-                                color = ServiceType.PORTAINER.primaryColor,
-                                modifier = Modifier.fillMaxWidth(),
-                                onClick = { onNavigateToContainers(selectedEndpoint!!.id) }
+                            ContainerSummaryCard(
+                                total = total,
+                                running = running,
+                                stopped = stopped,
+                                stacks = stackCount,
+                                onViewAll = { onNavigateToContainers(selectedEndpoint!!.id) }
                             )
                         }
 
@@ -231,18 +206,24 @@ fun PortainerDashboardScreen(
                             item { ResourceCard(icon = Icons.Default.Image, value = "${snapshot.imageCount}", label = stringResource(R.string.portainer_images), color = Color(0xFFFF9800)) }
                             item { ResourceCard(icon = Icons.Default.SdStorage, value = "${snapshot.volumeCount}", label = stringResource(R.string.portainer_volumes), color = ServiceType.PORTAINER.primaryColor) }
                             item {
+                                val cpuValue = if (snapshot.totalCpu > 0) "${snapshot.totalCpu}" else stringResource(R.string.not_available)
                                 ResourceCard(
                                     icon = Icons.Default.Memory,
-                                    value = "${snapshot.totalCpu}",
+                                    value = cpuValue,
                                     label = stringResource(R.string.portainer_cpu_label),
                                     color = Color(0xFF2196F3)
                                 )
                             }
                             item {
                                 val context = LocalContext.current
+                                val memoryValue = if (snapshot.totalMemory > 0) {
+                                    ResourceFormatters.formatBytes(snapshot.totalMemory.toDouble(), context)
+                                } else {
+                                    stringResource(R.string.not_available)
+                                }
                                 ResourceCard(
                                     icon = Icons.Default.Storage,
-                                    value = ResourceFormatters.formatBytes(snapshot.totalMemory.toDouble(), context),
+                                    value = memoryValue,
                                     label = stringResource(R.string.beszel_memory),
                                     color = Color(0xFF9C27B0)
                                 )
@@ -393,12 +374,14 @@ private fun ServerInfoSection(endpoint: PortainerEndpoint, raw: DockerSnapshotRa
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
-                    val os = raw.operatingSystem?.takeIf { it.isNotBlank() && it != "N/A" } ?: stringResource(R.string.not_available)
-                    val docker = raw.serverVersion?.takeIf { it.isNotBlank() && it != "N/A" } ?: stringResource(R.string.not_available)
-                    val arch = raw.architecture?.takeIf { it.isNotBlank() && it != "N/A" } ?: stringResource(R.string.not_available)
+                    val os = raw.resolvedOperatingSystem?.takeIf { it.isNotBlank() && it != "N/A" } ?: stringResource(R.string.not_available)
+                    val docker = raw.resolvedServerVersion?.takeIf { it.isNotBlank() && it != "N/A" } ?: stringResource(R.string.not_available)
+                    val arch = raw.resolvedArchitecture?.takeIf { it.isNotBlank() && it != "N/A" } ?: stringResource(R.string.not_available)
                     
                     val snapshot = endpoint.snapshots?.firstOrNull()
-                    val cpuCores = snapshot?.totalCpu?.toString() ?: stringResource(R.string.not_available)
+                    val cpuCores = snapshot?.totalCpu?.takeIf { it > 0 }
+                    val cpuCoresLabel = cpuCores?.let { "$it ${stringResource(R.string.beszel_cores)}" }
+                        ?: stringResource(R.string.not_available)
                     
                     InfoRow(label = stringResource(R.string.portainer_os_label), value = os)
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
@@ -409,11 +392,11 @@ private fun ServerInfoSection(endpoint: PortainerEndpoint, raw: DockerSnapshotRa
                     InfoRow(label = stringResource(R.string.portainer_arch_label), value = arch)
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                     
-                    InfoRow(label = stringResource(R.string.portainer_cpu_label), value = "$cpuCores ${stringResource(R.string.beszel_cores)}")
+                    InfoRow(label = stringResource(R.string.portainer_cpu_label), value = cpuCoresLabel)
                     HorizontalDivider(color = MaterialTheme.colorScheme.surfaceVariant)
                     
                     val context = LocalContext.current
-                    InfoRow(label = stringResource(R.string.portainer_ram_label), value = snapshot?.totalMemory?.let { ResourceFormatters.formatBytes(it.toDouble(), context) } ?: stringResource(R.string.not_available))
+                    InfoRow(label = stringResource(R.string.portainer_ram_label), value = snapshot?.totalMemory?.takeIf { it > 0 }?.let { ResourceFormatters.formatBytes(it.toDouble(), context) } ?: stringResource(R.string.not_available))
                 }
             }
         }
@@ -475,23 +458,89 @@ private fun ResourceCard(icon: androidx.compose.ui.graphics.vector.ImageVector, 
 }
 
 @Composable
-private fun ContainerStatusBar(total: Int, running: Int, paused: Int, stopped: Int) {
-    if (total <= 0) return
+private fun ContainerSummaryCard(
+    total: Int,
+    running: Int,
+    stopped: Int,
+    stacks: Int,
+    onViewAll: () -> Unit
+) {
     Surface(
-        shape = RoundedCornerShape(4.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHighest,
-        modifier = Modifier.fillMaxWidth().height(8.dp)
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Row(modifier = Modifier.fillMaxSize()) {
-            if (running > 0) {
-                Box(modifier = Modifier.weight(running.toFloat()).fillMaxHeight().background(Color(0xFF4CAF50)))
+        Column(modifier = Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SummaryStatColumn(
+                    label = stringResource(R.string.portainer_total),
+                    value = total,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.weight(1f)
+                )
+                VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.height(36.dp))
+                SummaryStatColumn(
+                    label = stringResource(R.string.portainer_running),
+                    value = running,
+                    color = Color(0xFF4CAF50),
+                    modifier = Modifier.weight(1f)
+                )
+                VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.height(36.dp))
+                SummaryStatColumn(
+                    label = stringResource(R.string.portainer_stopped),
+                    value = stopped,
+                    color = Color(0xFFF44336),
+                    modifier = Modifier.weight(1f)
+                )
+                VerticalDivider(color = MaterialTheme.colorScheme.outlineVariant, modifier = Modifier.height(36.dp))
+                SummaryStatColumn(
+                    label = stringResource(R.string.portainer_stacks),
+                    value = stacks,
+                    color = ServiceType.PORTAINER.primaryColor,
+                    modifier = Modifier.weight(1f)
+                )
             }
-            if (paused > 0) {
-                Box(modifier = Modifier.weight(paused.toFloat()).fillMaxHeight().background(Color(0xFFFF9800)))
-            }
-            if (stopped > 0) {
-                Box(modifier = Modifier.weight(stopped.toFloat()).fillMaxHeight().background(Color(0xFFF44336)))
-            }
+
+            M3ExpressiveButtonCard(
+                text = stringResource(R.string.portainer_all_containers),
+                icon = Icons.Default.ChevronRight,
+                color = ServiceType.PORTAINER.primaryColor,
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onViewAll
+            )
         }
+    }
+}
+
+@Composable
+private fun SummaryStatColumn(
+    label: String,
+    value: Int,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = "$value",
+            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+            color = color,
+            maxLines = 1
+        )
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp, lineHeight = 12.sp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 2,
+            overflow = TextOverflow.Clip,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
     }
 }

@@ -43,25 +43,6 @@ struct PortainerDashboard: View {
             // Container stats
             containerStatsSection
 
-            // View all button (moved here)
-            if let ep = selectedEndpoint {
-                NavigationLink(value: PortainerRoute.containers(instanceId: selectedInstanceId, endpointId: ep.Id)) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "list.bullet.indent")
-                        Text(localizer.t.portainerViewAll)
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                            .font(.caption.bold())
-                            .accessibilityHidden(true)
-                    }
-                    .foregroundStyle(portainerColor)
-                    .padding(16)
-                    .glassCard()
-                }
-                .buttonStyle(.plain)
-            }
-
             // Resources
             if let snapshot = selectedEndpoint?.Snapshots?.first {
                 resourcesSection(snapshot)
@@ -85,10 +66,9 @@ struct PortainerDashboard: View {
         return Group {
             if instances.count > 1 {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(localizer.t.dashboardInstances)
+                    Text(localizer.t.dashboardInstances.sentenceCased())
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(AppTheme.textMuted)
-                        .textCase(.uppercase)
 
                     ForEach(instances) { instance in
                         Button {
@@ -128,10 +108,9 @@ struct PortainerDashboard: View {
 
     private var endpointPicker: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(localizer.t.portainerEndpoints)
+            Text(localizer.t.portainerEndpoints.sentenceCased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
 
             ForEach(endpoints) { ep in
                 Button {
@@ -147,7 +126,7 @@ struct PortainerDashboard: View {
                             Text(ep.Name)
                                 .font(.subheadline.weight(.semibold))
                                 .foregroundStyle(.primary)
-                            Text(ep.URL)
+                            Text(ep.URL ?? localizer.t.notAvailable)
                                 .font(.caption)
                                 .foregroundStyle(AppTheme.textMuted)
                         }
@@ -196,15 +175,7 @@ struct PortainerDashboard: View {
                 }
             }
 
-            // Server details card (Simplified per user request)
-            if let raw = ep.Snapshots?.first?.DockerSnapshotRaw, let name = raw.Name {
-                VStack(spacing: 0) {
-                    serverInfoRow(label: localizer.t.portainerHost, value: name)
-                }
-                .padding(.horizontal, 16)
-                .padding(.vertical, 4)
-                .glassCard()
-            }
+            // Removed host row per user request
         }
     }
 
@@ -224,56 +195,81 @@ struct PortainerDashboard: View {
     // MARK: - Container Stats
 
     private var containerStatsSection: some View {
-        let running = containers.filter { $0.State == "running" }.count
-        let stopped = containers.filter { $0.State == "exited" || $0.State == "dead" }.count
+        let running = containers.filter { ($0.State ?? "") == "running" }.count
+        let stopped = containers.filter { let s = $0.State ?? ""; return s == "exited" || s == "dead" }.count
         let total = containers.count
         let stacks = selectedEndpoint?.Snapshots?.first?.StackCount ?? 0
 
         return VStack(alignment: .leading, spacing: 12) {
-            Text(localizer.t.portainerContainers)
+            Text(localizer.t.portainerContainers.sentenceCased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
 
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                miniStatCard(label: localizer.t.portainerTotal, value: total, color: AppTheme.info)
-                miniStatCard(label: localizer.t.portainerStacks, value: stacks, color: portainerColor)
-                miniStatCard(label: localizer.t.portainerRunning, value: running, color: AppTheme.running)
-                miniStatCard(label: localizer.t.portainerStopped, value: stopped, color: AppTheme.stopped)
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    miniStatChip(label: localizer.t.portainerTotal, value: total, color: AppTheme.info)
+                    miniStatChip(label: localizer.t.portainerStacks, value: stacks, color: portainerColor)
+                    miniStatChip(label: localizer.t.portainerRunning, value: running, color: AppTheme.running)
+                    miniStatChip(label: localizer.t.portainerStopped, value: stopped, color: AppTheme.stopped)
+                }
+                .padding(12)
+
+                if let ep = selectedEndpoint {
+                    Divider().padding(.leading, 12)
+
+                    NavigationLink(value: PortainerRoute.containers(instanceId: selectedInstanceId, endpointId: ep.Id)) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "list.bullet.indent")
+                            Text(localizer.t.portainerViewAll)
+                                .fontWeight(.semibold)
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.caption.bold())
+                                .accessibilityHidden(true)
+                        }
+                        .foregroundStyle(portainerColor)
+                        .padding(12)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
             }
+            .glassCard()
         }
     }
 
-    private func miniStatCard(label: String, value: Int, color: Color) -> some View {
-        VStack(spacing: 4) {
-            Text("\(value)")
-                .font(.title2.bold())
-                .foregroundStyle(color)
-            Text(label)
-                .font(.caption2.weight(.medium))
+    private func miniStatChip(label: String, value: Int, color: Color) -> some View {
+        VStack(alignment: .center, spacing: 6) {
+            Text(label.sentenceCased())
+                .font(.caption2.weight(.semibold))
                 .foregroundStyle(AppTheme.textSecondary)
-                .lineLimit(1)
-                .minimumScaleFactor(0.7)
+                .lineLimit(2)
+                .minimumScaleFactor(0.6)
+                .multilineTextAlignment(.center)
+                .fixedSize(horizontal: false, vertical: true)
+            Text("\(value)")
+                .font(.title3.bold())
+                .foregroundStyle(.primary)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
-        .glassCard()
+        .frame(maxWidth: .infinity, minHeight: 72, alignment: .center)
+        .padding(.vertical, 12)
+        .padding(.horizontal, 8)
+        .glassCard(cornerRadius: 14, tint: color.opacity(0.08))
     }
 
     // MARK: - Resources
 
     private func resourcesSection(_ snapshot: EndpointSnapshot) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(localizer.t.portainerResources)
+            Text(localizer.t.portainerResources.sentenceCased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
-                resourceCard(icon: "photo.fill", value: "\(snapshot.ImageCount)", label: localizer.t.portainerImages, color: AppTheme.paused)
-                resourceCard(icon: "externaldrive.fill", value: "\(snapshot.VolumeCount)", label: localizer.t.portainerVolumes, color: portainerColor)
-                resourceCard(icon: "cpu", value: "\(snapshot.TotalCPU)", label: localizer.t.portainerCpus, color: AppTheme.created)
-                resourceCard(icon: "memorychip", value: Formatters.formatBytes(Double(snapshot.TotalMemory)), label: localizer.t.portainerMemory, color: AppTheme.info)
+                resourceCard(icon: "photo.fill", value: "\(snapshot.ImageCount ?? 0)", label: localizer.t.portainerImages, color: AppTheme.paused)
+                resourceCard(icon: "externaldrive.fill", value: "\(snapshot.VolumeCount ?? 0)", label: localizer.t.portainerVolumes, color: portainerColor)
+                resourceCard(icon: "cpu", value: "\(snapshot.TotalCPU ?? 0)", label: localizer.t.portainerCpus, color: AppTheme.created)
+                resourceCard(icon: "memorychip", value: Formatters.formatBytes(Double(snapshot.TotalMemory ?? 0)), label: localizer.t.portainerMemory, color: AppTheme.info)
             }
         }
     }
@@ -303,19 +299,18 @@ struct PortainerDashboard: View {
 
     @ViewBuilder
     private func healthSection(_ snapshot: EndpointSnapshot) -> some View {
-        if snapshot.HealthyContainerCount > 0 || snapshot.UnhealthyContainerCount > 0 {
+        if (snapshot.HealthyContainerCount ?? 0) > 0 || (snapshot.UnhealthyContainerCount ?? 0) > 0 {
             VStack(alignment: .leading, spacing: 12) {
-                Text(localizer.t.portainerHealthStatus)
+                Text(localizer.t.portainerHealthStatus.sentenceCased())
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(AppTheme.textMuted)
-                    .textCase(.uppercase)
 
                 HStack(spacing: 10) {
-                    if snapshot.HealthyContainerCount > 0 {
-                        healthCard(icon: "heart.fill", value: "\(snapshot.HealthyContainerCount)", label: localizer.t.portainerHealthy, color: AppTheme.running)
+                    if let healthy = snapshot.HealthyContainerCount, healthy > 0 {
+                        healthCard(icon: "heart.fill", value: "\(healthy)", label: localizer.t.portainerHealthy, color: AppTheme.running)
                     }
-                    if snapshot.UnhealthyContainerCount > 0 {
-                        healthCard(icon: "heart.slash.fill", value: "\(snapshot.UnhealthyContainerCount)", label: localizer.t.portainerUnhealthy, color: AppTheme.stopped)
+                    if let unhealthy = snapshot.UnhealthyContainerCount, unhealthy > 0 {
+                        healthCard(icon: "heart.slash.fill", value: "\(unhealthy)", label: localizer.t.portainerUnhealthy, color: AppTheme.stopped)
                     }
                 }
             }

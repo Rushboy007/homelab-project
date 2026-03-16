@@ -7,18 +7,23 @@ import android.util.Log
  */
 object Logger {
     fun d(tag: String, message: String) {
+        LogStore.add(LogLevel.DEBUG, tag, message)
         Log.d(tag, message)
     }
 
     fun i(tag: String, message: String) {
+        LogStore.add(LogLevel.INFO, tag, message)
         Log.i(tag, message)
     }
 
     fun w(tag: String, message: String) {
+        LogStore.add(LogLevel.WARN, tag, message)
         Log.w(tag, message)
     }
 
     fun e(tag: String, message: String, throwable: Throwable? = null) {
+        val formatted = if (throwable?.message.isNullOrBlank()) message else "$message (${throwable?.message})"
+        LogStore.add(LogLevel.ERROR, tag, formatted)
         Log.e(tag, message, throwable)
     }
 
@@ -30,6 +35,8 @@ object Logger {
             is UiState.Error -> "Error(${state.message})"
             is UiState.Offline -> "Offline"
         }
-        Log.d(tag, "State Transition -> $stateName: $stateString")
+        val message = "State Transition -> $stateName: $stateString"
+        LogStore.add(LogLevel.DEBUG, tag, message)
+        Log.d(tag, message)
     }
 }

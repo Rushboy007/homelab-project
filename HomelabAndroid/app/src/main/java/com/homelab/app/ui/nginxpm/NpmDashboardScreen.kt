@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.activity.compose.BackHandler
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -850,12 +851,8 @@ private fun DashboardMenu(
     val usersLabel = stringResource(R.string.npm_users)
     val auditLogsLabel = stringResource(R.string.npm_audit_logs)
 
-    val items = remember(data, proxyHostsLabel, redirectionsLabel, streamsLabel, deadHostsLabel, accessListLabel, sslLabel, usersLabel, auditLogsLabel) {
+    val items = remember(data, accessListLabel, sslLabel, usersLabel, auditLogsLabel) {
         listOf(
-            DashboardMenuItem(Icons.Default.Dns, "${data.hostReport.proxy}", proxyHostsLabel, NpmOrange, TAB_PROXY_HOSTS),
-            DashboardMenuItem(Icons.AutoMirrored.Filled.Redo, "${data.hostReport.redirection}", redirectionsLabel, Color(0xFF5B8DEF), TAB_REDIR),
-            DashboardMenuItem(Icons.Default.SwapHoriz, "${data.hostReport.stream}", streamsLabel, Color(0xFF34C759), TAB_STREAMS),
-            DashboardMenuItem(Icons.Default.Warning, "${data.hostReport.dead}", deadHostsLabel, Color(0xFFFF9500), TAB_DEAD_HOSTS),
             DashboardMenuItem(Icons.Default.People, "${data.accessLists.size}", accessListLabel, Color(0xFF8E8E93), TAB_ACCESS_LISTS),
             DashboardMenuItem(Icons.Default.Lock, "${data.certificates.size}", sslLabel, NpmOrange, TAB_SSL),
             DashboardMenuItem(Icons.Default.Person, "${data.users.size}", usersLabel, Color(0xFF5C6BC0), TAB_USERS),
@@ -877,7 +874,15 @@ private fun DashboardMenu(
                 }
             )
         }
-        item { DashboardHeroCard(report = data.hostReport) }
+        item {
+            DashboardHeroCard(
+                report = data.hostReport,
+                onProxyHosts = { onTabSelect(TAB_PROXY_HOSTS) },
+                onRedirections = { onTabSelect(TAB_REDIR) },
+                onStreams = { onTabSelect(TAB_STREAMS) },
+                onDeadHosts = { onTabSelect(TAB_DEAD_HOSTS) }
+            )
+        }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 for (row in items.chunked(2)) {
@@ -947,46 +952,114 @@ private fun RowScope.DashboardMenuCard(
 }
 
 @Composable
-private fun DashboardHeroCard(report: NpmHostReport) {
+private fun DashboardHeroCard(
+    report: NpmHostReport,
+    onProxyHosts: () -> Unit,
+    onRedirections: () -> Unit,
+    onStreams: () -> Unit,
+    onDeadHosts: () -> Unit
+) {
     Surface(
-        shape = RoundedCornerShape(18.dp),
+        shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceContainerLow,
         modifier = Modifier.fillMaxWidth()
     ) {
-        Row(
-            modifier = Modifier.padding(18.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Surface(
-                shape = RoundedCornerShape(16.dp),
-                color = NpmOrange,
-                modifier = Modifier.size(56.dp)
+        Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable { onProxyHosts() }
             ) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = NpmOrange,
+                    modifier = Modifier.size(56.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Language,
+                        contentDescription = stringResource(R.string.npm_proxy_hosts),
+                        tint = Color.White,
+                        modifier = Modifier.padding(14.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(14.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        stringResource(R.string.npm_proxy_hosts),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        "${report.total}",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                    )
+                }
                 Icon(
-                    Icons.Default.Language,
-                    contentDescription = stringResource(R.string.npm_host_report),
-                    tint = Color.White,
-                    modifier = Modifier.padding(14.dp)
+                    Icons.Default.ChevronRight,
+                    contentDescription = stringResource(R.string.npm_proxy_hosts),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .size(20.dp)
                 )
             }
-            Spacer(modifier = Modifier.width(14.dp))
-            Column {
-                Text(
-                    stringResource(R.string.npm_host_report),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                HeroStatChip(
+                    label = stringResource(R.string.npm_redirections),
+                    value = report.redirection,
+                    color = Color(0xFF5B8DEF),
+                    modifier = Modifier.weight(1f),
+                    onClick = onRedirections
                 )
-                Text(
-                    "${report.total}",
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Bold)
+                HeroStatChip(
+                    label = stringResource(R.string.npm_streams),
+                    value = report.stream,
+                    color = Color(0xFF34C759),
+                    modifier = Modifier.weight(1f),
+                    onClick = onStreams
+                )
+                HeroStatChip(
+                    label = stringResource(R.string.npm_404_hosts),
+                    value = report.dead,
+                    color = Color(0xFFFF9500),
+                    modifier = Modifier.weight(1f),
+                    onClick = onDeadHosts
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                Icons.Default.BarChart,
-                contentDescription = null,
-                tint = NpmOrange.copy(alpha = 0.3f),
-                modifier = Modifier.size(28.dp)
+        }
+    }
+}
+
+@Composable
+private fun HeroStatChip(
+    label: String,
+    value: Int,
+    color: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Surface(
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        modifier = modifier.clickable(onClick = onClick)
+    ) {
+        Column(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "$value",
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = color
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                textAlign = TextAlign.Center
             )
         }
     }

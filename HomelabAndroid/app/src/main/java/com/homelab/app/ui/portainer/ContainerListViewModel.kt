@@ -4,10 +4,11 @@ import android.content.Context
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.homelab.app.R
 import com.homelab.app.data.remote.dto.portainer.ContainerAction
+import com.homelab.app.data.remote.dto.portainer.ContainerStats
 import com.homelab.app.data.remote.dto.portainer.PortainerContainer
 import com.homelab.app.data.repository.PortainerRepository
+import com.homelab.app.util.ErrorHandler
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -43,6 +44,11 @@ class ContainerListViewModel @Inject constructor(
     private val _actionInProgress = MutableStateFlow<String?>(null)
     val actionInProgress: StateFlow<String?> = _actionInProgress
 
+    private val _containerStats = MutableStateFlow<Map<String, ContainerStats>>(emptyMap())
+    val containerStats: StateFlow<Map<String, ContainerStats>> = _containerStats
+
+    private val statsLoading = mutableSetOf<String>()
+
     val filteredContainers: StateFlow<List<PortainerContainer>> = combine(
         _containers, _searchQuery, _filter
     ) { containers, query, filter ->
@@ -76,10 +82,13 @@ class ContainerListViewModel @Inject constructor(
             if (_containers.value.isEmpty()) _isLoading.value = true
             _error.value = null
             try {
-                _containers.value = repository.getContainers(instanceId, endpointId)
+                val list = repository.getContainers(instanceId, endpointId)
+                _containers.value = list
+                val validIds = list.map { it.id }.toSet()
+                _containerStats.value = _containerStats.value.filterKeys { it in validIds }
             } catch (e: Exception) {
                 if (_containers.value.isEmpty()) {
-                    _error.value = e.localizedMessage ?: context.getString(R.string.portainer_error_loading_containers)
+                    _error.value = ErrorHandler.getMessage(context, e)
                 }
             } finally {
                 _isLoading.value = false
@@ -113,9 +122,25 @@ class ContainerListViewModel @Inject constructor(
                 }
                 fetchContainers()
             } catch (e: Exception) {
-                _error.value = e.localizedMessage ?: context.getString(R.string.portainer_error_action_failed)
+                _error.value = ErrorHandler.getMessage(context, e)
             } finally {
                 _actionInProgress.value = null
+            }
+        }
+    }
+
+    fun fetchContainerStats(containerId: String) {
+        if (_containerStats.value.containsKey(containerId)) return
+        if (!statsLoading.add(containerId)) return
+
+        viewModelScope.launch {
+            try {
+                val stats = repository.getContainerStats(instanceId, endpointId, containerId)
+                _containerStats.value = _containerStats.value + (containerId to stats)
+            } catch (_: Exception) {
+                // Ignore stats errors to keep list responsive
+            } finally {
+                statsLoading.remove(containerId)
             }
         }
     }

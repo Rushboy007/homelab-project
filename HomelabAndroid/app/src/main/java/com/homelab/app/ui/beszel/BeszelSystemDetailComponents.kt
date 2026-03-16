@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -135,6 +136,233 @@ internal fun BeszelHeaderCard(system: BeszelSystem) {
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+internal fun CombinedHeaderCard(system: BeszelSystem, info: BeszelSystemInfo?, details: BeszelSystemDetails?) {
+    val isUp = system.isOnline
+    val statusColor = if (isUp) StatusGreen else StatusRed
+    var expanded by remember { mutableStateOf(false) }
+
+    val osText = details?.osName ?: info?.os
+    val kernelText = details?.kernel ?: info?.k
+    val hostnameText = details?.hostname ?: info?.h
+    val uptimeSeconds = info?.uValue
+    val cpuText = details?.cpu ?: info?.cm
+    val coresValue = details?.cores ?: info?.c
+    val threadsValue = details?.threads
+    val archText = details?.arch
+    val memoryDisplay = details?.memory?.let { bytes ->
+        val gb = bytes / (1024.0 * 1024.0 * 1024.0)
+        formatGB(gb)
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+    ) {
+        Column {
+            // Header row
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp).fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = statusColor.copy(alpha = 0.1f),
+                    modifier = Modifier.size(44.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            if (isUp) Icons.Default.Wifi else Icons.Default.WifiOff,
+                            contentDescription = null,
+                            tint = statusColor,
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(system.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
+                    Text(
+                        system.host,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+
+                Surface(shape = RoundedCornerShape(12.dp), color = statusColor.copy(alpha = 0.1f)) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp)
+                    ) {
+                        Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(statusColor))
+                        Text(
+                            if (isUp) stringResource(R.string.beszel_online) else stringResource(R.string.beszel_offline),
+                            style = MaterialTheme.typography.labelSmall,
+                            fontWeight = FontWeight.Bold,
+                            color = statusColor
+                        )
+                    }
+                }
+            }
+
+            // Expandable system info toggle
+            if (info != null || details != null) {
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { expanded = !expanded }
+                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Info,
+                        contentDescription = null,
+                        tint = ServiceType.BESZEL.primaryColor,
+                        modifier = Modifier.size(14.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.beszel_info_title),
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    hostnameText?.takeIf { it.isNotEmpty() }?.let {
+                        Text("•", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
+                        )
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
+                    Icon(
+                        imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
+
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = expandVertically() + fadeIn(),
+                    exit = shrinkVertically() + fadeOut()
+                ) {
+                    Column {
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+                            osText?.takeIf { it.isNotEmpty() }?.let {
+                                InfoRow(stringResource(R.string.beszel_os), it)
+                            }
+                            kernelText?.takeIf { it.isNotEmpty() }?.let {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                                InfoRow(stringResource(R.string.beszel_kernel), it)
+                            }
+                            cpuText?.takeIf { it.isNotEmpty() }?.let {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                                InfoRow(stringResource(R.string.beszel_cpu), it)
+                            }
+                            coresValue?.takeIf { it > 0 }?.let { c ->
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                                val coreStr = if (threadsValue != null && threadsValue > 0) "$c ($threadsValue threads)" else "$c"
+                                InfoRow(stringResource(R.string.beszel_cores), coreStr)
+                            }
+                            if (uptimeSeconds != null && uptimeSeconds > 0) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                                InfoRow(stringResource(R.string.beszel_uptime), formatUptimeShort(uptimeSeconds))
+                            }
+                            memoryDisplay?.takeIf { it.isNotEmpty() }?.let {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                                InfoRow(stringResource(R.string.beszel_memory), it)
+                            }
+                            archText?.takeIf { it.isNotEmpty() }?.let {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                                InfoRow(stringResource(R.string.beszel_arch), it)
+                            }
+                            if (details?.podman == true) {
+                                HorizontalDivider(
+                                    modifier = Modifier.padding(vertical = 4.dp),
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.4f)
+                                )
+                                InfoRow(stringResource(R.string.beszel_podman), "true")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun ContainersNavigationCard(onNavigateToContainers: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onNavigateToContainers),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            Surface(
+                shape = RoundedCornerShape(10.dp),
+                color = ServiceType.BESZEL.primaryColor.copy(alpha = 0.1f),
+                modifier = Modifier.size(36.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Icon(
+                        Icons.Default.Inventory2,
+                        contentDescription = null,
+                        tint = ServiceType.BESZEL.primaryColor,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+            Text(
+                text = stringResource(R.string.beszel_containers_title).replace(" (%d)", ""),
+                style = MaterialTheme.typography.titleSmall,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -935,82 +1163,32 @@ internal fun DockerMetricsSection(
 @Composable
 internal fun PerCoreCpuSection(cores: List<Double>) {
     if (cores.isEmpty()) return
-    var expanded by remember { mutableStateOf(false) }
     val avg = cores.average()
     val peak = cores.maxOrNull() ?: 0.0
 
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SectionHeader(icon = Icons.Default.Memory, title = stringResource(R.string.beszel_per_core_cpu))
+        SectionHeader(icon = Icons.Default.Speed, title = stringResource(R.string.beszel_per_core_cpu))
+
+        Text(
+            text = stringResource(R.string.beszel_per_core_summary, cores.size, avg, peak),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable { expanded = !expanded },
+            modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow)
         ) {
-            Column(
-                modifier = Modifier.padding(12.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(10.dp),
-                        color = ServiceType.BESZEL.primaryColor.copy(alpha = 0.12f),
-                        modifier = Modifier.size(36.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Memory,
-                                contentDescription = null,
-                                tint = ServiceType.BESZEL.primaryColor,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                    Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
-                        Text(
-                            text = stringResource(R.string.beszel_per_core_cpu),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = stringResource(
-                                R.string.beszel_per_core_summary,
-                                cores.size,
-                                avg,
-                                peak
-                            ),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                itemsIndexed(cores) { index, value ->
+                    PerCoreBarTile(
+                        label = stringResource(R.string.beszel_cpu_core_label, index + 1),
+                        value = value
                     )
-                }
-
-                AnimatedVisibility(
-                    visible = expanded,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    LazyRow(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        itemsIndexed(cores) { index, value ->
-                            PerCoreUsageTile(
-                                label = stringResource(R.string.beszel_cpu_core_label, index),
-                                value = value
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -1018,60 +1196,64 @@ internal fun PerCoreCpuSection(cores: List<Double>) {
 }
 
 @Composable
-private fun PerCoreUsageTile(label: String, value: Double) {
+private fun PerCoreBarTile(label: String, value: Double) {
     val accent = when {
         value >= 90.0 -> StatusRed
         value >= 70.0 -> StatusOrange
-        else -> ServiceType.BESZEL.primaryColor
+        else -> StatusGreen
     }
+    val clamped = value.coerceIn(0.0, 100.0)
+    val barHeight = (clamped / 100.0 * 56.0).toFloat().coerceAtLeast(2f)
 
-    Surface(
-        modifier = Modifier.width(148.dp),
-        shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerHigh
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Box(
+            modifier = Modifier
+                .width(22.dp)
+                .height(56.dp)
+                .clip(RoundedCornerShape(3.dp))
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Text(
-                    text = String.format("%.0f%%", value),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    color = accent
-                )
-            }
             Box(
                 modifier = Modifier
+                    .align(Alignment.BottomCenter)
                     .fillMaxWidth()
-                    .height(5.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(3.dp))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth((value / 100.0).coerceIn(0.0, 1.0).toFloat())
-                        .height(5.dp)
-                        .background(accent, RoundedCornerShape(3.dp))
-                )
-            }
+                    .height(barHeight.dp)
+                    .background(Brush.verticalGradient(listOf(accent.copy(alpha = 0.7f), accent)))
+            )
         }
+
+        Text(
+            text = String.format("%.0f%%", clamped),
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.Bold,
+            color = accent
+        )
     }
 }
 
 @Composable
-internal fun ContainersSection(containers: List<BeszelContainer>) {
+internal fun ContainersSection(containers: List<BeszelContainer>, onNavigateToContainers: () -> Unit = {}) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        SectionHeader(icon = Icons.Default.Inventory2, title = stringResource(R.string.beszel_containers_title).format(containers.count()))
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable { onNavigateToContainers() },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(modifier = Modifier.weight(1f)) {
+                SectionHeader(icon = Icons.Default.Inventory2, title = stringResource(R.string.beszel_containers_title).format(containers.count()))
+            }
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
 
         Card(
             modifier = Modifier.fillMaxWidth(),
@@ -1283,4 +1465,3 @@ internal fun InfoRow(label: String, value: String) {
         )
     }
 }
-

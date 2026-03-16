@@ -51,6 +51,7 @@ import androidx.navigation.compose.rememberNavController
 import com.homelab.app.R
 import com.homelab.app.ui.home.HomeScreen
 import com.homelab.app.ui.settings.SettingsScreen
+import com.homelab.app.ui.settings.DebugLogsScreen
 import com.homelab.app.util.ServiceType
 
 sealed class Screen(
@@ -187,8 +188,15 @@ fun AppNavigation() {
                 SettingsScreen(
                     onNavigateToLogin = { type, instanceId ->
                         navController.navigate(loginRoute(type, instanceId))
+                    },
+                    onNavigateToDebugLogs = {
+                        navController.navigate("settings/debug-logs")
                     }
                 )
+            }
+
+            composable("settings/debug-logs") {
+                DebugLogsScreen(onNavigateBack = { navController.popBackStack() })
             }
 
             composable(
@@ -322,8 +330,26 @@ fun AppNavigation() {
                     androidx.navigation.navArgument("systemId") { type = NavType.StringType }
                 )
             ) { backStackEntry ->
-                val systemId = backStackEntry.arguments?.getString("systemId") ?: return@composable
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                val systemId = android.net.Uri.decode(backStackEntry.arguments?.getString("systemId") ?: return@composable)
                 com.homelab.app.ui.beszel.BeszelSystemDetailScreen(
+                    systemId = systemId,
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToContainers = {
+                        navController.navigate("beszel/$instanceId/system/${Uri.encode(systemId)}/containers")
+                    }
+                )
+            }
+
+            composable(
+                route = "beszel/{instanceId}/system/{systemId}/containers",
+                arguments = listOf(
+                    androidx.navigation.navArgument("instanceId") { type = NavType.StringType },
+                    androidx.navigation.navArgument("systemId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val systemId = android.net.Uri.decode(backStackEntry.arguments?.getString("systemId") ?: return@composable)
+                com.homelab.app.ui.beszel.BeszelContainersScreen(
                     systemId = systemId,
                     onNavigateBack = { navController.popBackStack() }
                 )

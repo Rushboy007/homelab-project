@@ -90,3 +90,12 @@ enum Formatters {
         return String(format: "%.\(decimals)f GB", gb)
     }
 }
+
+extension String {
+    func sentenceCased(locale: Locale = .current) -> String {
+        guard !isEmpty else { return self }
+        let lowercasedValue = lowercased(with: locale)
+        let firstChar = lowercasedValue.prefix(1).uppercased(with: locale)
+        return firstChar + lowercasedValue.dropFirst()
+    }
+}

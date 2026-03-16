@@ -14,6 +14,7 @@ struct ContainerListView: View {
     @State private var filter: FilterType = .all
     @State private var isLoading = true
     @State private var actionInProgress: String?
+    @State private var containerStats: [String: ContainerStats] = [:]
     @State private var actionError: String?
     @State private var showActionError = false
 
@@ -27,12 +28,12 @@ struct ContainerListView: View {
         var result = containers
         switch filter {
         case .all: break
-        case .running: result = result.filter { $0.State == "running" }
-        case .stopped: result = result.filter { $0.State == "exited" || $0.State == "dead" }
+        case .running: result = result.filter { ($0.State ?? "") == "running" }
+        case .stopped: result = result.filter { let s = $0.State ?? ""; return s == "exited" || s == "dead" }
         }
         if !search.trimmingCharacters(in: .whitespaces).isEmpty {
             let q = search.lowercased()
-            result = result.filter { $0.displayName.lowercased().contains(q) || $0.Image.lowercased().contains(q) }
+            result = result.filter { $0.displayName.lowercased().contains(q) || ($0.Image ?? "").lowercased().contains(q) }
         }
         return result
     }
@@ -48,8 +49,8 @@ struct ContainerListView: View {
     private func filterCount(_ f: FilterType) -> Int {
         switch f {
         case .all: return containers.count
-        case .running: return containers.filter { $0.State == "running" }.count
-        case .stopped: return containers.filter { $0.State == "exited" || $0.State == "dead" }.count
+        case .running: return containers.filter { ($0.State ?? "") == "running" }.count
+        case .stopped: return containers.filter { let s = $0.State ?? ""; return s == "exited" || s == "dead" }.count
         }
     }
 
@@ -172,6 +173,8 @@ struct ContainerListView: View {
                     NavigationLink(value: PortainerRoute.containerDetail(instanceId: instanceId, endpointId: endpointId, containerId: container.Id)) {
                         ContainerRow(
                             container: container,
+                            stats: containerStats[container.Id],
+                            actionInProgress: actionInProgress == container.Id,
                             t: localizer.t,
                             onAction: { action in
                                 handleAction(containerId: container.Id, action: action)
@@ -218,11 +221,30 @@ struct ContainerListView: View {
             guard let client = await servicesStore.portainerClient(instanceId: instanceId) else {
                 throw APIError.notConfigured
             }
-            containers = try await client.getContainers(endpointId: endpointId)
+            let list = try await client.getContainers(endpointId: endpointId)
+            containers = list
+            // Trigger stats fetch
+            fetchStats(for: list)
         } catch {
             if containers.isEmpty {
                 actionError = error.localizedDescription
                 showActionError = true
+            }
+        }
+    }
+
+    private func fetchStats(for list: [PortainerContainer]) {
+        for container in list where (container.State ?? "") == "running" {
+            Task {
+                do {
+                    guard let client = await servicesStore.portainerClient(instanceId: instanceId) else { return }
+                    let stats = try await client.getContainerStats(endpointId: endpointId, containerId: container.Id)
+                    await MainActor.run {
+                        containerStats[container.Id] = stats
+                    }
+                } catch {
+                    // Ignore stats errors
+                }
             }
         }
     }
@@ -232,85 +254,216 @@ struct ContainerListView: View {
 
 struct ContainerRow: View {
     let container: PortainerContainer
+    let stats: ContainerStats?
+    let actionInProgress: Bool
     let t: Translations
     let onAction: (ContainerAction) -> Void
 
     private let portainerColor = ServiceType.portainer.colors.primary
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
-            // Header: name + status
-            HStack {
+        VStack(alignment: .leading, spacing: 12) {
+            // Header: status dot + name + actions
+            HStack(alignment: .center, spacing: 8) {
+                Circle()
+                    .fill(AppTheme.statusColor(for: container.State ?? ""))
+                    .frame(width: 8, height: 8)
+                    .shadow(color: AppTheme.statusColor(for: container.State ?? "").opacity(0.5), radius: 2)
+                
                 Text(container.displayName)
                     .font(.subheadline.weight(.semibold))
                     .lineLimit(1)
-                Spacer(minLength: 8)
-                StatusBadge(status: container.State, compact: true)
-            }
-
-            // Image
-            Text(container.Image)
-                .font(.caption)
-                .foregroundStyle(AppTheme.textMuted)
-                .lineLimit(1)
-
-            // Status + created
-            HStack {
-                Text(container.Status)
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.textSecondary)
-                Spacer()
-                Text(Formatters.formatUnixDate(container.Created))
-                    .font(.caption)
-                    .foregroundStyle(AppTheme.textMuted)
-            }
-
-            // Ports
-            if !container.Ports.isEmpty {
-                let visiblePorts = container.Ports.filter { $0.PublicPort != nil }.prefix(3)
-                if !visiblePorts.isEmpty {
-                    HStack(spacing: 6) {
-                        ForEach(Array(visiblePorts.enumerated()), id: \.offset) { _, port in
-                            Text("\(port.PublicPort ?? 0):\(port.PrivatePort)/\(port.portType)")
-                                .font(.caption2)
-                                .foregroundStyle(AppTheme.info)
-                                .padding(.horizontal, 8)
-                                .padding(.vertical, 3)
-                                .background(AppTheme.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 6, style: .continuous))
+                
+                Spacer(minLength: 4)
+                
+                // Action Toolbar
+                HStack(spacing: 12) {
+                    if actionInProgress {
+                        ProgressView()
+                            .tint(portainerColor)
+                            .scaleEffect(0.8)
+                            .frame(width: 32, height: 32)
+                    } else {
+                        let state = container.State ?? ""
+                        if state == "running" {
+                            actionIconButton(action: .stop, color: AppTheme.stopped)
+                            actionIconButton(action: .pause, color: AppTheme.info)
+                            actionIconButton(action: .restart, color: AppTheme.warning)
+                        } else if state == "paused" {
+                            actionIconButton(action: .stop, color: AppTheme.stopped)
+                            actionIconButton(action: .unpause, color: AppTheme.running)
+                            actionIconButton(action: .restart, color: AppTheme.warning)
+                        } else {
+                            actionIconButton(action: .start, color: AppTheme.running)
                         }
                     }
                 }
             }
 
-            // Actions
-            Divider()
-            HStack(spacing: 8) {
-                if container.State == "running" {
-                    actionButton(action: .stop, color: AppTheme.stopped)
-                    actionButton(action: .restart, color: AppTheme.warning)
-                } else {
-                    actionButton(action: .start, color: AppTheme.running)
+            VStack(alignment: .leading, spacing: 4) {
+                // Image
+                Text(container.Image ?? "Unknown")
+                    .font(.caption2)
+                    .foregroundStyle(AppTheme.textMuted)
+                    .lineLimit(1)
+
+                // Status + created
+                HStack {
+                    Label(container.Status ?? "", systemImage: "clock")
+                        .font(.system(size: 9))
+                        .foregroundStyle(AppTheme.textSecondary)
+                    Spacer()
+                    Text(Formatters.formatUnixDate(container.Created ?? 0))
+                        .font(.system(size: 9))
+                        .foregroundStyle(AppTheme.textMuted)
                 }
             }
+
+            // Ports
+            if let ports = container.Ports, !ports.isEmpty {
+                let visiblePorts = ports.filter { $0.PublicPort != nil }.prefix(3)
+                if !visiblePorts.isEmpty {
+                    HStack(spacing: 6) {
+                        ForEach(Array(visiblePorts.enumerated()), id: \.offset) { _, port in
+                            Text("\(port.PublicPort ?? 0):\(port.PrivatePort)/\(port.portType)")
+                                .font(.system(size: 9, weight: .medium))
+                                .foregroundStyle(AppTheme.info)
+                                .padding(.horizontal, 6)
+                                .padding(.vertical, 2)
+                                .background(AppTheme.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 4, style: .continuous))
+                        }
+                    }
+                }
+            }
+
+            // Stats section
+            let state = container.State ?? ""
+            if state == "running" || state == "paused" {
+                Divider().opacity(0.5)
+                statsGrid
+            }
         }
-        .padding(16)
+        .padding(14)
         .glassCard()
     }
 
-    private func actionButton(action: ContainerAction, color: Color) -> some View {
+    private var statsGrid: some View {
+        HStack(alignment: .top, spacing: 8) {
+            horizontalStatItem(
+                icon: "cpu",
+                label: "CPU",
+                value: cpuValue,
+                percent: cpuPercent,
+                color: AppTheme.info
+            )
+            horizontalStatItem(
+                icon: "memorychip",
+                label: "Mem",
+                value: memoryValue,
+                percent: memoryPercent,
+                color: AppTheme.warning
+            )
+            horizontalStatItem(
+                icon: "network",
+                label: "Net",
+                value: networkValue.components(separatedBy: " / ").first ?? "—",
+                color: AppTheme.running
+            )
+            horizontalStatItem(
+                icon: "list.number",
+                label: "PIDs",
+                value: pidsValue,
+                color: .primary.opacity(0.6)
+            )
+        }
+        .padding(.top, 4)
+    }
+
+    private func horizontalStatItem(icon: String, label: String, value: String, percent: Double? = nil, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            HStack(spacing: 4) {
+                Image(systemName: icon)
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(color)
+                Text(label)
+                    .font(.system(size: 10))
+                    .foregroundStyle(AppTheme.textSecondary)
+            }
+            
+            Text(value)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundStyle(.primary)
+                .lineLimit(1)
+            
+            if let percent = percent {
+                GeometryReader { geo in
+                    ZStack(alignment: .leading) {
+                        RoundedRectangle(cornerRadius: 1)
+                            .fill(color.opacity(0.1))
+                        RoundedRectangle(cornerRadius: 1)
+                            .fill(color.gradient)
+                            .frame(width: geo.size.width * CGFloat(min(max(percent / 100, 0), 1)))
+                    }
+                }
+                .frame(height: 2)
+            } else {
+                Spacer(minLength: 2)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(8)
+        .background(Color.white.opacity(0.04), in: RoundedRectangle(cornerRadius: 8))
+    }
+
+    private var cpuPercent: Double {
+        guard let stats = stats, let cpu = stats.cpu_stats, let pre = stats.precpu_stats else { return 0 }
+        let cpuDelta = Double((cpu.cpu_usage.total_usage) - (pre.cpu_usage.total_usage))
+        let systemDelta = Double((cpu.system_cpu_usage ?? 0) - (pre.system_cpu_usage ?? 0))
+        return Formatters.calculateCpuPercent(cpuDelta: cpuDelta, systemDelta: systemDelta, cpuCount: cpu.online_cpus ?? 1)
+    }
+
+    private var cpuValue: String {
+        guard stats != nil else { return "—" }
+        return String(format: "%.1f%%", cpuPercent)
+    }
+
+    private var memoryPercent: Double {
+        guard let stats = stats, let mem = stats.memory_stats, (mem.limit ?? 0) > 0 else { return 0 }
+        let usage = mem.usage ?? 0
+        let cache = mem.stats?.cache ?? 0
+        let finalUsage = Double(max(0, usage - cache))
+        return (finalUsage / Double(mem.limit ?? 1)) * 100
+    }
+
+    private var memoryValue: String {
+        guard let stats = stats, let mem = stats.memory_stats else { return "—" }
+        let usage = mem.usage ?? 0
+        let cache = mem.stats?.cache ?? 0
+        let finalUsage = Double(max(0, usage - cache))
+        return Formatters.formatBytes(finalUsage, decimals: 1)
+    }
+
+    private var networkValue: String {
+        guard let stats = stats, let networks = stats.networks else { return "—" }
+        let rx = Double(networks.values.reduce(0) { $0 + $1.rx_bytes })
+        let tx = Double(networks.values.reduce(0) { $0 + $1.tx_bytes })
+        return "\(Formatters.formatBytes(rx)) / \(Formatters.formatBytes(tx))"
+    }
+
+    private var pidsValue: String {
+        guard let stats = stats, let pids = stats.pids_stats?.current else { return "—" }
+        return "\(pids)"
+    }
+
+    private func actionIconButton(action: ContainerAction, color: Color) -> some View {
         Button {
             onAction(action)
         } label: {
-            HStack(spacing: 5) {
-                Image(systemName: action.symbolName)
-                    .font(.caption)
-                Text(action.displayName)
-                    .font(.caption.weight(.semibold))
-            }
-            .foregroundStyle(color)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 7)
-            .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+            Image(systemName: action.symbolName)
+                .font(.system(size: 14, weight: .bold))
+                .foregroundStyle(color)
+                .frame(width: 32, height: 32)
+                .contentShape(Circle())
         }
         .buttonStyle(.plain)
     }

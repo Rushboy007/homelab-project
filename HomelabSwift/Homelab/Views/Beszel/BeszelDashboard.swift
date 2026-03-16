@@ -31,8 +31,6 @@ struct BeszelDashboard: View {
 
             overviewCard
 
-            refreshHint
-
             if systems.isEmpty && !state.isLoading {
                 emptyState
             } else {
@@ -140,21 +138,6 @@ struct BeszelDashboard: View {
         .glassCard()
     }
 
-    // MARK: - Refresh Hint
-
-    private var refreshHint: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "arrow.clockwise")
-                .font(.caption2)
-                .foregroundStyle(AppTheme.textMuted)
-                .accessibilityHidden(true)
-            Text(localizer.t.beszelRefreshRate)
-                .font(.caption)
-                .foregroundStyle(AppTheme.textMuted)
-        }
-        .padding(.horizontal, 4)
-    }
-
     // MARK: - Empty State
 
     private var emptyState: some View {
@@ -232,6 +215,9 @@ private struct SystemCard: View {
             .padding(.bottom, 14)
 
             if isUp {
+                let externalMax = info.efs?.compactMap { $0.value ?? nil }.max() ?? 0
+                let diskPercent = max(info.dpValue, externalMax)
+
                 // Metrics: CPU, Memory, Disk
                 VStack(spacing: 12) {
                     MetricBar(
@@ -244,7 +230,7 @@ private struct SystemCard: View {
                     MetricBar(
                         icon: "memorychip",
                         iconColor: memoryColor,
-                        label: t.beszelMemory,
+                        label: t.beszelRam,
                         value: info.mpValue,
                         barColor: memoryColor
                     )
@@ -252,7 +238,7 @@ private struct SystemCard: View {
                         icon: "internaldrive",
                         iconColor: AppTheme.warning,
                         label: t.beszelDisk,
-                        value: info.dpValue,
+                        value: diskPercent,
                         barColor: AppTheme.warning
                     )
                 }

@@ -1,5 +1,6 @@
 package com.homelab.app.data.remote
 
+import com.homelab.app.data.repository.BeszelRepository
 import com.homelab.app.data.repository.ServiceInstancesRepository
 import com.homelab.app.domain.model.ServiceInstance
 import com.homelab.app.util.GlobalEventBus
@@ -21,11 +22,20 @@ import org.junit.Test
 
 class AuthInterceptorTest {
 
+    private fun createInterceptor(
+        eventBus: GlobalEventBus = mockk(relaxed = true),
+        instancesRepository: ServiceInstancesRepository = mockk()
+    ): Triple<AuthInterceptor, GlobalEventBus, ServiceInstancesRepository> {
+        val beszelRepo = mockk<dagger.Lazy<BeszelRepository>>()
+        every { beszelRepo.get() } returns mockk()
+        return Triple(AuthInterceptor(eventBus, instancesRepository, beszelRepo), eventBus, instancesRepository)
+    }
+
     @Test
     fun `resolves auth from instance id instead of service header`() {
         val eventBus = mockk<GlobalEventBus>(relaxed = true)
         val instancesRepository = mockk<ServiceInstancesRepository>()
-        val interceptor = AuthInterceptor(eventBus, instancesRepository)
+        val (interceptor) = createInterceptor(eventBus, instancesRepository)
         val chain = mockk<Interceptor.Chain>()
         val capturedRequest = slot<Request>()
         val request = Request.Builder()
@@ -58,7 +68,7 @@ class AuthInterceptorTest {
     fun `resolves auth even when service header is missing`() {
         val eventBus = mockk<GlobalEventBus>(relaxed = true)
         val instancesRepository = mockk<ServiceInstancesRepository>()
-        val interceptor = AuthInterceptor(eventBus, instancesRepository)
+        val (interceptor) = createInterceptor(eventBus, instancesRepository)
         val chain = mockk<Interceptor.Chain>()
         val capturedRequest = slot<Request>()
         val request = Request.Builder()
@@ -88,7 +98,7 @@ class AuthInterceptorTest {
     fun `401 emits auth error for affected instance only`() {
         val eventBus = mockk<GlobalEventBus>(relaxed = true)
         val instancesRepository = mockk<ServiceInstancesRepository>()
-        val interceptor = AuthInterceptor(eventBus, instancesRepository)
+        val (interceptor) = createInterceptor(eventBus, instancesRepository)
         val chain = mockk<Interceptor.Chain>()
         val request = Request.Builder()
             .url("https://example.com/api/v1/user")

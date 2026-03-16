@@ -164,7 +164,8 @@ private fun ServiceInstanceEntity.toDomain(): ServiceInstance {
         piholePassword = piholePassword,
         piholeAuthMode = piholeAuthMode?.let(PiHoleAuthMode::valueOf),
         fallbackUrl = fallbackUrl,
-        allowSelfSigned = allowSelfSigned
+        allowSelfSigned = allowSelfSigned,
+        password = password
     )
 }
 
@@ -180,7 +181,8 @@ private fun ServiceInstance.toEntity(): ServiceInstanceEntity {
         piholePassword = piholePassword,
         piholeAuthMode = piholeAuthMode?.name,
         fallbackUrl = fallbackUrl,
-        allowSelfSigned = allowSelfSigned
+        allowSelfSigned = allowSelfSigned,
+        password = password
     )
 }
 

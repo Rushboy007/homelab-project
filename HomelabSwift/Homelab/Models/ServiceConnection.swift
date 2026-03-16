@@ -17,6 +17,7 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
     var piholeAuthMode: PiHoleAuthMode?
     var fallbackUrl: String?
     var allowSelfSigned: Bool
+    var password: String?
 
     init(
         id: UUID = UUID(),
@@ -29,7 +30,8 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
         piholePassword: String? = nil,
         piholeAuthMode: PiHoleAuthMode? = nil,
         fallbackUrl: String? = nil,
-        allowSelfSigned: Bool = false
+        allowSelfSigned: Bool = false,
+        password: String? = nil
     ) {
         self.id = id
         self.type = type
@@ -42,6 +44,7 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
         self.piholeAuthMode = piholeAuthMode
         self.fallbackUrl = Self.cleanOptionalURL(fallbackUrl)
         self.allowSelfSigned = allowSelfSigned
+        self.password = password?.trimmedNilIfEmpty
     }
 
     var displayLabel: String {
@@ -70,7 +73,8 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
             apiKey: apiKey,
             piholePassword: migratedPiHolePassword,
             piholeAuthMode: piholeAuthMode ?? self.piholeAuthMode,
-            fallbackUrl: fallbackUrl
+            fallbackUrl: fallbackUrl,
+            password: password
         )
     }
 
@@ -83,7 +87,8 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
         piholePassword: String? = nil,
         piholeAuthMode: PiHoleAuthMode? = nil,
         fallbackUrl: String? = nil,
-        allowSelfSigned: Bool = false
+        allowSelfSigned: Bool = false,
+        password: String? = nil
     ) -> ServiceInstance {
         ServiceInstance(
             id: id,
@@ -96,7 +101,8 @@ struct ServiceInstance: Codable, Identifiable, Equatable, Hashable {
             piholePassword: piholePassword ?? self.piholePassword,
             piholeAuthMode: piholeAuthMode ?? self.piholeAuthMode,
             fallbackUrl: fallbackUrl ?? self.fallbackUrl,
-            allowSelfSigned: allowSelfSigned
+            allowSelfSigned: allowSelfSigned,
+            password: password ?? self.password
         )
     }
 

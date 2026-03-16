@@ -225,6 +225,7 @@ struct Translations {
     let beszelDown: String
     let beszelCpu: String
     let beszelMemory: String
+    let beszelRam: String
     let beszelDisk: String
     let beszelNetwork: String
     let beszelUptime: String
@@ -232,6 +233,7 @@ struct Translations {
     let beszelSystemDetail: String
     let beszelOs: String
     let beszelKernel: String
+    let beszelArch: String
     let beszelHostname: String
     let beszelCpuModel: String
     let beszelTotalMemory: String
@@ -247,6 +249,62 @@ struct Translations {
     let beszelNetworkTraffic: String
     let beszelContainers: String
     let beszelNoContainers: String
+    let beszelCpuBreakdown: String
+    let beszelCpuUser: String
+    let beszelCpuSystem: String
+    let beszelCpuNice: String
+    let beszelCpuWait: String
+    let beszelCpuIdle: String
+    let beszelExtraMetrics: String
+    let beszelGpu: String
+    let beszelGpuUsage: String
+    let beszelGpuPower: String
+    let beszelGpuVram: String
+    let beszelTemperature: String
+    let beszelLoadAverage: String
+    let beszelDiskIO: String
+    let beszelBattery: String
+    let beszelSwap: String
+    let beszelSmartDevices: String
+    let beszelHealthNone: String
+    let beszelHealthStarting: String
+    let beszelHealthHealthy: String
+    let beszelHealthUnhealthy: String
+    let beszelPerCoreCpu: String
+    let beszelPerCoreSummary: String
+    let beszelCpuCoreLabel: String
+    let beszelDocker: String
+    let beszelNetworkInterfaces: String
+    let beszelExternalFilesystems: String
+    let beszelRead: String
+    let beszelWrite: String
+    let beszelUpload: String
+    let beszelDownload: String
+    let beszelTotalUpload: String
+    let beszelTotalDownload: String
+    let beszelPassed: String
+    let beszelFailing: String
+    let beszelLevel: String
+    let beszelRemaining: String
+    let beszelTotal: String
+    let beszelUsed: String
+    let beszelModel: String
+    let beszelCapacity: String
+    let beszelType: String
+    let beszelPowerOnHours: String
+    let beszelPowerCycles: String
+    let beszelSmartAttributes: String
+    let beszelPodman: String
+    let beszelMemoryUsage: String
+    let beszelDockerCpuUsage: String
+    let beszelDockerMemoryUsage: String
+    let beszelDockerNetworkIO: String
+    let beszelContainerInfo: String
+    let beszelContainerLogs: String
+    let beszelContainerDetails: String
+    let beszelContainerFilter: String
+    let beszelShowCharts: String
+    let beszelHideCharts: String
 
     // Gitea
     let giteaRepos: String
@@ -448,6 +506,8 @@ struct Translations {
     let settingsFallbackPrefix: String
     let settingsMoveUp: String
     let settingsMoveDown: String
+    let settingsDebug: String
+    let settingsDebugLogs: String
     let actionEdit: String
 
     // Security

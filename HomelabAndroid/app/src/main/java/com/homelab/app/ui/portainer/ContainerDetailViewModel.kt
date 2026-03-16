@@ -1,15 +1,15 @@
 package com.homelab.app.ui.portainer
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.homelab.app.R
 import com.homelab.app.data.remote.dto.portainer.ContainerAction
 import com.homelab.app.data.remote.dto.portainer.ContainerDetail
 import com.homelab.app.data.remote.dto.portainer.ContainerStats
 import com.homelab.app.data.repository.PortainerRepository
+import com.homelab.app.util.ErrorHandler
+import com.homelab.app.util.Logger
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -75,7 +75,7 @@ class ContainerDetailViewModel @Inject constructor(
                             val stacks = repository.getStacks(instanceId, endpointId)
                             stackId = stacks.find { it.name == stackName }?.id
                         } catch (e: Exception) {
-                            Log.e("ContainerDetailVM", "Failed to search stack by name: $stackName", e)
+                            Logger.e("ContainerDetailVM", "Failed to search stack by name: $stackName", e)
                         }
                     }
                 }
@@ -84,14 +84,14 @@ class ContainerDetailViewModel @Inject constructor(
                     try {
                         _composeFile.value = repository.getStackFile(instanceId, stackId)
                     } catch (e: Exception) {
-                        Log.e("ContainerDetailVM", "Failed to fetch stack file for ID $stackId", e)
+                        Logger.e("ContainerDetailVM", "Failed to fetch stack file for ID $stackId", e)
                         _composeFile.value = null 
                     }
                 } else {
                     _composeFile.value = null
                 }
             } catch (e: Exception) {
-                _error.value = e.localizedMessage ?: context.getString(R.string.portainer_error_loading_details)
+                _error.value = ErrorHandler.getMessage(context, e)
             } finally {
                 _isLoading.value = false
             }
@@ -113,7 +113,7 @@ class ContainerDetailViewModel @Inject constructor(
             try {
                 _logs.value = repository.getContainerLogs(instanceId, endpointId, containerId, tail = 100)
             } catch (e: Exception) {
-                _logs.value = context.getString(R.string.portainer_error_logs_unavailable)
+                _logs.value = ErrorHandler.getMessage(context, e)
             }
         }
     }
@@ -132,7 +132,7 @@ class ContainerDetailViewModel @Inject constructor(
                 }
                 fetchContainerDetails()
             } catch (e: Exception) {
-                _error.value = e.localizedMessage
+                _error.value = ErrorHandler.getMessage(context, e)
                 _isLoading.value = false
             }
         }

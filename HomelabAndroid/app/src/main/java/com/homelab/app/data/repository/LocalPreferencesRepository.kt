@@ -56,6 +56,9 @@ class LocalPreferencesRepository @Inject constructor(
     private val PIN_KEY = stringPreferencesKey("app_pin")
     private val BIOMETRIC_KEY = booleanPreferencesKey("biometric_enabled")
     private val ONBOARDING_COMPLETED_KEY = booleanPreferencesKey("onboarding_completed")
+    private val BESZEL_SHOW_CPU_KEY = booleanPreferencesKey("beszel_show_cpu")
+    private val BESZEL_SHOW_MEMORY_KEY = booleanPreferencesKey("beszel_show_memory")
+    private val BESZEL_SHOW_NETWORK_KEY = booleanPreferencesKey("beszel_show_network")
 
     val themeMode: Flow<ThemeMode> = dataStore.data
         .catch { exception ->
@@ -91,6 +94,48 @@ class LocalPreferencesRepository @Inject constructor(
         dataStore.edit { preferences ->
             preferences[LANG_KEY] = mode.code
         }
+    }
+
+    val beszelShowCpu: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[BESZEL_SHOW_CPU_KEY] ?: true }
+
+    val beszelShowMemory: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[BESZEL_SHOW_MEMORY_KEY] ?: true }
+
+    val beszelShowNetwork: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[BESZEL_SHOW_NETWORK_KEY] ?: true }
+
+    suspend fun setBeszelShowCpu(value: Boolean) {
+        dataStore.edit { preferences -> preferences[BESZEL_SHOW_CPU_KEY] = value }
+    }
+
+    suspend fun setBeszelShowMemory(value: Boolean) {
+        dataStore.edit { preferences -> preferences[BESZEL_SHOW_MEMORY_KEY] = value }
+    }
+
+    suspend fun setBeszelShowNetwork(value: Boolean) {
+        dataStore.edit { preferences -> preferences[BESZEL_SHOW_NETWORK_KEY] = value }
     }
 
     val hiddenServices: Flow<Set<String>> = dataStore.data

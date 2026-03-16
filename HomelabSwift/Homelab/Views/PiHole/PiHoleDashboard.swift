@@ -56,55 +56,7 @@ struct PiHoleDashboard: View {
                     queryHistoryChart
                 }
 
-                // Gravity info
-                gravitySection(stats)
-                
-                // Domain Management Link
-                NavigationLink(destination: PiholeDomainListView(instanceId: selectedInstanceId)) {
-                    HStack {
-                        Image(systemName: "list.bullet.rectangle.portrait.fill")
-                            .font(.body)
-                            .foregroundStyle(piholeColor)
-                            .frame(width: 36, height: 36)
-                            .background(piholeColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                        
-                        Text(localizer.t.piholeDomainManagement)
-                            .font(.headline)
-                        
-                        Spacer()
-                        
-                        Image(systemName: "chevron.right")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color(.tertiaryLabel))
-                            .accessibilityHidden(true)
-                    }
-                    .padding(16)
-                    .glassCard()
-                }
-                .buttonStyle(.plain)
-
-                NavigationLink(destination: PiholeQueryLogView(instanceId: selectedInstanceId)) {
-                    HStack {
-                        Image(systemName: "text.append")
-                            .font(.body)
-                            .foregroundStyle(AppTheme.info)
-                            .frame(width: 36, height: 36)
-                            .background(AppTheme.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-
-                        Text(localizer.t.piholeQueryLog)
-                            .font(.headline)
-
-                        Spacer()
-
-                        Image(systemName: "chevron.right")
-                            .font(.subheadline.weight(.semibold))
-                            .foregroundStyle(Color(.tertiaryLabel))
-                            .accessibilityHidden(true)
-                    }
-                    .padding(16)
-                    .glassCard()
-                }
-                .buttonStyle(.plain)
+                toolsCard(stats)
             }
 
             // Top blocked
@@ -163,10 +115,9 @@ struct PiHoleDashboard: View {
         return Group {
             if instances.count > 1 {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text(localizer.t.dashboardInstances)
+                    Text(localizer.t.dashboardInstances.sentenceCased())
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(AppTheme.textMuted)
-                        .textCase(.uppercase)
 
                     ForEach(instances) { instance in
                         Button {
@@ -261,10 +212,9 @@ struct PiHoleDashboard: View {
 
     private func statsOverview(_ stats: PiholeStats) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(localizer.t.piholeOverview)
+            Text(localizer.t.piholeOverview.sentenceCased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
                 statCard(icon: "magnifyingglass", iconBg: piholeColor, value: Formatters.formatNumber(stats.queries.total), label: localizer.t.piholeTotalQueries)
@@ -308,10 +258,9 @@ struct PiHoleDashboard: View {
         let maxQuery = max(total, 1)
 
         return VStack(alignment: .leading, spacing: 10) {
-            Text(localizer.t.piholeQueryActivity)
+            Text(localizer.t.piholeQueryActivity.sentenceCased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
 
             VStack(spacing: 10) {
                 activityBar(label: localizer.t.piholeBlockedQueries, value: blocked, max: maxQuery, color: AppTheme.stopped)
@@ -354,10 +303,9 @@ struct PiHoleDashboard: View {
 
     private var queryHistoryChart: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(localizer.t.piholeQueriesOverTime)
+            Text(localizer.t.piholeQueriesOverTime.sentenceCased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
 
             VStack(spacing: 12) {
                 let recent = Array(history.suffix(24))
@@ -404,9 +352,66 @@ struct PiHoleDashboard: View {
         }
     }
 
-    // MARK: - Gravity
+    // MARK: - Tools Card
 
-    private func gravitySection(_ stats: PiholeStats) -> some View {
+    private func toolsCard(_ stats: PiholeStats) -> some View {
+        VStack(spacing: 0) {
+            gravityRow(stats)
+
+            Divider().padding(.leading, 68)
+
+            NavigationLink(destination: PiholeDomainListView(instanceId: selectedInstanceId)) {
+                HStack(spacing: 14) {
+                    Image(systemName: "list.bullet.rectangle.portrait.fill")
+                        .font(.body)
+                        .foregroundStyle(piholeColor)
+                        .frame(width: 44, height: 44)
+                        .background(piholeColor.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                    Text(localizer.t.piholeDomainManagement)
+                        .font(.headline)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(.tertiaryLabel))
+                        .accessibilityHidden(true)
+                }
+                .padding(16)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            Divider().padding(.leading, 68)
+
+            NavigationLink(destination: PiholeQueryLogView(instanceId: selectedInstanceId)) {
+                HStack(spacing: 14) {
+                    Image(systemName: "text.append")
+                        .font(.body)
+                        .foregroundStyle(AppTheme.info)
+                        .frame(width: 44, height: 44)
+                        .background(AppTheme.info.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+                    Text(localizer.t.piholeQueryLog)
+                        .font(.headline)
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(Color(.tertiaryLabel))
+                        .accessibilityHidden(true)
+                }
+                .padding(16)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+        }
+        .glassCard()
+    }
+
+    private func gravityRow(_ stats: PiholeStats) -> some View {
         HStack(spacing: 14) {
             Image(systemName: "cylinder.fill")
                 .font(.body)
@@ -426,10 +431,10 @@ struct PiHoleDashboard: View {
 
             if stats.gravity.last_update > 0 {
                 HStack(spacing: 4) {
-                Image(systemName: "clock")
-                    .font(.caption2)
-                    .foregroundStyle(AppTheme.textMuted)
-                    .accessibilityHidden(true)
+                    Image(systemName: "clock")
+                        .font(.caption2)
+                        .foregroundStyle(AppTheme.textMuted)
+                        .accessibilityHidden(true)
                     Text(Formatters.formatUnixDate(stats.gravity.last_update))
                         .font(.caption2)
                         .foregroundStyle(AppTheme.textMuted)
@@ -437,17 +442,15 @@ struct PiHoleDashboard: View {
             }
         }
         .padding(16)
-        .glassCard()
     }
 
     // MARK: - Top Lists
 
     private func topListSection(title: String, items: [PiholeTopItem], rankColor: Color) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title)
+            Text(title.sentenceCased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
 
             VStack(spacing: 0) {
                 ForEach(Array(items.enumerated()), id: \.element.id) { idx, item in
@@ -478,10 +481,9 @@ struct PiHoleDashboard: View {
         let maxCount = max(1, topDomains.map(\.count).max() ?? 1)
         return VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(localizer.t.piholeTopDomains)
+                Text(localizer.t.piholeTopDomains.sentenceCased())
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(AppTheme.textMuted)
-                    .textCase(.uppercase)
                 Spacer()
                 Text(Formatters.formatNumber(topDomains.reduce(0) { $0 + $1.count }))
                     .font(.caption2.weight(.semibold))
@@ -528,10 +530,9 @@ struct PiHoleDashboard: View {
 
     private var topClientsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(localizer.t.piholeClients)
+            Text(localizer.t.piholeClients.sentenceCased())
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(AppTheme.textMuted)
-                .textCase(.uppercase)
 
             VStack(spacing: 0) {
                 ForEach(Array(topClients.enumerated()), id: \.element.id) { idx, client in

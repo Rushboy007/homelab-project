@@ -14,6 +14,7 @@ import com.homelab.app.data.repository.ServiceInstancesRepository
 import com.homelab.app.data.repository.ServicesRepository
 import com.homelab.app.domain.model.PiHoleAuthMode
 import com.homelab.app.domain.model.ServiceInstance
+import com.homelab.app.util.ErrorHandler
 import com.homelab.app.util.ServiceType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -137,7 +138,8 @@ class ServiceLoginViewModel @Inject constructor(
                                 url = cleanUrl,
                                 token = token,
                                 username = trimmedUsername,
-                                fallbackUrl = cleanFallbackUrl
+                                fallbackUrl = cleanFallbackUrl,
+                                password = authPassword
                             )
                         }
                         ServiceType.GITEA -> {
@@ -157,7 +159,8 @@ class ServiceLoginViewModel @Inject constructor(
                                 url = cleanUrl,
                                 token = token,
                                 username = trimmedUsername,
-                                fallbackUrl = cleanFallbackUrl
+                                fallbackUrl = cleanFallbackUrl,
+                                password = authPassword
                             )
                         }
                         ServiceType.NGINX_PROXY_MANAGER -> {
@@ -177,7 +180,8 @@ class ServiceLoginViewModel @Inject constructor(
                                 url = cleanUrl,
                                 token = token,
                                 username = trimmedUsername,
-                                fallbackUrl = cleanFallbackUrl
+                                fallbackUrl = cleanFallbackUrl,
+                                password = authPassword
                             )
                         }
                         ServiceType.UNKNOWN -> throw IllegalArgumentException(context.getString(R.string.error_unknown))
@@ -187,7 +191,7 @@ class ServiceLoginViewModel @Inject constructor(
                 servicesRepository.saveInstance(instance)
                 _existingInstance.value = instance
             } catch (error: Exception) {
-                _error.value = error.localizedMessage ?: context.getString(R.string.error_unknown)
+                _error.value = ErrorHandler.getMessage(context, error)
             } finally {
                 _isLoading.value = false
             }

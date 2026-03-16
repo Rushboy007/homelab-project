@@ -101,21 +101,16 @@ actor PortainerAPIClient {
 
     func authenticateWithApiKey(url: String, apiKey: String) async throws {
         let cleanURL = Self.cleanURL(url)
-        guard let endpointsURL = URL(string: "\(cleanURL)/api/endpoints") else { throw APIError.invalidURL }
-
-        var req = URLRequest(url: endpointsURL)
-        req.setValue(apiKey, forHTTPHeaderField: "X-API-Key")
-        req.timeoutInterval = 8
-
-        let (_, resp) = try await URLSession.shared.data(for: req)
-        guard let http = resp as? HTTPURLResponse else { throw APIError.networkError(URLError(.badServerResponse)) }
-
-        if http.statusCode == 401 || http.statusCode == 403 {
-            throw APIError.custom("Invalid API Key. Check the key and try again.")
-        }
-        if http.statusCode >= 400 {
-            throw APIError.custom("API Key validation failed (\(http.statusCode)). Check URL and key.")
-        }
+        let headers = ["X-API-Key": apiKey]
+        
+        // We use requestData to benefit from interceptResponse logic (HTML detection, 401/403 handling)
+        _ = try await engine.requestData(
+            baseURL: cleanURL,
+            fallbackURL: "",
+            path: "/api/endpoints",
+            method: "GET",
+            headers: headers
+        )
     }
 
     // MARK: - Endpoints

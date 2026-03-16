@@ -28,9 +28,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import com.homelab.app.R
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
@@ -48,6 +52,7 @@ import kotlinx.coroutines.delay
 @Composable
 fun SettingsScreen(
     onNavigateToLogin: (ServiceType, String?) -> Unit = { _, _ -> },
+    onNavigateToDebugLogs: () -> Unit = {},
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val themeMode by viewModel.themeMode.collectAsStateWithLifecycle()
@@ -330,24 +335,40 @@ fun SettingsScreen(
                                     }
                                 }
                             } else {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                Surface(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    onClick = { showChangePinSheet = true },
+                                    color = Color.Transparent
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.LockOpen,
-                                        contentDescription = stringResource(R.string.security_not_configured),
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(12.dp))
-                                    Text(
-                                        text = stringResource(R.string.security_not_configured),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
+                                    Row(
+                                        modifier = Modifier.padding(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Lock,
+                                            contentDescription = stringResource(R.string.security_setup_pin),
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = stringResource(R.string.security_setup_pin),
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                fontWeight = FontWeight.Medium
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.security_setup_pin_desc),
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Icon(
+                                            imageVector = Icons.Default.ChevronRight,
+                                            contentDescription = stringResource(R.string.security_setup_pin),
+                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -388,7 +409,8 @@ fun SettingsScreen(
                             decorFitsSystemWindows = false
                         )
                     ) {
-                        var changePinStep by remember { mutableStateOf(0) } // 0: current, 1: new, 2: confirm
+                        val startPinStep = if (isPinSet) 0 else 1
+                        var changePinStep by remember(startPinStep) { mutableStateOf(startPinStep) } // 0: current, 1: new/setup, 2: confirm
                         var newPinInput by remember { mutableStateOf("") }
                         var pinError by remember { mutableStateOf<String?>(null) }
                         val scope = rememberCoroutineScope()
@@ -423,8 +445,8 @@ fun SettingsScreen(
                                     }
                                     1 -> {
                                         com.homelab.app.ui.security.PinEntryScreen(
-                                            title = stringResource(R.string.security_new_pin),
-                                            subtitle = stringResource(R.string.security_new_pin_desc),
+                                            title = stringResource(if (isPinSet) R.string.security_new_pin else R.string.security_setup_pin),
+                                            subtitle = stringResource(if (isPinSet) R.string.security_new_pin_desc else R.string.security_setup_pin_desc),
                                             onPinComplete = { pin ->
                                                 newPinInput = pin
                                                 changePinStep = 2
@@ -439,6 +461,11 @@ fun SettingsScreen(
                                             onPinComplete = { pin ->
                                                 if (pin == newPinInput) {
                                                     viewModel.savePin(pin)
+                                                    android.widget.Toast.makeText(
+                                                        context,
+                                                        context.getString(R.string.security_pin_saved),
+                                                        android.widget.Toast.LENGTH_SHORT
+                                                    ).show()
                                                     showChangePinSheet = false
                                                 } else {
                                                     pinError = context.getString(R.string.security_pin_mismatch)
@@ -497,6 +524,56 @@ fun SettingsScreen(
                 )
             }
 
+            // --- DEBUG ---
+            item {
+                Text(
+                    text = stringResource(R.string.settings_debug_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
+                )
+
+                Surface(
+                    onClick = onNavigateToDebugLogs,
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 0.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.BugReport,
+                            contentDescription = stringResource(R.string.debug_logs_title),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.debug_logs_title),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_debug_logs_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.Default.ChevronRight,
+                            contentDescription = stringResource(R.string.debug_logs_title),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
+
             // --- CONTACTS ---
             item {
                 Text(
@@ -513,60 +590,70 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Telegram
-                    Surface(
+                    ContactChip(
+                        label = stringResource(R.string.settings_contact_telegram),
+                        iconUrl = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/telegram.png",
                         onClick = { uriHandler.openUri("https://t.me/finalyxre") },
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.weight(1f).height(48.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(R.string.settings_contact_telegram),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-
-                    // Reddit
-                    Surface(
+                        modifier = Modifier.weight(1f)
+                    )
+                    ContactChip(
+                        label = stringResource(R.string.settings_contact_reddit),
+                        iconUrl = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/reddit.png",
                         onClick = { uriHandler.openUri("https://www.reddit.com/user/finalyxre/") },
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.weight(1f).height(48.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(R.string.settings_contact_reddit),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
-
-                    // GitHub
-                    Surface(
+                        modifier = Modifier.weight(1f)
+                    )
+                    ContactChip(
+                        label = stringResource(R.string.settings_contact_github),
+                        iconUrl = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/github.png",
                         onClick = { uriHandler.openUri("https://github.com/JohnnWi/homelab-project") },
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.weight(1f).height(48.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(R.string.settings_contact_github),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                        }
-                    }
+                        modifier = Modifier.weight(1f)
+                    )
                 }
             }
 
 
+        }
+    }
+}
+
+@Composable
+private fun ContactChip(
+    label: String,
+    iconUrl: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        onClick = onClick,
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
+        modifier = modifier.height(48.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            AsyncImage(
+                model = iconUrl,
+                contentDescription = label,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = label,
+                style = MaterialTheme.typography.titleSmall.copy(fontSize = 12.sp),
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false
+            )
         }
     }
 }

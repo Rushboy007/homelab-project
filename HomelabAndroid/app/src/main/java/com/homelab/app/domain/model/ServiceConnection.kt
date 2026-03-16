@@ -21,7 +21,8 @@ data class ServiceInstance(
     val piholePassword: String? = null,
     val piholeAuthMode: PiHoleAuthMode? = null,
     val fallbackUrl: String? = null,
-    val allowSelfSigned: Boolean = false
+    val allowSelfSigned: Boolean = false,
+    val password: String? = null
 ) {
     val piHoleStoredSecret: String?
         get() = when {

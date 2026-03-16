@@ -55,6 +55,7 @@ struct NpmDashboard: View {
     @State private var users: [NpmUser] = []
     @State private var auditLogs: [NpmAuditLog] = []
     @State private var state: LoadableState<Void> = .idle
+    @State private var hasRestoredCache = false
 
     // CRUD sheet state
     @State private var showingProxyForm = false
@@ -79,6 +80,22 @@ struct NpmDashboard: View {
     @State private var actionMessage: String?
 
     private let npmColor = Color(hex: "#F15B2A")
+    private static let cacheTtl: TimeInterval = 120
+
+    private struct CacheEntry {
+        let hostReport: NpmHostReport?
+        let proxyHosts: [NpmProxyHost]
+        let redirectionHosts: [NpmRedirectionHost]
+        let streams: [NpmStream]
+        let deadHosts: [NpmDeadHost]
+        let certificates: [NpmCertificate]
+        let accessLists: [NpmAccessList]
+        let users: [NpmUser]
+        let auditLogs: [NpmAuditLog]
+        let lastFetch: Date
+    }
+
+    private static var cache: [UUID: CacheEntry] = [:]
 
     init(instanceId: UUID) {
         self.instanceId = instanceId
@@ -90,7 +107,7 @@ struct NpmDashboard: View {
             serviceType: .nginxProxyManager,
             instanceId: selectedInstanceId,
             state: state,
-            onRefresh: fetchDashboard
+            onRefresh: { await fetchDashboard(force: true) }
         ) {
             instancePicker
             menuHero
@@ -100,7 +117,7 @@ struct NpmDashboard: View {
         .navigationDestination(for: NpmTab.self) { tab in
             sectionScreen(for: tab)
         }
-        .task(id: selectedInstanceId) { await fetchDashboard() }
+        .task(id: selectedInstanceId) { await loadAndRefreshIfNeeded() }
         .sheet(isPresented: $showingProxyForm, onDismiss: { editingProxyHost = nil }) {
             NpmProxyHostForm(
                 editing: editingProxyHost,
@@ -258,6 +275,7 @@ struct NpmDashboard: View {
                             selectedInstanceId = instance.id
                             servicesStore.setPreferredInstance(id: instance.id, for: .nginxProxyManager)
                             clearData()
+                            hasRestoredCache = false
                         } label: {
                             HStack(spacing: 10) {
                                 Circle()
@@ -316,43 +334,70 @@ struct NpmDashboard: View {
         ]
     }
 
+    private var primaryItems: [MenuItem] {
+        menuItems.filter { [.redirections, .streams, .deadHosts].contains($0.tab) }
+    }
+
+    private var secondaryItems: [MenuItem] {
+        menuItems.filter { [.accessLists, .ssl, .users, .auditLogs].contains($0.tab) }
+    }
+
     private var menuHero: some View {
         let report = hostReport ?? NpmHostReport()
-        return HStack(spacing: 16) {
-            Image(systemName: "globe")
-                .font(.title2)
-                .foregroundStyle(.white)
-                .frame(width: 56, height: 56)
-                .background(npmColor, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+        return VStack(alignment: .leading, spacing: 14) {
+            NavigationLink(value: NpmTab.proxyHosts) {
+                HStack(spacing: 16) {
+                    Image(systemName: "globe")
+                        .font(.title2)
+                        .foregroundStyle(npmColor)
+                        .frame(width: 56, height: 56)
+                        .background(npmColor.opacity(0.15), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(localizer.t.npmHostReport)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(AppTheme.textMuted)
-                    .textCase(.uppercase)
-                Text("\(report.total)")
-                    .font(.title.bold())
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(localizer.t.npmHostReport.sentenceCased())
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(AppTheme.textMuted)
+                        Text("\(report.total)")
+                            .font(.title.bold())
+                    }
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.bold())
+                        .foregroundStyle(AppTheme.textMuted)
+                        .accessibilityHidden(true)
+                }
             }
+            .buttonStyle(.plain)
 
-            Spacer()
-
-            Image(systemName: "chart.bar.fill")
-                .font(.title2)
-                .foregroundStyle(npmColor.opacity(0.35))
+            HStack(spacing: 10) {
+                ForEach(primaryItems) { item in
+                    NavigationLink(value: item.tab) {
+                        primaryStatCard(item)
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
         .padding(18)
-        .glassCard()
+        .glassCard(tint: npmColor.opacity(0.08))
     }
 
     private var menuContent: some View {
-        LazyVGrid(columns: twoColumnGrid, spacing: AppTheme.gridSpacing) {
-            ForEach(menuItems) { item in
+        VStack(spacing: 0) {
+            ForEach(secondaryItems) { item in
                 NavigationLink(value: item.tab) {
-                    menuCard(item)
+                    secondaryRow(item)
                 }
                 .buttonStyle(.plain)
+                if item.id != secondaryItems.last?.id {
+                    Divider().padding(.leading, 64)
+                }
             }
         }
+        .padding(.vertical, 4)
+        .glassCard()
     }
 
     private func sectionScreen(for tab: NpmTab) -> some View {
@@ -360,7 +405,7 @@ struct NpmDashboard: View {
             serviceType: .nginxProxyManager,
             instanceId: selectedInstanceId,
             state: state,
-            onRefresh: fetchDashboard
+            onRefresh: { await fetchDashboard(force: true) }
         ) {
             switch tab {
             case .overview:
@@ -389,29 +434,57 @@ struct NpmDashboard: View {
         .toolbar { toolbarAddButton(for: tab) }
     }
 
-    private func menuCard(_ item: MenuItem) -> some View {
-        HStack(spacing: 12) {
+    private func primaryStatCard(_ item: MenuItem) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Image(systemName: item.icon)
+                    .font(.subheadline)
+                    .foregroundStyle(item.color)
+                    .frame(width: 32, height: 32)
+                    .background(item.color.opacity(0.16), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                Spacer()
+                Text(item.value)
+                    .font(.title3.bold())
+                    .foregroundStyle(.primary)
+            }
+            Text(item.label.sentenceCased())
+                .font(.caption2.weight(.medium))
+                .foregroundStyle(AppTheme.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+        }
+        .padding(12)
+        .frame(maxWidth: .infinity, minHeight: 70, maxHeight: 70, alignment: .leading)
+        .glassCard(cornerRadius: 14, tint: item.color.opacity(0.12))
+        .contentShape(Rectangle())
+    }
+
+    private func secondaryRow(_ item: MenuItem) -> some View {
+        HStack(spacing: 14) {
             Image(systemName: item.icon)
                 .font(.subheadline)
                 .foregroundStyle(item.color)
-                .frame(width: 36, height: 36)
-                .background(item.color.opacity(0.12), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .frame(width: 38, height: 38)
+                .background(item.color.opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
 
             VStack(alignment: .leading, spacing: 2) {
+                Text(item.label.sentenceCased())
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
                 Text(item.value)
-                    .font(.title3.bold())
-                Text(item.label)
                     .font(.caption2)
                     .foregroundStyle(AppTheme.textMuted)
-                    .lineLimit(2)
-                    .minimumScaleFactor(0.85)
             }
 
             Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption.bold())
+                .foregroundStyle(AppTheme.textMuted)
+                .accessibilityHidden(true)
         }
-        .padding(12)
-        .frame(maxWidth: .infinity, minHeight: 86, maxHeight: 86, alignment: .leading)
-        .glassCard()
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
         .contentShape(Rectangle())
     }
 
@@ -854,8 +927,58 @@ struct NpmDashboard: View {
 
     // MARK: - Data Fetching
 
-    private func fetchDashboard() async {
-        state = .loading
+    private func loadAndRefreshIfNeeded() async {
+        restoreCacheIfNeeded()
+
+        let shouldRefresh: Bool = {
+            guard let cached = Self.cache[selectedInstanceId] else { return true }
+            return Date().timeIntervalSince(cached.lastFetch) > Self.cacheTtl
+        }()
+
+        if shouldRefresh {
+            await fetchDashboard(force: false)
+        }
+    }
+
+    private func restoreCacheIfNeeded() {
+        guard !hasRestoredCache, let cached = Self.cache[selectedInstanceId] else { return }
+        hostReport = cached.hostReport
+        proxyHosts = cached.proxyHosts
+        redirectionHosts = cached.redirectionHosts
+        streams = cached.streams
+        deadHosts = cached.deadHosts
+        certificates = cached.certificates
+        accessLists = cached.accessLists
+        users = cached.users
+        auditLogs = cached.auditLogs
+        state = .loaded(())
+        hasRestoredCache = true
+    }
+
+    private func updateCache() {
+        Self.cache[selectedInstanceId] = CacheEntry(
+            hostReport: hostReport,
+            proxyHosts: proxyHosts,
+            redirectionHosts: redirectionHosts,
+            streams: streams,
+            deadHosts: deadHosts,
+            certificates: certificates,
+            accessLists: accessLists,
+            users: users,
+            auditLogs: auditLogs,
+            lastFetch: Date()
+        )
+    }
+
+    private func fetchDashboard(force: Bool) async {
+        if !force, let cached = Self.cache[selectedInstanceId], Date().timeIntervalSince(cached.lastFetch) <= Self.cacheTtl {
+            return
+        }
+        let hasContent = hostReport != nil || !proxyHosts.isEmpty || !redirectionHosts.isEmpty || !streams.isEmpty ||
+            !deadHosts.isEmpty || !certificates.isEmpty || !accessLists.isEmpty || !users.isEmpty || !auditLogs.isEmpty
+        if !hasContent {
+            state = .loading
+        }
         do {
             guard let client = await servicesStore.npmClient(instanceId: selectedInstanceId) else {
                 state = .error(.notConfigured)
@@ -890,6 +1013,7 @@ struct NpmDashboard: View {
             users = resolvedUsers
             auditLogs = resolvedAuditLogs
             state = .loaded(())
+            updateCache()
         } catch {
             state = .error(.custom(error.localizedDescription))
         }
@@ -1155,6 +1279,7 @@ struct NpmDashboard: View {
             deadHosts = dead
             certificates = certs
             accessLists = access
+            updateCache()
         } catch {
             // Silently fail on refresh - data will be stale but user already got their action feedback
         }
@@ -1173,6 +1298,7 @@ struct NpmDashboard: View {
 
             users = resolvedUsers
             auditLogs = resolvedAuditLogs
+            updateCache()
         } catch {
             // Ignore refresh errors
         }

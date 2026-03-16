@@ -39,6 +39,9 @@ class HomeViewModel @Inject constructor(
     data class GiteaSummary(val totalRepos: Int)
     data class NpmSummary(val proxyHosts: Int, val total: Int)
 
+    /** Summary info for a single instance card. */
+    data class InstanceSummary(val value: String, val subValue: String?, val label: String)
+
     val reachability: StateFlow<Map<String, Boolean?>> = servicesRepository.reachability
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
@@ -75,6 +78,7 @@ class HomeViewModel @Inject constructor(
             ServiceType.entries.filter { it != ServiceType.UNKNOWN }
         )
 
+    // Legacy per-type summaries (kept for old DashboardSummary if still referenced)
     private val _portainerSummary = MutableStateFlow<PortainerSummary?>(null)
     val portainerSummary: StateFlow<PortainerSummary?> = _portainerSummary
 
@@ -89,6 +93,13 @@ class HomeViewModel @Inject constructor(
 
     private val _npmSummary = MutableStateFlow<NpmSummary?>(null)
     val npmSummary: StateFlow<NpmSummary?> = _npmSummary
+
+    /** Per-instance summary data, keyed by instance ID. */
+    private val _instanceSummaries = MutableStateFlow<Map<String, InstanceSummary>>(emptyMap())
+    val instanceSummaries: StateFlow<Map<String, InstanceSummary>> = _instanceSummaries
+
+    private val _summaryLoading = MutableStateFlow(false)
+    val summaryLoading: StateFlow<Boolean> = _summaryLoading
 
     private var summaryJob: Job? = null
 
@@ -108,85 +119,82 @@ class HomeViewModel @Inject constructor(
         if (summaryJob?.isActive == true) return
         Log.d("HomeViewModel", "Fetching summary data...")
         val instancesMap = instancesByType.value
-        val preferredIds = preferredInstanceIdByType.value
-        val preferredInstances = ServiceType.entries
-            .filter { it != ServiceType.UNKNOWN }
-            .associateWith { type ->
-                val insts = instancesMap[type].orEmpty()
-                val preferredId = preferredIds[type]
-                insts.firstOrNull { it.id == preferredId } ?: insts.firstOrNull()
-            }
-
         summaryJob = viewModelScope.launch {
+            _summaryLoading.value = true
             try {
-                val portainerInstance = preferredInstances[ServiceType.PORTAINER]
-                if (portainerInstance != null) {
-                    try {
-                        val endpoints = portainerRepository.getEndpoints(portainerInstance.id)
-                        val first = endpoints.firstOrNull()
-                        _portainerSummary.value = if (first != null) {
-                            val containers = portainerRepository.getContainers(portainerInstance.id, first.id)
-                            val running = containers.count { it.state == "running" || it.status.contains("Up") }
-                            PortainerSummary(running, containers.size)
-                        } else {
-                            PortainerSummary(0, 0)
+                val newSummaries = mutableMapOf<String, InstanceSummary>()
+
+                for (type in ServiceType.entries) {
+                    if (type == ServiceType.UNKNOWN) continue
+                    val instances = instancesMap[type].orEmpty()
+                    for (instance in instances) {
+                        try {
+                            val summary = fetchInstanceSummary(type, instance.id)
+                            if (summary != null) {
+                                newSummaries[instance.id] = summary
+                            }
+                        } catch (error: Exception) {
+                            Log.e("HomeViewModel", "${type.name} summary error for ${instance.id}: ${error.message}")
                         }
-                    } catch (error: Exception) {
-                        Log.e("HomeViewModel", "Portainer summary error: ${error.message}")
-                        _portainerSummary.value = null
                     }
                 }
 
-                val piholeInstance = preferredInstances[ServiceType.PIHOLE]
-                if (piholeInstance != null) {
-                    try {
-                        val stats = piholeRepository.getStats(piholeInstance.id)
-                        _piholeSummary.value = PiholeSummary(stats.queries.total)
-                    } catch (error: Exception) {
-                        Log.e("HomeViewModel", "Pihole summary error: ${error.message}")
-                        _piholeSummary.value = null
-                    }
-                }
+                _instanceSummaries.value = newSummaries
 
-                val beszelInstance = preferredInstances[ServiceType.BESZEL]
-                if (beszelInstance != null) {
-                    try {
-                        val systems = beszelRepository.getSystems(beszelInstance.id)
-                        _beszelSummary.value = BeszelSummary(
-                            online = systems.count { it.isOnline },
-                            total = systems.size
-                        )
-                    } catch (error: Exception) {
-                        Log.e("HomeViewModel", "Beszel summary error: ${error.message}")
-                        _beszelSummary.value = null
-                    }
-                }
-
-                val giteaInstance = preferredInstances[ServiceType.GITEA]
-                if (giteaInstance != null) {
-                    try {
-                        val repos = giteaRepository.getUserRepos(giteaInstance.id, 1, 100)
-                        _giteaSummary.value = GiteaSummary(repos.size)
-                    } catch (error: Exception) {
-                        Log.e("HomeViewModel", "Gitea summary error: ${error.message}")
-                        _giteaSummary.value = null
-                    }
-                }
-
-                val npmInstance = preferredInstances[ServiceType.NGINX_PROXY_MANAGER]
-                if (npmInstance != null) {
-                    try {
-                        val report = nginxProxyManagerRepository.getHostReport(npmInstance.id)
-                        _npmSummary.value = NpmSummary(proxyHosts = report.proxy, total = report.total)
-                    } catch (error: Exception) {
-                        Log.e("HomeViewModel", "NPM summary error: ${error.message}")
-                        _npmSummary.value = null
-                    }
+                // Also update legacy per-type summaries from preferred instances
+                val preferredIds = preferredInstanceIdByType.value
+                for (type in ServiceType.entries) {
+                    if (type == ServiceType.UNKNOWN) continue
+                    val prefId = preferredIds[type] ?: instancesMap[type]?.firstOrNull()?.id ?: continue
+                    val summary = newSummaries[prefId]
+                    updateLegacySummary(type, prefId, instancesMap)
                 }
             } finally {
+                _summaryLoading.value = false
                 summaryJob = null
             }
         }
+    }
+
+    private suspend fun fetchInstanceSummary(type: ServiceType, instanceId: String): InstanceSummary? {
+        return when (type) {
+            ServiceType.PORTAINER -> {
+                val endpoints = portainerRepository.getEndpoints(instanceId)
+                val first = endpoints.firstOrNull() ?: return InstanceSummary("0", "/ 0", "containers")
+                val containers = portainerRepository.getContainers(instanceId, first.id)
+                val running = containers.count { it.state == "running" || it.status.contains("Up") }
+                _portainerSummary.value = PortainerSummary(running, containers.size)
+                InstanceSummary("$running", "/ ${containers.size}", "containers")
+            }
+            ServiceType.PIHOLE -> {
+                val stats = piholeRepository.getStats(instanceId)
+                _piholeSummary.value = PiholeSummary(stats.queries.total)
+                val formatted = java.text.NumberFormat.getInstance().format(stats.queries.total)
+                InstanceSummary(formatted, null, "total_queries")
+            }
+            ServiceType.BESZEL -> {
+                val systems = beszelRepository.getSystems(instanceId)
+                val online = systems.count { it.isOnline }
+                _beszelSummary.value = BeszelSummary(online, systems.size)
+                InstanceSummary("$online", "/ ${systems.size}", "systems_online")
+            }
+            ServiceType.GITEA -> {
+                val repos = giteaRepository.getUserRepos(instanceId, 1, 100)
+                _giteaSummary.value = GiteaSummary(repos.size)
+                InstanceSummary("${repos.size}", null, "repos")
+            }
+            ServiceType.NGINX_PROXY_MANAGER -> {
+                val report = nginxProxyManagerRepository.getHostReport(instanceId)
+                _npmSummary.value = NpmSummary(report.proxy, report.total)
+                InstanceSummary("${report.proxy}", "/ ${report.total}", "proxy_hosts")
+            }
+            else -> null
+        }
+    }
+
+    private suspend fun updateLegacySummary(type: ServiceType, prefId: String, instancesMap: Map<ServiceType, List<ServiceInstance>>) {
+        // Legacy summaries already updated inside fetchInstanceSummary
+        // This is a no-op placeholder for compatibility
     }
 
     fun moveService(serviceType: ServiceType, offset: Int) {
