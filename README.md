@@ -1,9 +1,9 @@
 # 🏠 Homelab Dashboard
 
-[![Swift](https://img.shields.io/badge/Swift-6.2-orange.svg?logo=swift)](https://swift.org)
+[![Swift](https://img.shields.io/badge/Swift-6.0-orange.svg?logo=swift)](https://swift.org)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0-purple.svg?logo=kotlin)](https://kotlinlang.org)
-[![Platform](https://img.shields.io/badge/Platform-iOS%2018%2B-blue.svg)](https://developer.apple.com/ios/)
-[![Platform](https://img.shields.io/badge/Platform-Android%2012%2B-green.svg)](https://developer.android.com)
+[![Platform](https://img.shields.io/badge/Platform-iOS%2026%2B-blue.svg)](https://developer.apple.com/ios/)
+[![Platform](https://img.shields.io/badge/Platform-Android%208.0%2B-green.svg)](https://developer.android.com)
 [![Made with SwiftUI](https://img.shields.io/badge/Made%20with-SwiftUI-blue.svg?logo=swift)](https://developer.apple.com/xcode/swiftui/)
 [![Made with Jetpack Compose](https://img.shields.io/badge/Made%20with-Jetpack%20Compose-green.svg?logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
 
@@ -23,72 +23,26 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 ## 📱 iOS Version (Swift Native + Liquid Glass)
 Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 technologies. The UI is built around the **Liquid Glass** design system, leveraging frosted glass effects and fluid animations for a high-end feel.
 
-### Dashboard
-|  |
-| :--: |
-| <img src="media-docs/foto-ios/IMG_9186.PNG" width="250" /> |
-
-### Portainer
-| Containers | Detail | Actions |
-| :--: | :--: | :--: |
-| <img src="media-docs/foto-ios/IMG_9187.PNG" width="250" /> | <img src="media-docs/foto-ios/IMG_9188.PNG" width="250" /> | <img src="media-docs/foto-ios/IMG_9189.PNG" width="250" /> |
-
-### Nginx Proxy Manager
-| Hosts | Detail | Certificates |
-| :--: | :--: | :--: |
-| <img src="media-docs/foto-ios/IMG_9190.PNG" width="250" /> | <img src="media-docs/foto-ios/IMG_9191.PNG" width="250" /> | <img src="media-docs/foto-ios/IMG_9192.PNG" width="250" /> |
-
-### Beszel
-| Overview | System | Containers | Detail | Graphs | Charts |
-| :--: | :--: | :--: | :--: | :--: | :--: |
-| <img src="media-docs/foto-ios/IMG_9193.PNG" width="200" /> | <img src="media-docs/foto-ios/IMG_9194.PNG" width="200" /> | <img src="media-docs/foto-ios/IMG_9195.PNG" width="200" /> | <img src="media-docs/foto-ios/IMG_9196.PNG" width="200" /> | <img src="media-docs/foto-ios/IMG_9197.PNG" width="200" /> | <img src="media-docs/foto-ios/IMG_9198.PNG" width="200" /> |
-
-### Pi-hole · Gitea · Bookmarks · Settings
-| Pi-hole | Gitea | Bookmarks | Settings |
-| :--: | :--: | :--: | :--: |
-| <img src="media-docs/foto-ios/IMG_9199.PNG" width="250" /> | <img src="media-docs/foto-ios/IMG_9200.jpg" width="250" /> | <img src="media-docs/foto-ios/IMG_9201.PNG" width="250" /> | <img src="media-docs/foto-ios/IMG_9202.PNG" width="250" /> |
+| Dashboard | Portainer | | | Nginx Proxy | | |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| <img src="media-docs/foto-ios/IMG_9186.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9187.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9188.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9189.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9190.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9191.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9192.PNG" width="140" /> |
+| **Beszel** | | | | | | |
+| <img src="media-docs/foto-ios/IMG_9193.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9194.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9195.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9196.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9197.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9198.PNG" width="140" /> | |
+| **Pi-hole** | **Gitea** | **Bookmarks** | **Settings** | | | |
+| <img src="media-docs/foto-ios/IMG_9199.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9200.jpg" width="140" /> | <img src="media-docs/foto-ios/IMG_9201.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9202.PNG" width="140" /> | | | |
 
 ---
 
 ## 🤖 Android Version (Kotlin Native + Material Expressive 3)
 Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressive 3** design language. It focuses on dynamic color integration, haptic-rich interactions, and modern Android architecture.
 
-### Dashboard
-|  |
-| :--: |
-| <img src="media-docs/foto-android/photo_15_2026-03-16_20-24-21.jpg" width="250" /> |
-
-### Portainer
-| Containers | Detail | Actions |
-| :--: | :--: | :--: |
-| <img src="media-docs/foto-android/photo_1_2026-03-16_20-24-21.jpg" width="250" /> | <img src="media-docs/foto-android/photo_2_2026-03-16_20-24-21.jpg" width="250" /> | <img src="media-docs/foto-android/photo_3_2026-03-16_20-24-21.jpg" width="250" /> |
-
-### Beszel
-| Overview | System | Containers | Detail |
-| :--: | :--: | :--: | :--: |
-| <img src="media-docs/foto-android/photo_4_2026-03-16_20-24-21.jpg" width="220" /> | <img src="media-docs/foto-android/photo_5_2026-03-16_20-24-21.jpg" width="220" /> | <img src="media-docs/foto-android/photo_6_2026-03-16_20-24-21.jpg" width="220" /> | <img src="media-docs/foto-android/photo_7_2026-03-16_20-24-21.jpg" width="220" /> |
-| **Graphs** | **Charts** | **Stats** | **Monitor** |
-| <img src="media-docs/foto-android/photo_8_2026-03-16_20-24-21.jpg" width="220" /> | <img src="media-docs/foto-android/photo_9_2026-03-16_20-24-21.jpg" width="220" /> | <img src="media-docs/foto-android/photo_10_2026-03-16_20-24-21.jpg" width="220" /> | <img src="media-docs/foto-android/photo_11_2026-03-16_20-24-21.jpg" width="220" /> |
-
-### Gitea
-|  |
-| :--: |
-| <img src="media-docs/foto-android/photo_12_2026-03-16_20-24-21.jpg" width="250" /> |
-
-### Nginx Proxy Manager
-| Hosts | Detail |
-| :--: | :--: |
-| <img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="250" /> | <img src="media-docs/foto-android/photo_14_2026-03-16_20-24-21.jpg" width="250" /> |
-
-### Pi-hole
-| Dashboard | Stats |
-| :--: | :--: |
-| <img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="250" /> | <img src="media-docs/foto-android/photo_17_2026-03-16_20-24-21.jpg" width="250" /> |
-
-### Bookmarks · Settings
-| Bookmarks | Bookmarks Detail | Settings |
-| :--: | :--: | :--: |
-| <img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="250" /> | <img src="media-docs/foto-android/photo_19_2026-03-16_20-24-21.jpg" width="250" /> | <img src="media-docs/foto-android/photo_20_2026-03-16_20-24-21.jpg" width="250" /> |
+| Dashboard | Portainer | | | Nginx Proxy | | Gitea |
+| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
+| <img src="media-docs/foto-android/photo_15_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_1_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_2_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_3_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_14_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_12_2026-03-16_20-24-21.jpg" width="140" /> |
+| **Beszel** | | | | | | |
+| <img src="media-docs/foto-android/photo_4_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_5_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_6_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_7_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_8_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_9_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_10_2026-03-16_20-24-21.jpg" width="140" /> |
+| **Pi-hole** | | **Bookmarks** | | **Settings** | | |
+| <img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_17_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_19_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_20_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_11_2026-03-16_20-24-21.jpg" width="140" /> | |
 
 ---
 
@@ -106,7 +60,7 @@ If you find this dashboard useful, consider supporting my studies with a donatio
 ## 🚀 Getting Started
 
 ### 🍎 Build for iOS
-1. **Open Xcode**: Open `HomelabSwift/Homelab.xcodeproj` in Xcode 16.0+.
+1. **Open Xcode**: Open `HomelabSwift/Homelab.xcodeproj` in Xcode 26+.
 2. **Signing**: Go to the project settings, select the **Homelab** target, and under **Signing & Capabilities**, select your development team.
 3. **Run**: Connect your iPhone or select a simulator and press `Cmd + R` to build and run.
 
@@ -149,7 +103,7 @@ Both apps are fully localized and automatically adapt to your system language. S
 ---
 
 ## 🛠 Tech Summary
-- **iOS**: Swift 6, SwiftUI, Keychain (Security), URLSession (Networking), Glassmorphism UI.
+- **iOS**: Swift 6, SwiftUI, Keychain (Security), URLSession (Networking), Liquid Glass UI.
 - **Android**: Kotlin, Jetpack Compose, DataStore, Retrofit, Material Expressive 3 UI.
 
 ---
