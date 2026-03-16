@@ -29,7 +29,7 @@
           "date": "2026-03-16",
           "localizedDescription": "What's New in v0.4.0:\n\n• Redesigned dashboard UI for all services\n• New Beszel containers view and system detail\n• Line graph visualizations\n• Debug logging and improved error handling\n• Multi-language support updates\n• Various bug fixes and stability improvements",
           "downloadURL": "https://github.com/JohnnWi/homelab-project/releases/download/v0.4.0/Homelab.ipa",
-          "size": 9601122,
+          "size": 33005537,
           "minOSVersion": "18.0"
         }
       ],
