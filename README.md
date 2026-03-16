@@ -23,26 +23,119 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 ## 📱 iOS Version (Swift Native + Liquid Glass)
 Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 technologies. The UI is built around the **Liquid Glass** design system, leveraging frosted glass effects and fluid animations for a high-end feel.
 
-| Dashboard | Portainer | | | Nginx Proxy | | |
-| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| <img src="media-docs/foto-ios/IMG_9186.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9187.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9188.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9189.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9190.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9191.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9192.PNG" width="140" /> |
-| **Beszel** | | | | | | |
-| <img src="media-docs/foto-ios/IMG_9193.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9194.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9195.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9196.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9197.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9198.PNG" width="140" /> | |
-| **Pi-hole** | **Gitea** | **Bookmarks** | **Settings** | | | |
-| <img src="media-docs/foto-ios/IMG_9199.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9200.jpg" width="140" /> | <img src="media-docs/foto-ios/IMG_9201.PNG" width="140" /> | <img src="media-docs/foto-ios/IMG_9202.PNG" width="140" /> | | | |
+<table align="center">
+  <tr>
+    <th>Dashboard</th>
+    <th colspan="3" align="center">Portainer</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9186.PNG" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9187.PNG" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9188.PNG" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9189.PNG" width="180" /></td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <th colspan="3" align="center">Nginx Proxy Manager</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9190.PNG" width="200" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9191.PNG" width="200" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9192.PNG" width="200" /></td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <th colspan="6" align="center">Beszel</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9193.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9194.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9195.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9196.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9197.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9198.PNG" width="145" /></td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <th>Pi-hole</th>
+    <th>Gitea</th>
+    <th>Bookmarks</th>
+    <th>Settings</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9199.PNG" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9200.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9201.PNG" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9202.PNG" width="180" /></td>
+  </tr>
+</table>
 
 ---
 
 ## 🤖 Android Version (Kotlin Native + Material Expressive 3)
 Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressive 3** design language. It focuses on dynamic color integration, haptic-rich interactions, and modern Android architecture.
 
-| Dashboard | Portainer | | | Nginx Proxy | | Gitea |
-| :--: | :--: | :--: | :--: | :--: | :--: | :--: |
-| <img src="media-docs/foto-android/photo_15_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_1_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_2_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_3_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_14_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_12_2026-03-16_20-24-21.jpg" width="140" /> |
-| **Beszel** | | | | | | |
-| <img src="media-docs/foto-android/photo_4_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_5_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_6_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_7_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_8_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_9_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_10_2026-03-16_20-24-21.jpg" width="140" /> |
-| **Pi-hole** | | **Bookmarks** | | **Settings** | | |
-| <img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_17_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_19_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_20_2026-03-16_20-24-21.jpg" width="140" /> | <img src="media-docs/foto-android/photo_11_2026-03-16_20-24-21.jpg" width="140" /> | |
+<table align="center">
+  <tr>
+    <th>Dashboard</th>
+    <th colspan="3" align="center">Portainer</th>
+    <th>Gitea</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media-docs/foto-android/photo_15_2026-03-16_20-24-21.jpg" width="160" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-16_20-24-21.jpg" width="160" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_2_2026-03-16_20-24-21.jpg" width="160" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_3_2026-03-16_20-24-21.jpg" width="160" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_12_2026-03-16_20-24-21.jpg" width="160" /></td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <th colspan="8" align="center">Beszel</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media-docs/foto-android/photo_4_2026-03-16_20-24-21.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_5_2026-03-16_20-24-21.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_6_2026-03-16_20-24-21.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_7_2026-03-16_20-24-21.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_8_2026-03-16_20-24-21.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_9_2026-03-16_20-24-21.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_10_2026-03-16_20-24-21.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_11_2026-03-16_20-24-21.jpg" width="110" /></td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <th colspan="2" align="center">Nginx Proxy Manager</th>
+    <th colspan="2" align="center">Pi-hole</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_14_2026-03-16_20-24-21.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_17_2026-03-16_20-24-21.jpg" width="180" /></td>
+  </tr>
+</table>
+
+<table align="center">
+  <tr>
+    <th colspan="2" align="center">Bookmarks</th>
+    <th>Settings</th>
+  </tr>
+  <tr>
+    <td align="center"><img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="200" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_19_2026-03-16_20-24-21.jpg" width="200" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_20_2026-03-16_20-24-21.jpg" width="200" /></td>
+  </tr>
+</table>
 
 ---
 
