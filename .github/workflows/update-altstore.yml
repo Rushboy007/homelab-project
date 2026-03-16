@@ -1,0 +1,96 @@
+name: Update AltStore Source
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  update-source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update apps.json
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          VERSION="${RELEASE_TAG#v}"
+          DATE=$(date -u +%Y-%m-%d)
+
+          # Find the IPA asset URL and size
+          IPA_URL=""
+          IPA_SIZE=0
+          for asset in $(echo '${{ toJSON(github.event.release.assets) }}' | jq -r '.[] | @base64'); do
+            name=$(echo "$asset" | base64 -d | jq -r '.name')
+            if [[ "$name" == *.ipa ]]; then
+              IPA_URL=$(echo "$asset" | base64 -d | jq -r '.browser_download_url')
+              IPA_SIZE=$(echo "$asset" | base64 -d | jq -r '.size')
+              break
+            fi
+          done
+
+          if [ -z "$IPA_URL" ]; then
+            echo "No .ipa file found in release assets, skipping update"
+            exit 0
+          fi
+
+          # Build changelog from release body (replace newlines for JSON)
+          CHANGELOG=$(echo "$RELEASE_BODY" | jq -Rs .)
+
+          # Create new version entry
+          NEW_VERSION=$(jq -n \
+            --arg ver "$VERSION" \
+            --arg date "$DATE" \
+            --arg desc "$(echo "$RELEASE_BODY")" \
+            --arg url "$IPA_URL" \
+            --argjson size "$IPA_SIZE" \
+            '{
+              version: $ver,
+              date: $date,
+              localizedDescription: $desc,
+              downloadURL: $url,
+              size: $size,
+              minOSVersion: "18.0"
+            }')
+
+          # Prepend new version to versions array
+          jq --argjson new_ver "$NEW_VERSION" \
+            '.apps[0].versions = [$new_ver] + .apps[0].versions' \
+            apps.json > apps_tmp.json && mv apps_tmp.json apps.json
+
+          # Add news entry
+          NEW_NEWS=$(jq -n \
+            --arg title "$RELEASE_TAG — $(echo "$RELEASE_BODY" | head -1)" \
+            --arg id "release-$VERSION" \
+            --arg caption "$(echo "$RELEASE_BODY" | head -3 | tr '\n' ' ')" \
+            --arg date "$DATE" \
+            --arg url "https://github.com/${{ github.repository }}/releases/tag/$RELEASE_TAG" \
+            '{
+              title: $title,
+              identifier: $id,
+              caption: $caption,
+              date: $date,
+              tintColor: "#4A90D9",
+              notify: true,
+              url: $url,
+              appID: "homelab.foreverhomelab"
+            }')
+
+          jq --argjson new_news "$NEW_NEWS" \
+            '.news = [$new_news] + .news' \
+            apps.json > apps_tmp.json && mv apps_tmp.json apps.json
+
+          echo "Updated apps.json to version $VERSION"
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add apps.json
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "Update AltStore source to ${{ github.event.release.tag_name }}"
+          git push
