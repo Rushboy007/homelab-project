@@ -11,6 +11,7 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 
 ## Highlights
 
+- **Multi-instance support**: add multiple instances of the same service (e.g. several Portainer or Pi-hole servers) and switch between them seamlessly.
 - **Tailscale support**: quickly open Tailscale, check VPN connectivity status, and secure access to homelab services when they are not directly reachable.
 - **Bookmarks**: save your favorite internal tools and dashboards with categories, tags, and custom icons for faster access from both apps.
 
