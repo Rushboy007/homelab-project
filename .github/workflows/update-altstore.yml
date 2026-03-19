@@ -64,11 +64,13 @@ jobs:
             '.apps[0].versions = [$new_ver] + .apps[0].versions' \
             apps.json > apps_tmp.json && mv apps_tmp.json apps.json
 
-          # Add news entry
+          # Add news entry — strip markdown headers from title/caption
+          CLEAN_TITLE=$(echo "$RELEASE_BODY" | sed 's/^#* *//' | grep -v '^\s*$' | head -1)
+          CLEAN_CAPTION=$(echo "$RELEASE_BODY" | sed 's/^#* *//' | grep -v '^\s*$' | head -3 | tr '\n' ' ' | sed 's/  */ /g' | xargs)
           NEW_NEWS=$(jq -n \
-            --arg title "$RELEASE_TAG — $(echo "$RELEASE_BODY" | head -1)" \
+            --arg title "$RELEASE_TAG — $CLEAN_TITLE" \
             --arg id "release-$VERSION" \
-            --arg caption "$(echo "$RELEASE_BODY" | head -3 | tr '\n' ' ')" \
+            --arg caption "$CLEAN_CAPTION" \
             --arg date "$DATE" \
             --arg url "https://github.com/${{ github.repository }}/releases/tag/$RELEASE_TAG" \
             '{

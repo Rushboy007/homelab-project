@@ -60,9 +60,9 @@
   ],
   "news": [
     {
-      "title": "v0.6.0 — ## What's New in v0.6.0",
+      "title": "v0.6.0 — Healthcheck Service",
       "identifier": "release-0.6.0",
-      "caption": "## What's New in v0.6.0  ### New Service: Healthcheck ",
+      "caption": "New Healthcheck service to monitor uptime, response times, and notifications for all your services.",
       "date": "2026-03-19",
       "tintColor": "#4A90D9",
       "notify": true,
