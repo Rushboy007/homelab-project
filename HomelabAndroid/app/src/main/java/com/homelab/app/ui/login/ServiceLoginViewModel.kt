@@ -8,8 +8,10 @@ import com.homelab.app.R
 import com.homelab.app.data.repository.BeszelRepository
 import com.homelab.app.data.repository.GiteaRepository
 import com.homelab.app.data.repository.HealthchecksRepository
+import com.homelab.app.data.repository.JellystatRepository
 import com.homelab.app.data.repository.AdGuardHomeRepository
 import com.homelab.app.data.repository.NginxProxyManagerRepository
+import com.homelab.app.data.repository.PatchmonRepository
 import com.homelab.app.data.repository.PiholeRepository
 import com.homelab.app.data.repository.PortainerRepository
 import com.homelab.app.data.repository.ServiceInstancesRepository
@@ -38,7 +40,9 @@ class ServiceLoginViewModel @Inject constructor(
     private val beszelRepository: BeszelRepository,
     private val giteaRepository: GiteaRepository,
     private val nginxProxyManagerRepository: NginxProxyManagerRepository,
-    private val healthchecksRepository: HealthchecksRepository
+    private val healthchecksRepository: HealthchecksRepository,
+    private val jellystatRepository: JellystatRepository,
+    private val patchmonRepository: PatchmonRepository
 ) : ViewModel() {
 
     private val existingInstanceId: String? = savedStateHandle["instanceId"]
@@ -217,6 +221,38 @@ class ServiceLoginViewModel @Inject constructor(
                                 label = normalizedLabel,
                                 url = cleanUrl,
                                 apiKey = trimmedApiKey,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.JELLYSTAT -> {
+                            require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
+                            jellystatRepository.authenticate(cleanUrl, trimmedApiKey)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                apiKey = trimmedApiKey,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.PATCHMON -> {
+                            require(trimmedUsername.isNotBlank()) { context.getString(R.string.patchmon_login_error_token_key_required) }
+                            val tokenSecret = trimmedPassword.ifBlank {
+                                if (existing != null && existing.url == cleanUrl && existing.username == trimmedUsername) {
+                                    return@ifBlank existing.password.orEmpty()
+                                }
+                                throw IllegalArgumentException(context.getString(R.string.patchmon_login_error_token_secret_required))
+                            }
+                            require(tokenSecret.isNotBlank()) { context.getString(R.string.patchmon_login_error_token_secret_required) }
+                            patchmonRepository.authenticate(cleanUrl, trimmedUsername, tokenSecret)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                username = trimmedUsername,
+                                password = tokenSecret,
                                 fallbackUrl = cleanFallbackUrl
                             )
                         }

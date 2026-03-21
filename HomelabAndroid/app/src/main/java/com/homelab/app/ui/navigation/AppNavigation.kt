@@ -70,10 +70,12 @@ private fun dashboardRoute(type: ServiceType, instanceId: String): String {
         ServiceType.PORTAINER -> "portainer/$instanceId/dashboard"
         ServiceType.PIHOLE -> "pihole/$instanceId/dashboard"
         ServiceType.ADGUARD_HOME -> "adguard/$instanceId/dashboard"
+        ServiceType.JELLYSTAT -> "jellystat/$instanceId/dashboard"
         ServiceType.BESZEL -> "beszel/$instanceId/dashboard"
         ServiceType.GITEA -> "gitea/$instanceId/dashboard"
         ServiceType.NGINX_PROXY_MANAGER -> "nginxpm/$instanceId/dashboard"
         ServiceType.HEALTHCHECKS -> "healthchecks/$instanceId/dashboard"
+        ServiceType.PATCHMON -> "patchmon/$instanceId/dashboard"
         ServiceType.UNKNOWN -> Screen.Home.route
     }
 }
@@ -130,12 +132,21 @@ fun AppNavigation() {
                                     if (currentDestination?.route == screen.route) return@clickable
 
                                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
-                                    navController.navigate(screen.route) {
-                                        popUpTo(navController.graph.findStartDestination().id) {
-                                            saveState = false
+                                    if (screen == Screen.Settings && isServiceChild) {
+                                        navController.navigate(screen.route) {
+                                            launchSingleTop = true
                                         }
-                                        launchSingleTop = true
-                                        restoreState = false
+                                    } else if (screen == Screen.Home && currentDestination?.route == Screen.Settings.route) {
+                                        // If Settings was opened from a service dashboard, return there instead of resetting to main Home.
+                                        if (navController.popBackStack()) return@clickable
+                                    } else {
+                                        navController.navigate(screen.route) {
+                                            popUpTo(navController.graph.findStartDestination().id) {
+                                                saveState = false
+                                            }
+                                            launchSingleTop = true
+                                            restoreState = false
+                                        }
                                     }
                                 },
                             horizontalAlignment = Alignment.CenterHorizontally,
@@ -381,6 +392,23 @@ fun AppNavigation() {
             }
 
             composable(
+                route = "jellystat/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.jellystat.JellystatDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.JELLYSTAT, newInstanceId)) {
+                                popUpTo("jellystat/$instanceId/dashboard") { inclusive = true }
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(
                 route = "beszel/{instanceId}/dashboard",
                 arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
             ) { backStackEntry ->
@@ -599,6 +627,48 @@ fun AppNavigation() {
             ) {
                 com.homelab.app.ui.gitea.GiteaRepoDetailScreen(
                     onNavigateBack = { navController.navigateUp() }
+                )
+            }
+
+            composable(
+                route = "patchmon/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.patchmon.PatchmonDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.PATCHMON, newInstanceId)) {
+                                popUpTo("patchmon/$instanceId/dashboard") { inclusive = true }
+                            }
+                        }
+                    },
+                    onNavigateToHostDetail = { hostId ->
+                        navController.navigate("patchmon/$instanceId/host/${Uri.encode(hostId)}")
+                    }
+                )
+            }
+
+            composable(
+                route = "patchmon/{instanceId}/host/{hostId}",
+                arguments = listOf(
+                    androidx.navigation.navArgument("instanceId") { type = NavType.StringType },
+                    androidx.navigation.navArgument("hostId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.patchmon.PatchmonHostDetailScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.PATCHMON, newInstanceId)) {
+                                popUpTo("patchmon/$instanceId/dashboard") { inclusive = true }
+                            }
+                        } else {
+                            navController.popBackStack()
+                        }
+                    }
                 )
             }
         }

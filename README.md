@@ -20,8 +20,6 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 - [Install via AltStore / SideStore](#-install-via-altstore--sidestore)
 - [Getting Started](#-getting-started)
 - [Integrated Services](#-integrated-services)
-- [Multilingual](#-multilingual)
-- [Tech Summary](#-tech-summary)
 - [Usage & License](#-usage--license)
 
 ---
@@ -31,10 +29,29 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 - **Multi-instance support**: add multiple instances of the same service (e.g. several Portainer or Pi-hole servers) and switch between them seamlessly.
 - **Tailscale support**: quickly open Tailscale, check VPN connectivity status, and secure access to homelab services when they are not directly reachable.
 - **Bookmarks**: save your favorite internal tools and dashboards with categories, tags, and custom icons for faster access from both apps.
+- **Cyberpunk mode**: toggle a unique cyberpunk visual theme for your service cards.
+- **Multilingual**: English, Italian, French, Spanish, German — auto-detected from your system language.
 
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=JohnnWi/homelab-project&type=date&legend=top-left)](https://www.star-history.com/#JohnnWi/homelab-project&type=date&legend=top-left)
+<table>
+  <tr>
+    <td>
+      <a href="https://www.star-history.com/#JohnnWi/homelab-project&type=date&legend=top-left">
+        <img src="https://api.star-history.com/svg?repos=JohnnWi/homelab-project&type=date&legend=top-left" width="400" />
+      </a>
+    </td>
+    <td>
+      <b>10 integrated services</b><br>
+      Portainer, Pi-hole, Beszel, Gitea, Tailscale,<br>
+      Nginx Proxy Manager, AdGuard DNS,<br>
+      Healthcheck, Patchmon, Bookmarks<br><br>
+      <b>2 native apps</b><br>
+      Swift 6 + SwiftUI (iOS)<br>
+      Kotlin + Jetpack Compose (Android)<br><br>
+      <b>5 languages</b><br>
+      🇺🇸 🇮🇹 🇫🇷 🇪🇸 🇩🇪
+    </td>
+  </tr>
+</table>
 
 ---
 
@@ -63,15 +80,15 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
     <th>Gitea</th>
     <th>AdGuard DNS</th>
     <th>Healthcheck</th>
+    <th>Patchmon</th>
     <th>Bookmarks</th>
-    <th>Settings</th>
   </tr>
   <tr>
     <td align="center"><img src="media-docs/foto-ios/IMG_9200.jpg" width="150" /></td>
     <td align="center"><img src="media-docs/foto-ios/IMG_9218.PNG" width="150" /></td>
     <td align="center"><img src="media-docs/foto-ios/IMG_9238.PNG" width="150" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9275.PNG" width="150" /></td>
     <td align="center"><img src="media-docs/foto-ios/IMG_9201.PNG" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9202.PNG" width="150" /></td>
   </tr>
 </table>
 
@@ -125,6 +142,14 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
   </tr>
 </table>
 
+**Patchmon**
+<table>
+  <tr>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9269.PNG" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9275.PNG" width="180" /></td>
+  </tr>
+</table>
+
 </details>
 
 ---
@@ -154,15 +179,15 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
     <th>Pi-hole</th>
     <th>AdGuard DNS</th>
     <th>Healthcheck</th>
+    <th>Patchmon</th>
     <th>Bookmarks</th>
-    <th>Settings</th>
   </tr>
   <tr>
     <td align="center"><img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="150" /></td>
     <td align="center"><img src="media-docs/foto-android/adguard1.jpg" width="150" /></td>
     <td align="center"><img src="media-docs/foto-android/healthcheck1.jpg" width="150" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-21_01-00-34.jpg" width="150" /></td>
     <td align="center"><img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_20_2026-03-16_20-24-21.jpg" width="150" /></td>
   </tr>
 </table>
 
@@ -222,6 +247,14 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
   <tr>
     <td align="center"><img src="media-docs/foto-android/healthcheck1.jpg" width="180" /></td>
     <td align="center"><img src="media-docs/foto-android/healthcheck2.jpg" width="180" /></td>
+  </tr>
+</table>
+
+**Patchmon**
+<table>
+  <tr>
+    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-21_01-00-34.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_2_2026-03-21_01-00-34.jpg" width="180" /></td>
   </tr>
 </table>
 
@@ -306,20 +339,11 @@ Monitor and manage your AdGuard Home DNS server. View real-time query statistics
 ### 💓 Healthcheck
 Monitor the uptime and health of your services. View check statuses, response times, and get notified when services go down — all from a clean native interface.
 
+### 🩹 Patchmon
+Track software updates and patches across your infrastructure. Monitor version status, pending updates, and keep your homelab systems up to date from one place.
+
 ### 🔖 Bookmarks
 Keep all your most-used homelab links in one place with a native bookmarks feature that supports organization, quick access, and a cleaner daily workflow.
-
----
-
-## 🌍 Multilingual
-Both apps are fully localized and automatically adapt to your system language. Supported languages include:
-**English 🇺🇸, Italian 🇮🇹, French 🇫🇷, Spanish 🇪🇸, German 🇩🇪.**
-
----
-
-## 🛠 Tech Summary
-- **iOS**: Swift 6, SwiftUI, Keychain (Security), URLSession (Networking), Liquid Glass UI.
-- **Android**: Kotlin, Jetpack Compose, DataStore, Retrofit, Material Expressive 3 UI.
 
 ---
 

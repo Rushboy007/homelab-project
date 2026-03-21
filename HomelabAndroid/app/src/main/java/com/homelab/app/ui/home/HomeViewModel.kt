@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.homelab.app.data.repository.BeszelRepository
 import com.homelab.app.data.repository.GiteaRepository
+import com.homelab.app.data.repository.JellystatRepository
 import com.homelab.app.data.repository.LocalPreferencesRepository
 import com.homelab.app.data.repository.NginxProxyManagerRepository
 import com.homelab.app.data.repository.HealthchecksRepository
+import com.homelab.app.data.repository.PatchmonRepository
 import com.homelab.app.data.repository.AdGuardHomeRepository
 import com.homelab.app.data.repository.PiholeRepository
 import com.homelab.app.data.repository.PortainerRepository
@@ -15,6 +17,7 @@ import com.homelab.app.data.repository.ServicesRepository
 import com.homelab.app.domain.model.ServiceInstance
 import com.homelab.app.util.ServiceType
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.util.Locale
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,6 +26,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlin.math.floor
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -30,20 +34,24 @@ class HomeViewModel @Inject constructor(
     private val portainerRepository: PortainerRepository,
     private val piholeRepository: PiholeRepository,
     private val adGuardHomeRepository: AdGuardHomeRepository,
+    private val jellystatRepository: JellystatRepository,
     private val beszelRepository: BeszelRepository,
     private val giteaRepository: GiteaRepository,
     private val nginxProxyManagerRepository: NginxProxyManagerRepository,
     private val healthchecksRepository: HealthchecksRepository,
+    private val patchmonRepository: PatchmonRepository,
     private val localPreferencesRepository: LocalPreferencesRepository
 ) : ViewModel() {
 
     data class PortainerSummary(val running: Int, val total: Int)
     data class PiholeSummary(val totalQueries: Int)
     data class AdGuardSummary(val totalQueries: Long)
+    data class JellystatSummary(val watchedHours: Double, val totalViews: Int)
     data class BeszelSummary(val online: Int, val total: Int)
     data class GiteaSummary(val totalRepos: Int)
     data class NpmSummary(val proxyHosts: Int, val total: Int)
     data class HealthchecksSummary(val up: Int, val total: Int)
+    data class PatchmonSummary(val active: Int, val total: Int)
 
     /** Summary info for a single instance card. */
     data class InstanceSummary(val value: String, val subValue: String?, val label: String)
@@ -77,6 +85,9 @@ class HomeViewModel @Inject constructor(
     val hiddenServices: StateFlow<Set<String>> = localPreferencesRepository.hiddenServices
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptySet())
 
+    val homeCyberpunkCardsEnabled: StateFlow<Boolean> = localPreferencesRepository.homeCyberpunkCardsEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     val serviceOrder: StateFlow<List<ServiceType>> = localPreferencesRepository.serviceOrder
         .stateIn(
             viewModelScope,
@@ -94,6 +105,9 @@ class HomeViewModel @Inject constructor(
     private val _adguardSummary = MutableStateFlow<AdGuardSummary?>(null)
     val adguardSummary: StateFlow<AdGuardSummary?> = _adguardSummary
 
+    private val _jellystatSummary = MutableStateFlow<JellystatSummary?>(null)
+    val jellystatSummary: StateFlow<JellystatSummary?> = _jellystatSummary
+
     private val _beszelSummary = MutableStateFlow<BeszelSummary?>(null)
     val beszelSummary: StateFlow<BeszelSummary?> = _beszelSummary
 
@@ -105,6 +119,9 @@ class HomeViewModel @Inject constructor(
 
     private val _healthchecksSummary = MutableStateFlow<HealthchecksSummary?>(null)
     val healthchecksSummary: StateFlow<HealthchecksSummary?> = _healthchecksSummary
+
+    private val _patchmonSummary = MutableStateFlow<PatchmonSummary?>(null)
+    val patchmonSummary: StateFlow<PatchmonSummary?> = _patchmonSummary
 
     /** Per-instance summary data, keyed by instance ID. */
     private val _instanceSummaries = MutableStateFlow<Map<String, InstanceSummary>>(emptyMap())
@@ -190,6 +207,11 @@ class HomeViewModel @Inject constructor(
                 val formatted = java.text.NumberFormat.getInstance().format(stats.numDnsQueries)
                 InstanceSummary(formatted, null, "adguard_total_queries")
             }
+            ServiceType.JELLYSTAT -> {
+                val summary = jellystatRepository.getWatchSummary(instanceId, 7)
+                _jellystatSummary.value = JellystatSummary(summary.totalHours, summary.totalViews)
+                InstanceSummary(formatHours(summary.totalHours), null, "jellystat_watch_time")
+            }
             ServiceType.BESZEL -> {
                 val systems = beszelRepository.getSystems(instanceId)
                 val online = systems.count { it.isOnline }
@@ -212,6 +234,12 @@ class HomeViewModel @Inject constructor(
                 _healthchecksSummary.value = HealthchecksSummary(up, checks.size)
                 InstanceSummary("$up", "/ ${checks.size}", "checks")
             }
+            ServiceType.PATCHMON -> {
+                val hosts = patchmonRepository.getHosts(instanceId).hosts
+                val active = hosts.count { it.status.equals("active", ignoreCase = true) }
+                _patchmonSummary.value = PatchmonSummary(active, hosts.size)
+                InstanceSummary("$active", "/ ${hosts.size}", "hosts")
+            }
             else -> null
         }
     }
@@ -219,6 +247,20 @@ class HomeViewModel @Inject constructor(
     private suspend fun updateLegacySummary(type: ServiceType, prefId: String, instancesMap: Map<ServiceType, List<ServiceInstance>>) {
         // Legacy summaries already updated inside fetchInstanceSummary
         // This is a no-op placeholder for compatibility
+    }
+
+    private fun formatHours(value: Double): String {
+        val locale = Locale.getDefault()
+        if (value in 0.000001..0.999999) {
+            val minutes = floor(value * 60.0).toInt()
+            if (minutes <= 0) return "<1m"
+            return "${minutes}m"
+        }
+        return when {
+            value >= 100.0 -> String.format(locale, "%.0fh", value)
+            value >= 10.0 -> String.format(locale, "%.1fh", value)
+            else -> String.format(locale, "%.2fh", value)
+        }
     }
 
     fun moveService(serviceType: ServiceType, offset: Int) {

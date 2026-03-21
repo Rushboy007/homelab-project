@@ -27,6 +27,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
@@ -41,6 +43,36 @@ import com.homelab.app.ui.theme.primaryColor
 import com.homelab.app.util.ServiceType
 import java.text.SimpleDateFormat
 import java.util.*
+
+@Composable
+private fun portainerListCardColor(
+    accent: Color? = null,
+    tint: Float = 0.08f
+): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val base = if (isDarkTheme) Color(0xFF121C2A) else Color(0xFFF4F4F1)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.22f)) } ?: base
+}
+
+@Composable
+private fun portainerListRaisedColor(
+    accent: Color? = null,
+    tint: Float = 0.06f
+): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val base = if (isDarkTheme) Color(0xFF1A2638) else Color(0xFFF9F9F7)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.18f)) } ?: base
+}
+
+@Composable
+private fun portainerListBorderColor(
+    accent: Color? = null,
+    tint: Float = 0.16f
+): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val base = if (isDarkTheme) Color(0xFF34465F) else Color(0xFFD4D6D1)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.18f)) } ?: base
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -105,8 +137,8 @@ fun ContainerListScreen(
                 keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+                    unfocusedContainerColor = portainerListRaisedColor(),
+                    focusedContainerColor = portainerListRaisedColor(),
                     unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
                     focusedBorderColor = ServiceType.PORTAINER.primaryColor
                 ),
@@ -132,8 +164,8 @@ fun ContainerListScreen(
                     
                     Surface(
                         shape = CircleShape,
-                        color = if (isSelected) ServiceType.PORTAINER.primaryColor.copy(alpha = 0.1f) else MaterialTheme.colorScheme.surfaceContainerHighest,
-                        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, ServiceType.PORTAINER.primaryColor.copy(alpha = 0.3f)) else null,
+                        color = if (isSelected) ServiceType.PORTAINER.primaryColor.copy(alpha = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.14f else 0.08f) else portainerListRaisedColor(),
+                        border = if (isSelected) androidx.compose.foundation.BorderStroke(1.dp, ServiceType.PORTAINER.primaryColor.copy(alpha = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.34f else 0.22f)) else androidx.compose.foundation.BorderStroke(1.dp, portainerListBorderColor().copy(alpha = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.72f else 0.52f)),
                         modifier = Modifier.clickable {
                             haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
                             viewModel.setFilter(f)
@@ -200,6 +232,12 @@ fun ContainerRowCard(
         label = "BouncyCard"
     )
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val stateColor = when (container.state.lowercase()) {
+        "running" -> Color(0xFF4CAF50)
+        "paused" -> Color(0xFFFFB74D)
+        "exited", "dead" -> Color(0xFFF44336)
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
 
     Surface(
         modifier = Modifier
@@ -214,7 +252,17 @@ fun ContainerRowCard(
                 }
             ),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = portainerListCardColor(
+            accent = stateColor,
+            tint = if (stateColor == MaterialTheme.colorScheme.onSurfaceVariant) 0.04f else if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.10f else 0.06f
+        ),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            portainerListBorderColor(
+                accent = stateColor,
+                tint = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.22f else 0.14f
+            ).copy(alpha = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.78f else 0.62f)
+        )
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             // Header
@@ -314,7 +362,7 @@ fun ContainerRowCard(
                         visiblePorts.forEach { port ->
                             Surface(
                                 shape = RoundedCornerShape(6.dp),
-                                color = Color(0xFF2196F3).copy(alpha = 0.1f)
+                                color = portainerListRaisedColor(accent = Color(0xFF2196F3), tint = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.12f else 0.08f)
                             ) {
                                 Text(
                                     text = "${port.publicPort}:${port.privatePort}/${port.type}",
@@ -434,7 +482,7 @@ private fun MiniStatChip(
 ) {
     Surface(
         shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = portainerListRaisedColor(accent = color, tint = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.12f else 0.08f),
         modifier = modifier
     ) {
         Column(

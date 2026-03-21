@@ -1,5 +1,6 @@
 package com.homelab.app.ui.adguard
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.collectIsPressedAsState
@@ -66,6 +67,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -86,6 +90,52 @@ import com.homelab.app.util.ServiceType
 import com.homelab.app.util.UiState
 import java.text.NumberFormat
 import java.util.Locale
+
+private fun adguardPageBackground(isDarkTheme: Boolean, accent: Color): Brush = if (isDarkTheme) {
+    Brush.verticalGradient(
+        listOf(
+            Color(0xFF0A110D),
+            Color(0xFF0F1913),
+            accent.copy(alpha = 0.045f),
+            Color(0xFF0A120E)
+        )
+    )
+} else {
+    Brush.verticalGradient(
+        listOf(
+            Color(0xFFF7FCF8),
+            Color(0xFFF1F9F4),
+            accent.copy(alpha = 0.03f),
+            Color(0xFFF5FBF7)
+        )
+    )
+}
+
+private val AdGuardLinkBlue = Color(0xFF4D8FFF)
+
+private fun adguardCardColor(isDarkTheme: Boolean, accent: Color? = null): Color {
+    val neutral = if (isDarkTheme) Color(0xFF121A16) else Color(0xFFF3F8F4)
+    val tintAmount = if (isDarkTheme) 0.17f else 0.10f
+    return accent?.let { lerp(neutral, it, tintAmount) } ?: neutral
+}
+
+private fun adguardRaisedCardColor(isDarkTheme: Boolean, accent: Color? = null): Color {
+    val neutral = if (isDarkTheme) Color(0xFF18211D) else Color(0xFFF9FCFA)
+    val tintAmount = if (isDarkTheme) 0.13f else 0.08f
+    return accent?.let { lerp(neutral, it, tintAmount) } ?: neutral
+}
+
+private fun adguardBorderTone(isDarkTheme: Boolean, accent: Color? = null): Color {
+    val neutral = if (isDarkTheme) Color(0xFF2E3C35) else Color(0xFFBED4C8)
+    val tintAmount = if (isDarkTheme) 0.34f else 0.22f
+    return accent?.let { lerp(neutral, it, tintAmount) } ?: neutral
+}
+
+private fun adguardTrackTone(isDarkTheme: Boolean, accent: Color? = null): Color {
+    val neutral = if (isDarkTheme) Color(0xFF25382E) else Color(0xFFDCE9E2)
+    val tintAmount = if (isDarkTheme) 0.14f else 0.08f
+    return accent?.let { lerp(neutral, it, tintAmount) } ?: neutral
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -108,6 +158,12 @@ fun AdGuardHomeDashboardScreen(
     val isToggling by viewModel.isTogglingProtection.collectAsStateWithLifecycle()
     val actionError by viewModel.actionError.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
+    val accent = ServiceType.ADGUARD_HOME.primaryColor
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val pageBrush = remember(isDarkTheme) { adguardPageBackground(isDarkTheme, accent) }
+    val pageGlow = remember(isDarkTheme) {
+        if (isDarkTheme) accent.copy(alpha = 0.085f) else accent.copy(alpha = 0.04f)
+    }
 
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -137,144 +193,195 @@ fun AdGuardHomeDashboardScreen(
                         Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Transparent
     ) { paddingValues ->
-        when (val state = uiState) {
-            is UiState.Loading, is UiState.Idle -> {
-                Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = ServiceType.ADGUARD_HOME.primaryColor)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(pageBrush)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(pageGlow, Color.Transparent),
+                            center = Offset(160f, 90f),
+                            radius = 560f
+                        )
+                    )
+            )
+
+            when (val state = uiState) {
+                is UiState.Loading, is UiState.Idle -> {
+                    Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = accent)
+                    }
                 }
-            }
-            is UiState.Error -> {
-                ErrorScreen(
-                    message = state.message,
-                    onRetry = { state.retryAction?.invoke() ?: viewModel.fetchDashboard() },
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
-            is UiState.Offline -> {
-                ErrorScreen(
-                    message = "",
-                    onRetry = { viewModel.fetchDashboard() },
-                    isOffline = true,
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
-            is UiState.Success -> {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        ServiceInstancePicker(
-                            instances = instances,
-                            selectedInstanceId = viewModel.instanceId,
-                            onInstanceSelected = { instance ->
-                                viewModel.setPreferredInstance(instance.id)
-                                onNavigateToInstance(instance.id)
+                is UiState.Error -> {
+                    ErrorScreen(
+                        message = state.message,
+                        onRetry = { state.retryAction?.invoke() ?: viewModel.fetchDashboard() },
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
+                is UiState.Offline -> {
+                    ErrorScreen(
+                        message = "",
+                        onRetry = { viewModel.fetchDashboard() },
+                        isOffline = true,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
+                is UiState.Success -> {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            ServiceInstancePicker(
+                                instances = instances,
+                                selectedInstanceId = viewModel.instanceId,
+                                onInstanceSelected = { instance ->
+                                    viewModel.setPreferredInstance(instance.id)
+                                    onNavigateToInstance(instance.id)
+                                }
+                            )
+                        }
+
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            ProtectionCard(
+                                enabled = status?.protectionEnabled == true,
+                                isToggling = isToggling,
+                                onToggle = { duration -> viewModel.toggleProtection(duration) }
+                            )
+                        }
+
+                        if (stats != null) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                AdGuardSectionHeader(title = stringResource(R.string.adguard_overview))
                             }
-                        )
-                    }
+                            item {
+                                StatCard(
+                                    icon = Icons.Default.AutoGraph,
+                                    iconBg = ServiceType.ADGUARD_HOME.primaryColor,
+                                    value = formatNum(stats!!.numDnsQueries),
+                                    label = stringResource(R.string.adguard_total_queries),
+                                    onClick = { onNavigateToQueryLog("all") }
+                                )
+                            }
+                            item {
+                                StatCard(
+                                    icon = Icons.Default.Block,
+                                    iconBg = StatusRed,
+                                    value = formatNum(stats!!.numBlockedFiltering),
+                                    label = stringResource(R.string.adguard_blocked),
+                                    onClick = { onNavigateToQueryLog("blocked") }
+                                )
+                            }
+                            item {
+                                val pct = if (stats!!.numDnsQueries > 0) {
+                                    (stats!!.numBlockedFiltering.toDouble() / stats!!.numDnsQueries.toDouble()) * 100.0
+                                } else 0.0
+                                StatCard(
+                                    icon = Icons.Default.BarChart,
+                                    iconBg = StatusOrange,
+                                    value = String.format(Locale.getDefault(), "%.1f%%", pct),
+                                    label = stringResource(R.string.adguard_blocked_percent)
+                                )
+                            }
+                            item {
+                                val avgMs = stats!!.avgProcessingTime * 1000.0
+                                StatCard(
+                                    icon = Icons.Default.Info,
+                                    iconBg = StatusBlue,
+                                    value = String.format(Locale.getDefault(), "%.2f ms", avgMs),
+                                    label = stringResource(R.string.adguard_avg_processing)
+                                )
+                            }
 
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        ProtectionCard(
-                            enabled = status?.protectionEnabled == true,
-                            isToggling = isToggling,
-                            onToggle = { duration -> viewModel.toggleProtection(duration) }
-                        )
-                    }
-
-                    if (stats != null) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            AdGuardSectionHeader(title = stringResource(R.string.adguard_overview))
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                QueryChartSection(stats = stats!!)
+                            }
                         }
-                        item {
-                            StatCard(
-                                icon = Icons.Default.AutoGraph,
-                                iconBg = ServiceType.ADGUARD_HOME.primaryColor,
-                                value = formatNum(stats!!.numDnsQueries),
-                                label = stringResource(R.string.adguard_total_queries),
-                                onClick = { onNavigateToQueryLog("all") }
+
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            QuickActionsSection(
+                                onNavigateToRewrites = onNavigateToRewrites,
+                                onNavigateToQueryLog = { onNavigateToQueryLog("all") },
+                                onNavigateToUserRules = onNavigateToUserRules,
+                                onNavigateToFilters = onNavigateToFilters,
+                                onNavigateToBlockedServices = onNavigateToBlockedServices
                             )
                         }
-                        item {
-                            StatCard(
-                                icon = Icons.Default.Block,
-                                iconBg = StatusRed,
-                                value = formatNum(stats!!.numBlockedFiltering),
-                                label = stringResource(R.string.adguard_blocked),
-                                onClick = { onNavigateToQueryLog("blocked") }
-                            )
-                        }
-                        item {
-                            val pct = if (stats!!.numDnsQueries > 0) {
-                                (stats!!.numBlockedFiltering.toDouble() / stats!!.numDnsQueries.toDouble()) * 100.0
-                            } else 0.0
-                            StatCard(
-                                icon = Icons.Default.BarChart,
-                                iconBg = StatusOrange,
-                                value = String.format(Locale.getDefault(), "%.1f%%", pct),
-                                label = stringResource(R.string.adguard_blocked_percent)
-                            )
-                        }
-                        item {
-                            val avgMs = stats!!.avgProcessingTime * 1000.0
-                            StatCard(
-                                icon = Icons.Default.Info,
-                                iconBg = StatusBlue,
-                                value = String.format(Locale.getDefault(), "%.2f ms", avgMs),
-                                label = stringResource(R.string.adguard_avg_processing)
-                            )
+
+                        if (status != null) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                AdGuardSectionHeader(title = stringResource(R.string.adguard_server_info))
+                            }
+                            item {
+                                InfoCard(
+                                    icon = Icons.Default.Settings,
+                                    label = stringResource(R.string.adguard_version),
+                                    value = status?.version.orEmpty(),
+                                    accent = StatusGreen
+                                )
+                            }
+                            item {
+                                InfoCard(
+                                    icon = Icons.Default.Storage,
+                                    label = stringResource(R.string.adguard_dns_address),
+                                    value = status?.dnsAddresses?.joinToString(", ").orEmpty(),
+                                    accent = StatusBlue
+                                )
+                            }
+                            item {
+                                InfoCard(
+                                    icon = Icons.Default.Security,
+                                    label = stringResource(R.string.adguard_dns_port),
+                                    value = status?.dnsPort?.toString().orEmpty(),
+                                    accent = StatusGreen
+                                )
+                            }
+                            item {
+                                InfoCard(
+                                    icon = Icons.Default.Link,
+                                    label = stringResource(R.string.adguard_http_port),
+                                    value = status?.httpPort?.toString().orEmpty(),
+                                    accent = AdGuardLinkBlue
+                                )
+                            }
                         }
 
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            QueryChartSection(stats = stats!!)
+                        if (topQueried.isNotEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                TopListSection(title = stringResource(R.string.adguard_top_queried), items = topQueried, accent = ServiceType.ADGUARD_HOME.primaryColor)
+                            }
                         }
-                    }
 
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        QuickActionsSection(
-                            onNavigateToRewrites = onNavigateToRewrites,
-                            onNavigateToQueryLog = { onNavigateToQueryLog("all") },
-                            onNavigateToUserRules = onNavigateToUserRules,
-                            onNavigateToFilters = onNavigateToFilters,
-                            onNavigateToBlockedServices = onNavigateToBlockedServices
-                        )
-                    }
-
-                    if (status != null) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            AdGuardSectionHeader(title = stringResource(R.string.adguard_server_info))
+                        if (topBlocked.isNotEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                TopListSection(title = stringResource(R.string.adguard_top_blocked), items = topBlocked, accent = StatusRed)
+                            }
                         }
-                        item { InfoCard(icon = Icons.Default.Settings, label = stringResource(R.string.adguard_version), value = status?.version.orEmpty()) }
-                        item { InfoCard(icon = Icons.Default.Storage, label = stringResource(R.string.adguard_dns_address), value = status?.dnsAddresses?.joinToString(", ").orEmpty()) }
-                        item { InfoCard(icon = Icons.Default.Security, label = stringResource(R.string.adguard_dns_port), value = status?.dnsPort?.toString().orEmpty()) }
-                        item { InfoCard(icon = Icons.Default.Link, label = stringResource(R.string.adguard_http_port), value = status?.httpPort?.toString().orEmpty()) }
-                    }
 
-                    if (topQueried.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            TopListSection(title = stringResource(R.string.adguard_top_queried), items = topQueried, accent = ServiceType.ADGUARD_HOME.primaryColor)
-                        }
-                    }
-
-                    if (topBlocked.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            TopListSection(title = stringResource(R.string.adguard_top_blocked), items = topBlocked, accent = StatusRed)
-                        }
-                    }
-
-                    if (topClients.isNotEmpty()) {
-                        item(span = { GridItemSpan(maxLineSpan) }) {
-                            TopListSection(title = stringResource(R.string.adguard_top_clients), items = topClients, accent = StatusGreen)
+                        if (topClients.isNotEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                TopListSection(title = stringResource(R.string.adguard_top_clients), items = topClients, accent = StatusGreen)
+                            }
                         }
                     }
                 }
@@ -289,6 +396,7 @@ private fun ProtectionCard(
     isToggling: Boolean,
     onToggle: (durationSeconds: Int?) -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     var showDialog by remember { mutableStateOf(false) }
 
     if (showDialog) {
@@ -373,7 +481,8 @@ private fun ProtectionCard(
                 }
             ),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = adguardCardColor(isDarkTheme, color),
+        border = BorderStroke(1.dp, adguardBorderTone(isDarkTheme, color).copy(alpha = if (isDarkTheme) 0.72f else 0.58f))
     ) {
         Row(
             modifier = Modifier.padding(18.dp),
@@ -381,7 +490,7 @@ private fun ProtectionCard(
         ) {
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = color.copy(alpha = 0.1f),
+                color = color.copy(alpha = if (isDarkTheme) 0.18f else 0.10f),
                 modifier = Modifier.size(56.dp)
             ) {
                 Icon(
@@ -415,6 +524,7 @@ private fun ProtectionCard(
 
 @Composable
 private fun StatCard(icon: androidx.compose.ui.graphics.vector.ImageVector, iconBg: Color, value: String, label: String, onClick: (() -> Unit)? = null) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     val modifier = if (onClick != null) {
         Modifier.clickable(onClick = onClick)
     } else {
@@ -423,10 +533,11 @@ private fun StatCard(icon: androidx.compose.ui.graphics.vector.ImageVector, icon
     Surface(
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = adguardRaisedCardColor(isDarkTheme, iconBg),
+        border = BorderStroke(1.dp, adguardBorderTone(isDarkTheme, iconBg).copy(alpha = if (isDarkTheme) 0.72f else 0.58f))
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Surface(shape = RoundedCornerShape(10.dp), color = iconBg.copy(alpha = 0.16f), modifier = Modifier.size(36.dp)) {
+            Surface(shape = RoundedCornerShape(10.dp), color = iconBg.copy(alpha = if (isDarkTheme) 0.22f else 0.16f), modifier = Modifier.size(36.dp)) {
                 Icon(icon, contentDescription = label, tint = iconBg, modifier = Modifier.padding(8.dp))
             }
             Text(text = value, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold), maxLines = 1)
@@ -437,9 +548,14 @@ private fun StatCard(icon: androidx.compose.ui.graphics.vector.ImageVector, icon
 
 @Composable
 private fun QueryChartSection(stats: AdGuardStats) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         AdGuardSectionHeader(title = stringResource(R.string.adguard_query_activity))
-        Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = adguardCardColor(isDarkTheme),
+            border = BorderStroke(1.dp, adguardBorderTone(isDarkTheme).copy(alpha = if (isDarkTheme) 0.72f else 0.58f))
+        ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 val maxValue = (stats.dnsQueries.maxOrNull() ?: 0).coerceAtLeast(1)
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -541,6 +657,7 @@ private fun QuickActionsSection(
     onNavigateToFilters: () -> Unit,
     onNavigateToBlockedServices: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         AdGuardSectionHeader(title = stringResource(R.string.adguard_quick_actions))
         Surface(
@@ -548,7 +665,8 @@ private fun QuickActionsSection(
                 .fillMaxWidth()
                 .clickable { onNavigateToRewrites() },
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLow
+            color = adguardCardColor(isDarkTheme, StatusBlue),
+            border = BorderStroke(1.dp, adguardBorderTone(isDarkTheme, StatusBlue).copy(alpha = if (isDarkTheme) 0.72f else 0.58f))
         ) {
             Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 Surface(shape = RoundedCornerShape(12.dp), color = StatusBlue.copy(alpha = 0.18f), modifier = Modifier.size(44.dp)) {
@@ -579,16 +697,18 @@ private fun RowScope.QuickActionCard(
     color: Color,
     onClick: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Surface(
         modifier = Modifier
             .weight(1f)
             .heightIn(min = 108.dp)
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = adguardRaisedCardColor(isDarkTheme, color),
+        border = BorderStroke(1.dp, adguardBorderTone(isDarkTheme, color).copy(alpha = if (isDarkTheme) 0.72f else 0.58f))
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Surface(shape = RoundedCornerShape(10.dp), color = color.copy(alpha = 0.18f), modifier = Modifier.size(36.dp)) {
+            Surface(shape = RoundedCornerShape(10.dp), color = color.copy(alpha = if (isDarkTheme) 0.24f else 0.18f), modifier = Modifier.size(36.dp)) {
                 Icon(icon, contentDescription = title, tint = color, modifier = Modifier.padding(8.dp))
             }
             Text(
@@ -603,15 +723,17 @@ private fun RowScope.QuickActionCard(
 }
 
 @Composable
-private fun InfoCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String) {
+private fun InfoCard(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, accent: Color) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Surface(
         modifier = Modifier.heightIn(min = 110.dp),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = adguardRaisedCardColor(isDarkTheme, accent),
+        border = BorderStroke(1.dp, adguardBorderTone(isDarkTheme, accent).copy(alpha = if (isDarkTheme) 0.72f else 0.58f))
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Surface(shape = RoundedCornerShape(10.dp), color = ServiceType.ADGUARD_HOME.primaryColor.copy(alpha = 0.16f), modifier = Modifier.size(34.dp)) {
-                Icon(icon, contentDescription = label, tint = ServiceType.ADGUARD_HOME.primaryColor, modifier = Modifier.padding(7.dp))
+            Surface(shape = RoundedCornerShape(10.dp), color = accent.copy(alpha = if (isDarkTheme) 0.22f else 0.16f), modifier = Modifier.size(34.dp)) {
+                Icon(icon, contentDescription = label, tint = accent, modifier = Modifier.padding(7.dp))
             }
             Text(
                 text = value.ifBlank { "—" },
@@ -627,9 +749,14 @@ private fun InfoCard(icon: androidx.compose.ui.graphics.vector.ImageVector, labe
 
 @Composable
 private fun TopListSection(title: String, items: List<AdGuardTopItem>, accent: Color) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         AdGuardSectionHeader(title = title)
-        Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = adguardCardColor(isDarkTheme, accent),
+            border = BorderStroke(1.dp, adguardBorderTone(isDarkTheme, accent).copy(alpha = if (isDarkTheme) 0.72f else 0.58f))
+        ) {
             Column {
                 val trimmed = items.take(10)
                 val maxValue = trimmed.maxOfOrNull { it.count }?.coerceAtLeast(1) ?: 1
@@ -638,7 +765,7 @@ private fun TopListSection(title: String, items: List<AdGuardTopItem>, accent: C
                     if (index < trimmed.lastIndex) {
                         androidx.compose.material3.HorizontalDivider(
                             modifier = Modifier.padding(start = 56.dp),
-                            color = MaterialTheme.colorScheme.outlineVariant
+                            color = adguardBorderTone(isDarkTheme, accent).copy(alpha = if (isDarkTheme) 0.56f else 0.46f)
                         )
                     }
                 }
@@ -649,6 +776,7 @@ private fun TopListSection(title: String, items: List<AdGuardTopItem>, accent: C
 
 @Composable
 private fun TopItemRow(rank: Int, label: String, value: Long, maxValue: Long, accent: Color) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Surface(shape = RoundedCornerShape(8.dp), color = accent.copy(alpha = 0.1f), modifier = Modifier.size(28.dp)) {
@@ -669,7 +797,7 @@ private fun TopItemRow(rank: Int, label: String, value: Long, maxValue: Long, ac
                 .fillMaxWidth()
                 .height(6.dp)
                 .clip(barShape)
-                .background(accent.copy(alpha = 0.18f))
+                .background(adguardTrackTone(isDarkTheme, accent))
         ) {
             Box(
                 modifier = Modifier

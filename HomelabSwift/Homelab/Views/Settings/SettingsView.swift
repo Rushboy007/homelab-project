@@ -39,6 +39,7 @@ struct SettingsView: View {
 
                             donationSection
                             themeSection
+                            homeStyleSection
                             languageSection
                             securitySection
                             debugSection
@@ -154,6 +155,42 @@ struct SettingsView: View {
             .glassCard(cornerRadius: 12)
             .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         }
+    }
+
+    private var homeStyleSection: some View {
+        HStack(spacing: 12) {
+            Image(systemName: settingsStore.homeCyberpunkCardsEnabled ? "sparkles.rectangle.stack.fill" : "rectangle.stack")
+                .font(.title3)
+                .foregroundStyle(settingsStore.homeCyberpunkCardsEnabled ? AppTheme.accent : AppTheme.textMuted)
+                .frame(width: 34, height: 34)
+                .background(Color.secondary.opacity(0.14), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(localizer.t.settingsHomeCyberpunkCards)
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.primary)
+                Text(localizer.t.settingsHomeCyberpunkCardsDesc)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.86)
+            }
+
+            Spacer()
+
+            Toggle("", isOn: Binding(
+                get: { settingsStore.homeCyberpunkCardsEnabled },
+                set: {
+                    settingsStore.homeCyberpunkCardsEnabled = $0
+                    HapticManager.light()
+                }
+            ))
+            .labelsHidden()
+            .tint(AppTheme.accent)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .glassCard(cornerRadius: 14)
     }
 
     private var languageSection: some View {
@@ -652,11 +689,9 @@ struct SettingsView: View {
                 ForEach(instances) { instance in
                     VStack(alignment: .leading, spacing: 10) {
                         HStack(spacing: 12) {
-                            if type == .healthchecks {
-                                ServiceIconView(type: .healthchecks, size: 22)
-                                    .frame(width: 36, height: 36)
-                                    .background(type.colors.bg, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            }
+                            ServiceIconView(type: type, size: 22)
+                                .frame(width: 36, height: 36)
+                                .background(type.colors.bg, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
                             VStack(alignment: .leading, spacing: 3) {
                                 HStack(spacing: 8) {
                                     Text(instance.displayLabel)

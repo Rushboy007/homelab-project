@@ -190,4 +190,16 @@ object NetworkModule {
     fun provideHealthchecksApi(retrofit: Retrofit): com.homelab.app.data.remote.api.HealthchecksApi {
         return retrofit.create(com.homelab.app.data.remote.api.HealthchecksApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun providePatchmonApi(retrofit: Retrofit): com.homelab.app.data.remote.api.PatchmonApi {
+        return retrofit.create(com.homelab.app.data.remote.api.PatchmonApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideJellystatApi(retrofit: Retrofit): com.homelab.app.data.remote.api.JellystatApi {
+        return retrofit.create(com.homelab.app.data.remote.api.JellystatApi::class.java)
+    }
 }

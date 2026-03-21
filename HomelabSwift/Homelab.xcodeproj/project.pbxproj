@@ -3,14 +3,16 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
 		001FA6007779556F8CF2BDC5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B518BC3D0A31F29612A69B75 /* Assets.xcassets */; };
+		011C344816A77F708FD46AF1 /* PatchmonModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 853EA1B757B0BD3540F2AEED /* PatchmonModels.swift */; };
 		0223089E3590C557B1077BC3 /* BookmarksStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27E1B9D98BB24CE9CC7DD66 /* BookmarksStore.swift */; };
 		03B92E43E53FDB090D96A183 /* NpmProxyHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2913EA81E6CCF74EFC883C /* NpmProxyHostForm.swift */; };
 		05260E0A1A5781AC8EAE7011 /* EditBookmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB770E60C2FE5FB6640BE98 /* EditBookmarkView.swift */; };
+		06B033BE66307E6CC8E75459 /* JellystatDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C74A7F7C1CB466CC7223840 /* JellystatDashboard.swift */; };
 		0E5566DAE01FB0E9F10E98C8 /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B6FAE42892F4BEB3097FD /* StatusBadge.swift */; };
 		0F634D9389BDB5467A64C25E /* GlassStatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735477DB04233B4FDA23469D /* GlassStatCard.swift */; };
 		10FBD548812295AB0814803D /* HealthchecksModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD139A00611FED93C43C0833 /* HealthchecksModels.swift */; };
@@ -20,6 +22,7 @@
 		1FEB8EB133A5749EBE928E1C /* BookmarkFormView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3565C63ADD375B1D9773CF8B /* BookmarkFormView.swift */; };
 		21BAB7FCB0AECC7133D55F6F /* ServiceConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 334BAFC4A25FD83F52E9CDD0 /* ServiceConnection.swift */; };
 		21E7233E678C07EF2FA629B5 /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F887B97554253C51BDFD167F /* EditCategoryView.swift */; };
+		24AF53A5125B18B4F58D1A21 /* PatchmonAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA7A42035DBFADEB256C578 /* PatchmonAPIClient.swift */; };
 		253B46BF21904B59477F2E8E /* GiteaDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3491FAD0D71DDB3C25D9D90 /* GiteaDashboard.swift */; };
 		29C9BD1512C814A8ED65D53A /* NpmDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB742A0C436A83F92CC1FED /* NpmDashboard.swift */; };
 		2A10CBCF4DFA744F2BE9BE8B /* AdGuardHomeFiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1461ABFFED5C380B73195B /* AdGuardHomeFiltersView.swift */; };
@@ -33,6 +36,7 @@
 		4E06A01BDB74CF4F678913CD /* AdGuardHomeDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10229F75137E8019ACE551D7 /* AdGuardHomeDashboard.swift */; };
 		5739C0189A11AB2E9F581D4C /* AdGuardHomeBlockedServicesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1B6C9B54D25DB2230917C8F8 /* AdGuardHomeBlockedServicesView.swift */; };
 		5A5F8EF3CA17C9A8CB0FA645 /* AdGuardHomeRewritesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F76B6FE397CB60885626195C /* AdGuardHomeRewritesView.swift */; };
+		5A7B08D9563CAA7DD0268405 /* PatchmonHostDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B16543E222589D62D5DFD50 /* PatchmonHostDetailView.swift */; };
 		60845D39E8A2BD7753B767BB /* PortainerDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 569655DA5311D77756775472 /* PortainerDashboard.swift */; };
 		62EF5383568C38878FAB5623 /* BookmarkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA8931C718CFC9019DCFF462 /* BookmarkManager.swift */; };
 		63A39B89AC9B8F48B3BC3147 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = FEF389260911EADF7079A97B /* APIClient.swift */; };
@@ -60,6 +64,7 @@
 		8EADC34444DEB43F553D0513 /* SkeletonLoader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3CC9947203975F8072646659 /* SkeletonLoader.swift */; };
 		8FC5C2BF6FC7CBC21BFF6696 /* ServiceDashboardLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7432B8C8ACBE47BDF26570DC /* ServiceDashboardLayout.swift */; };
 		8FF92C956D7D4D43C9F1547F /* HealthchecksAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC1DFC10F93EE792ED01CF97 /* HealthchecksAPIClient.swift */; };
+		9037BD60739CD62C84EFCDF1 /* PatchmonDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3B344770A37AF6E6CF0CCB9E /* PatchmonDashboard.swift */; };
 		95AC663AE4D3962BC2F4BB2A /* NpmDeadHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53BAF0C299F88C7BE7B562D3 /* NpmDeadHostForm.swift */; };
 		97C25FD08421A32F71C2B3BD /* NginxProxyManagerAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D740E72A36FA4EDBFEE8A195 /* NginxProxyManagerAPIClient.swift */; };
 		9A986ED771EA2DC52308E756 /* NpmAccessListCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34DDAD2C4F4522B5980306ED /* NpmAccessListCard.swift */; };
@@ -82,6 +87,7 @@
 		C18B23568F81455E4164835D /* GlassCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 486E817863BA2B5DA5318488 /* GlassCard.swift */; };
 		C462B63CC5FE35CD624ADFCD /* NpmStreamCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8904009FE0CC197DE3B1492A /* NpmStreamCard.swift */; };
 		C86FF5E6A543278A18B16E9B /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB95F4E19C7D3082B4D6484C /* APIError.swift */; };
+		CD29007C4FB0AD271F85673C /* JellystatAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = B0D364FA7AED9BAC9B522C01 /* JellystatAPIClient.swift */; };
 		CE78DBCA639D954A7CCB26D3 /* ServiceErrorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DBB688D017EE8175FB27EC7D /* ServiceErrorView.swift */; };
 		CF0124025064FF55FAD14233 /* BeszelDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408F0E514FDE46F6A78D0A58 /* BeszelDashboard.swift */; };
 		CFCDE90DDC7DCF5CB7F4A3A6 /* NpmUserForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9A1C1112D8A8BF86BB78353D /* NpmUserForm.swift */; };
@@ -141,8 +147,9 @@
 		34DDAD2C4F4522B5980306ED /* NpmAccessListCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmAccessListCard.swift; sourceTree = "<group>"; };
 		3565C63ADD375B1D9773CF8B /* BookmarkFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarkFormView.swift; sourceTree = "<group>"; };
 		38F7AE0005466E2FF260B000 /* Translations+English.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+English.swift"; sourceTree = "<group>"; };
-		3A088F5140A5297EA91E3821 /* Homelab.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Homelab.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		3A088F5140A5297EA91E3821 /* Homelab.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Homelab.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3AD1D644D530DE462BB79AA2 /* AppTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppTheme.swift; sourceTree = "<group>"; };
+		3B344770A37AF6E6CF0CCB9E /* PatchmonDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchmonDashboard.swift; sourceTree = "<group>"; };
 		3CC9947203975F8072646659 /* SkeletonLoader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SkeletonLoader.swift; sourceTree = "<group>"; };
 		3CFE5B253C47730D40039273 /* HealthchecksComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthchecksComponents.swift; sourceTree = "<group>"; };
 		3F5B6FAE42892F4BEB3097FD /* StatusBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBadge.swift; sourceTree = "<group>"; };
@@ -152,6 +159,7 @@
 		44F6D851F1B957C876FD6F0B /* GiteaModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GiteaModels.swift; sourceTree = "<group>"; };
 		465DB3CC355F5F7FDDF6DE00 /* PinEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinEntryView.swift; sourceTree = "<group>"; };
 		486E817863BA2B5DA5318488 /* GlassCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassCard.swift; sourceTree = "<group>"; };
+		4C74A7F7C1CB466CC7223840 /* JellystatDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellystatDashboard.swift; sourceTree = "<group>"; };
 		4E1A77FA193DE78992A80B91 /* HomelabTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HomelabTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4E1E8A717351D5E42B2696F1 /* BeszelAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelAPIClient.swift; sourceTree = "<group>"; };
 		4F2913EA81E6CCF74EFC883C /* NpmProxyHostForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmProxyHostForm.swift; sourceTree = "<group>"; };
@@ -171,6 +179,7 @@
 		773865BCB947A8885DA8DF37 /* Bookmark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Bookmark.swift; sourceTree = "<group>"; };
 		7BCDF60E05C067D5675AB59F /* BookmarksView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BookmarksView.swift; sourceTree = "<group>"; };
 		7E6FEE939313E58D34CE4BDB /* ServiceType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ServiceType.swift; sourceTree = "<group>"; };
+		853EA1B757B0BD3540F2AEED /* PatchmonModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchmonModels.swift; sourceTree = "<group>"; };
 		8569FC25F0824870C9BFD6A2 /* NpmProxyHostCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmProxyHostCard.swift; sourceTree = "<group>"; };
 		85D0D2A2905370C31F3A8ADE /* KeychainService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainService.swift; sourceTree = "<group>"; };
 		88B51084F8D0D0D7C999B8C3 /* BeszelModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelModels.swift; sourceTree = "<group>"; };
@@ -179,6 +188,7 @@
 		94D7A0C04FD3A10D46F836A9 /* ModelDecodingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDecodingTests.swift; sourceTree = "<group>"; };
 		95AC46B2418C37382FC7EAB9 /* LoadableState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadableState.swift; sourceTree = "<group>"; };
 		9A1C1112D8A8BF86BB78353D /* NpmUserForm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NpmUserForm.swift; sourceTree = "<group>"; };
+		9B16543E222589D62D5DFD50 /* PatchmonHostDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchmonHostDetailView.swift; sourceTree = "<group>"; };
 		9CB770E60C2FE5FB6640BE98 /* EditBookmarkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBookmarkView.swift; sourceTree = "<group>"; };
 		9D702ABD0D754FC3DEF8A7B4 /* PiholeDomainListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiholeDomainListView.swift; sourceTree = "<group>"; };
 		9E3E6D321C7DB682436A5607 /* BeszelDetailSheets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeszelDetailSheets.swift; sourceTree = "<group>"; };
@@ -191,6 +201,7 @@
 		AB95F4E19C7D3082B4D6484C /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
 		AD139A00611FED93C43C0833 /* HealthchecksModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthchecksModels.swift; sourceTree = "<group>"; };
 		AE1461ABFFED5C380B73195B /* AdGuardHomeFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdGuardHomeFiltersView.swift; sourceTree = "<group>"; };
+		B0D364FA7AED9BAC9B522C01 /* JellystatAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellystatAPIClient.swift; sourceTree = "<group>"; };
 		B0F5CFB96CB606EB9EC34EBB /* AdGuardHomeAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdGuardHomeAPIClient.swift; sourceTree = "<group>"; };
 		B1CB48124608D3A220C3A444 /* Translations+OtherLanguages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+OtherLanguages.swift"; sourceTree = "<group>"; };
 		B1EBFFF57A15B47F78E81D04 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
@@ -200,6 +211,7 @@
 		BB3E11D0571609D7927FCD5A /* AdGuardHomeQueryLogView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdGuardHomeQueryLogView.swift; sourceTree = "<group>"; };
 		BB7A6237B741BF62F16D9F8B /* OfflineBanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OfflineBanner.swift; sourceTree = "<group>"; };
 		BE0A64E52150CEEA94E249D7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		BEA7A42035DBFADEB256C578 /* PatchmonAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PatchmonAPIClient.swift; sourceTree = "<group>"; };
 		C226A2E333FD0452D26FF967 /* PiholeDomain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiholeDomain.swift; sourceTree = "<group>"; };
 		C4834BF58C4F9B1399553F78 /* CategoryFormView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryFormView.swift; sourceTree = "<group>"; };
 		C7F560D9B1083811461B4B44 /* Signing.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Signing.xcconfig; sourceTree = "<group>"; };
@@ -364,10 +376,19 @@
 				981FC3E8A73DC27EF4792684 /* Gitea */,
 				69A014381BA51401C9862848 /* Healthchecks */,
 				F3AB0740CCD7B809F06B451A /* NginxProxyManager */,
+				FBC83234CE88E51531A08129 /* Patchmon */,
 				F2BD8B68C5C78ECC6C3C024A /* PiHole */,
 				1E866E8511A219B4C76B9235 /* Portainer */,
 			);
 			path = Models;
+			sourceTree = "<group>";
+		};
+		4DF24834910915FEAB043587 /* Jellystat */ = {
+			isa = PBXGroup;
+			children = (
+				B0D364FA7AED9BAC9B522C01 /* JellystatAPIClient.swift */,
+			);
+			path = Jellystat;
 			sourceTree = "<group>";
 		};
 		58F8A8040064B68291A0616F /* ServiceLogin */ = {
@@ -395,6 +416,14 @@
 				E403C416C1CD9D360CB4369E /* HomelabTests */,
 				E163496F466E06D0E015E1FD /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		5C653FDCC31984516D486E0F /* Jellystat */ = {
+			isa = PBXGroup;
+			children = (
+				4C74A7F7C1CB466CC7223840 /* JellystatDashboard.swift */,
+			);
+			path = Jellystat;
 			sourceTree = "<group>";
 		};
 		69A014381BA51401C9862848 /* Healthchecks */ = {
@@ -455,6 +484,15 @@
 			path = Home;
 			sourceTree = "<group>";
 		};
+		88CAA1568236FD1297722073 /* Patchmon */ = {
+			isa = PBXGroup;
+			children = (
+				3B344770A37AF6E6CF0CCB9E /* PatchmonDashboard.swift */,
+				9B16543E222589D62D5DFD50 /* PatchmonHostDetailView.swift */,
+			);
+			path = Patchmon;
+			sourceTree = "<group>";
+		};
 		8CBB7F6BE424A7B126D2FFD6 /* DesignSystem */ = {
 			isa = PBXGroup;
 			children = (
@@ -512,6 +550,14 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
+		AEF3A1B12CFF68006D2F06AF /* Patchmon */ = {
+			isa = PBXGroup;
+			children = (
+				BEA7A42035DBFADEB256C578 /* PatchmonAPIClient.swift */,
+			);
+			path = Patchmon;
+			sourceTree = "<group>";
+		};
 		B95B7C501526C761049BD34F /* Views */ = {
 			isa = PBXGroup;
 			children = (
@@ -523,7 +569,9 @@
 				48AAFFAA1096205CCB4685B8 /* Gitea */,
 				73413D1CE20FEEB055D5D6DD /* Healthchecks */,
 				873F7F23714AC880CCFDA5BF /* Home */,
+				5C653FDCC31984516D486E0F /* Jellystat */,
 				710B37A9B027F4C732FAA0E0 /* NginxProxyManager */,
+				88CAA1568236FD1297722073 /* Patchmon */,
 				92577B05F8B135054A9B86B6 /* PiHole */,
 				EB0D5A2B9725AD26C768879F /* Portainer */,
 				092E6DA6764D5AD6F0361A22 /* Security */,
@@ -574,7 +622,9 @@
 				D5B24EF44902FCBD35F6D145 /* Beszel */,
 				289C5939524BACC32CDCCF25 /* Gitea */,
 				06347246AD362987E7E3A1D3 /* Healthchecks */,
+				4DF24834910915FEAB043587 /* Jellystat */,
 				23AB1F8E0947D3598E65C623 /* NginxProxyManager */,
+				AEF3A1B12CFF68006D2F06AF /* Patchmon */,
 				D43D23351242B6BFC6E743DC /* PiHole */,
 				3B0F0ED088E1700C927989C0 /* Portainer */,
 			);
@@ -664,6 +714,14 @@
 			path = NginxProxyManager;
 			sourceTree = "<group>";
 		};
+		FBC83234CE88E51531A08129 /* Patchmon */ = {
+			isa = PBXGroup;
+			children = (
+				853EA1B757B0BD3540F2AEED /* PatchmonModels.swift */,
+			);
+			path = Patchmon;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -728,6 +786,7 @@
 			);
 			mainGroup = 5A9E1D3A67703C812006DFAC;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
@@ -800,6 +859,8 @@
 				10FBD548812295AB0814803D /* HealthchecksModels.swift in Sources */,
 				703D6379BB37D3F83B0C21D5 /* HomeView.swift in Sources */,
 				826BA16B6B4D4F31C3CC2B5C /* HomelabApp.swift in Sources */,
+				CD29007C4FB0AD271F85673C /* JellystatAPIClient.swift in Sources */,
+				06B033BE66307E6CC8E75459 /* JellystatDashboard.swift in Sources */,
 				6B883FF0F9673181B59F8C83 /* KeychainService.swift in Sources */,
 				EAE1E1F928E990C7105F76A1 /* LoadableState.swift in Sources */,
 				FCBBD24B21419227C44FCC60 /* LockScreenView.swift in Sources */,
@@ -821,6 +882,10 @@
 				4CA71DBAD3D27E419ED0A10F /* NpmStreamForm.swift in Sources */,
 				CFCDE90DDC7DCF5CB7F4A3A6 /* NpmUserForm.swift in Sources */,
 				EAD085672E3D6DD29C4F51D1 /* OfflineBanner.swift in Sources */,
+				24AF53A5125B18B4F58D1A21 /* PatchmonAPIClient.swift in Sources */,
+				9037BD60739CD62C84EFCDF1 /* PatchmonDashboard.swift in Sources */,
+				5A7B08D9563CAA7DD0268405 /* PatchmonHostDetailView.swift in Sources */,
+				011C344816A77F708FD46AF1 /* PatchmonModels.swift in Sources */,
 				A283181CEA487B0C8346D967 /* PiHoleAPIClient.swift in Sources */,
 				1C4457681E0F071045A8132C /* PiHoleDashboard.swift in Sources */,
 				EC9F7C6B42D988E3D6D1E8BB /* PiHoleModels.swift in Sources */,

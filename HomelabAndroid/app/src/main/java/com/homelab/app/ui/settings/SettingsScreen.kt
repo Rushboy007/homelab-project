@@ -62,6 +62,7 @@ fun SettingsScreen(
     val preferredInstanceIdByType by viewModel.preferredInstanceIdByType.collectAsStateWithLifecycle()
     val hiddenServices by viewModel.hiddenServices.collectAsStateWithLifecycle()
     val serviceOrder by viewModel.serviceOrder.collectAsStateWithLifecycle()
+    val homeCyberpunkCardsEnabled by viewModel.homeCyberpunkCardsEnabled.collectAsStateWithLifecycle()
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -178,6 +179,45 @@ fun SettingsScreen(
                             onClick = { viewModel.setThemeMode(com.homelab.app.data.repository.ThemeMode.SYSTEM) },
                             shape = SegmentedButtonDefaults.itemShape(index = 2, count = 3)
                         ) { Text(stringResource(R.string.settings_theme_auto)) }
+                    }
+                }
+            }
+
+            item {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 0.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoAwesome,
+                            contentDescription = stringResource(R.string.settings_home_cyberpunk_title),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.settings_home_cyberpunk_title),
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(R.string.settings_home_cyberpunk_desc),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Switch(
+                            checked = homeCyberpunkCardsEnabled,
+                            onCheckedChange = { viewModel.setHomeCyberpunkCardsEnabled(it) }
+                        )
                     }
                 }
             }
@@ -495,36 +535,6 @@ fun SettingsScreen(
                 }
             }
 
-            // --- CONNECTED SERVICES ---
-            item {
-                Text(
-                    text = stringResource(R.string.settings_services_label),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
-                )
-            }
-
-            items(serviceOrder) { type ->
-                val index = serviceOrder.indexOf(type)
-                ServiceSettingsSection(
-                    type = type,
-                    instances = instancesByType[type].orEmpty(),
-                    preferredInstanceId = preferredInstanceIdByType[type],
-                    isHidden = hiddenServices.contains(type.name),
-                    canMoveUp = index > 0,
-                    canMoveDown = index in 0 until serviceOrder.lastIndex,
-                    onToggleVisibility = { viewModel.toggleServiceVisibility(type) },
-                    onMoveUp = { viewModel.moveService(type, -1) },
-                    onMoveDown = { viewModel.moveService(type, 1) },
-                    onAdd = { onNavigateToLogin(type, null) },
-                    onEdit = { instance -> onNavigateToLogin(type, instance.id) },
-                    onDelete = { instance -> viewModel.deleteInstance(instance.id) },
-                    onSetDefault = { instance -> viewModel.setPreferredInstance(type, instance.id) }
-                )
-            }
-
             // --- DEBUG ---
             item {
                 Text(
@@ -573,6 +583,36 @@ fun SettingsScreen(
                         )
                     }
                 }
+            }
+
+            // --- CONNECTED SERVICES ---
+            item {
+                Text(
+                    text = stringResource(R.string.settings_services_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
+                )
+            }
+
+            items(serviceOrder) { type ->
+                val index = serviceOrder.indexOf(type)
+                ServiceSettingsSection(
+                    type = type,
+                    instances = instancesByType[type].orEmpty(),
+                    preferredInstanceId = preferredInstanceIdByType[type],
+                    isHidden = hiddenServices.contains(type.name),
+                    canMoveUp = index > 0,
+                    canMoveDown = index in 0 until serviceOrder.lastIndex,
+                    onToggleVisibility = { viewModel.toggleServiceVisibility(type) },
+                    onMoveUp = { viewModel.moveService(type, -1) },
+                    onMoveDown = { viewModel.moveService(type, 1) },
+                    onAdd = { onNavigateToLogin(type, null) },
+                    onEdit = { instance -> onNavigateToLogin(type, instance.id) },
+                    onDelete = { instance -> viewModel.deleteInstance(instance.id) },
+                    onSetDefault = { instance -> viewModel.setPreferredInstance(type, instance.id) }
+                )
             }
 
             // --- CONTACTS ---
@@ -825,12 +865,20 @@ fun ServiceSettingsSection(
                     modifier = Modifier.heightIn(min = 48.dp),
                     contentPadding = PaddingValues(horizontal = 24.dp, vertical = 12.dp)
                 ) {
-                    Text(stringResource(R.string.delete))
+                    Text(
+                        text = stringResource(R.string.delete),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             },
             dismissButton = {
                 TextButton(onClick = { pendingDelete = null }) {
-                    Text(stringResource(R.string.cancel))
+                    Text(
+                        text = stringResource(R.string.cancel),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         )
@@ -920,7 +968,11 @@ private fun ServiceInstanceRow(
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                 ) {
-                    Text(stringResource(R.string.edit))
+                    Text(
+                        text = stringResource(R.string.edit),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
                 if (!isPreferred) {
                     FilledTonalButton(
@@ -940,7 +992,11 @@ private fun ServiceInstanceRow(
                     modifier = Modifier.weight(1f).heightIn(min = 48.dp),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp)
                 ) {
-                    Text(stringResource(R.string.delete))
+                    Text(
+                        text = stringResource(R.string.delete),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }

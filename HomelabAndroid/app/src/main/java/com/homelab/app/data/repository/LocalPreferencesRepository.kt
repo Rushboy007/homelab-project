@@ -59,6 +59,7 @@ class LocalPreferencesRepository @Inject constructor(
     private val BESZEL_SHOW_CPU_KEY = booleanPreferencesKey("beszel_show_cpu")
     private val BESZEL_SHOW_MEMORY_KEY = booleanPreferencesKey("beszel_show_memory")
     private val BESZEL_SHOW_NETWORK_KEY = booleanPreferencesKey("beszel_show_network")
+    private val HOME_CYBERPUNK_CARDS_KEY = booleanPreferencesKey("home_cyberpunk_cards")
 
     val themeMode: Flow<ThemeMode> = dataStore.data
         .catch { exception ->
@@ -151,6 +152,16 @@ class LocalPreferencesRepository @Inject constructor(
             if (raw.isBlank()) emptySet() else raw.split(",").toSet()
         }
 
+    val homeCyberpunkCardsEnabled: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[HOME_CYBERPUNK_CARDS_KEY] ?: false }
+
     val serviceOrder: Flow<List<ServiceType>> = dataStore.data
         .catch { exception ->
             if (exception is IOException) {
@@ -195,6 +206,12 @@ class LocalPreferencesRepository @Inject constructor(
             val moved = current.removeAt(index)
             current.add(destination, moved)
             preferences[SERVICE_ORDER_KEY] = current.joinToString(",") { it.name }
+        }
+    }
+
+    suspend fun setHomeCyberpunkCardsEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[HOME_CYBERPUNK_CARDS_KEY] = enabled
         }
     }
 

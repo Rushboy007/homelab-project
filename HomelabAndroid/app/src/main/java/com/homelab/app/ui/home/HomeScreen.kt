@@ -11,6 +11,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -39,7 +40,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -71,8 +71,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -95,6 +99,7 @@ import com.homelab.app.ui.theme.backgroundColor
 import com.homelab.app.ui.theme.fallbackIcon
 import com.homelab.app.ui.theme.primaryColor
 import com.homelab.app.util.ServiceType
+import coil3.compose.SubcomposeAsyncImage
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
@@ -118,6 +123,7 @@ fun HomeScreen(
     val preferredInstanceIds by viewModel.preferredInstanceIdByType.collectAsStateWithLifecycle()
     val instanceSummaries by viewModel.instanceSummaries.collectAsStateWithLifecycle()
     val summaryLoading by viewModel.summaryLoading.collectAsStateWithLifecycle()
+    val homeCyberpunkCardsEnabled by viewModel.homeCyberpunkCardsEnabled.collectAsStateWithLifecycle()
     var showReorderDialog by rememberSaveable { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
@@ -219,12 +225,17 @@ fun HomeScreen(
 
                 if (instances.isEmpty()) {
                     item {
-                        ConnectInstanceCard(type = type, onClick = { onNavigateToLogin(type, null) })
+                        ConnectInstanceCard(
+                            type = type,
+                            useCyberpunkCards = homeCyberpunkCardsEnabled,
+                            onClick = { onNavigateToLogin(type, null) }
+                        )
                     }
                 } else {
                     items(instances, key = { it.id }) { instance ->
                         InstanceCard(
                             type = type,
+                            useCyberpunkCards = homeCyberpunkCardsEnabled,
                             instance = instance,
                             isPreferred = instance.id == preferredInstanceIds[type],
                             isReachable = reachability[instance.id],
@@ -265,6 +276,7 @@ fun HomeScreen(
 @Composable
 private fun InstanceCard(
     type: ServiceType,
+    useCyberpunkCards: Boolean,
     instance: ServiceInstance,
     isPreferred: Boolean,
     isReachable: Boolean?,
@@ -274,6 +286,7 @@ private fun InstanceCard(
     onOpen: () -> Unit,
     onRefresh: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     val resolvedReachable = when {
         summary != null -> true
         isReachable == false && (isSummaryLoading || isPinging) -> null
@@ -294,6 +307,35 @@ private fun InstanceCard(
         false -> stringResource(R.string.home_status_offline)
         null -> stringResource(R.string.home_verifying)
     }
+    val cardShape = RoundedCornerShape(18.dp)
+    val cardColor = if (useCyberpunkCards) {
+        if (isDarkTheme) Color(0xFF10161F) else Color(0xFFFBFCFF)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    }
+    val cardBorder = if (useCyberpunkCards) {
+        BorderStroke(
+            1.25.dp,
+            type.primaryColor.copy(alpha = if (isDarkTheme) 0.82f else 0.58f)
+        )
+    } else {
+        null
+    }
+    val brandColor = type.primaryColor
+    val cardBrush = remember(brandColor, useCyberpunkCards, isDarkTheme) {
+        if (useCyberpunkCards) {
+            Brush.linearGradient(
+                colors = listOf(
+                    brandColor.copy(alpha = if (isDarkTheme) 0.13f else 0.075f),
+                    Color.Transparent
+                ),
+                start = Offset(0f, 0f),
+                end = Offset(580f, 520f)
+            )
+        } else {
+            null
+        }
+    }
 
     // Resolve label key to localized string
     val summaryLabel = summary?.let { s ->
@@ -305,157 +347,172 @@ private fun InstanceCard(
             "repos" -> stringResource(R.string.gitea_repos)
             "proxy_hosts" -> stringResource(R.string.npm_proxy_hosts)
             "checks" -> stringResource(R.string.healthchecks_checks)
+            "jellystat_watch_time" -> stringResource(R.string.jellystat_watch_time)
+            "hosts" -> stringResource(R.string.patchmon_hosts)
             else -> s.label
         }.lowercase()
     }
 
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        shape = cardShape,
+        color = cardColor,
+        border = cardBorder
     ) {
-        Column(
-            modifier = Modifier
-                .clickable(onClick = onOpen)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
-            ) {
-                ServiceIcon(
-                    type = type,
-                    size = 56.dp,
-                    iconSize = 36.dp,
-                    cornerRadius = 14.dp
+        Box {
+            if (cardBrush != null) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(cardBrush)
                 )
+            }
 
-                Spacer(modifier = Modifier.weight(1f))
+            Column(
+                modifier = Modifier
+                    .clickable(onClick = onOpen)
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    ServiceIcon(
+                        type = type,
+                        size = 52.dp,
+                        iconSize = 32.dp,
+                        cornerRadius = 13.dp
+                    )
 
-                if (resolvedReachable == true && summary != null) {
-                    // Inline summary stats (right of icon)
-                    Column(
-                        horizontalAlignment = Alignment.End,
-                        modifier = Modifier.widthIn(max = 110.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.Bottom,
-                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                    Spacer(modifier = Modifier.weight(1f))
+
+                    if (resolvedReachable == true && summary != null) {
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            modifier = Modifier.widthIn(max = 108.dp),
+                            verticalArrangement = Arrangement.spacedBy(1.dp)
                         ) {
-                            Text(
-                                text = summary.value,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                ),
-                                color = type.primaryColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                softWrap = false,
-                                modifier = Modifier.weight(1f, fill = false)
-                            )
-                            if (summary.subValue != null) {
+                            Row(
+                                verticalAlignment = Alignment.Bottom,
+                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                            ) {
                                 Text(
-                                    text = summary.subValue,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    text = summary.value,
+                                    style = MaterialTheme.typography.titleSmall.copy(
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = type.primaryColor,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
-                                    modifier = Modifier.padding(bottom = 2.dp)
+                                    softWrap = false,
+                                    modifier = Modifier.weight(1f, fill = false)
+                                )
+                                if (summary.subValue != null) {
+                                    Text(
+                                        text = summary.subValue,
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        softWrap = false,
+                                        modifier = Modifier.padding(bottom = 1.dp)
+                                    )
+                                }
+                            }
+                            Text(
+                                text = summaryLabel ?: "",
+                                style = MaterialTheme.typography.labelSmall.copy(lineHeight = 12.sp),
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.End,
+                                softWrap = false
+                            )
+                        }
+                    } else if (resolvedReachable == true && isSummaryLoading) {
+                        Surface(
+                            shape = RoundedCornerShape(6.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                            modifier = Modifier.size(width = 52.dp, height = 14.dp)
+                        ) {}
+                    } else if (resolvedReachable == false) {
+                        Surface(
+                            shape = CircleShape,
+                            color = type.primaryColor.copy(alpha = 0.1f),
+                            modifier = Modifier.size(36.dp)
+                        ) {
+                            IconButton(onClick = onRefresh) {
+                                val rotation by animateFloatAsState(
+                                    targetValue = if (isPinging) 360f else 0f,
+                                    animationSpec = if (isPinging) infiniteRepeatable(tween(1000, easing = LinearEasing)) else tween(300),
+                                    label = "refresh_rotation"
+                                )
+                                Icon(
+                                    imageVector = Icons.Default.Refresh,
+                                    contentDescription = stringResource(R.string.refresh),
+                                    tint = type.primaryColor,
+                                    modifier = Modifier.graphicsLayer(rotationZ = rotation)
                                 )
                             }
                         }
-                        Text(
-                            text = summaryLabel ?: "",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                    } else if (resolvedReachable == null) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(20.dp),
+                            strokeWidth = 2.dp,
+                            color = type.primaryColor
                         )
                     }
-                } else if (resolvedReachable == true && isSummaryLoading) {
-                    // Skeleton placeholder
+                }
+
+                Text(
+                    text = instance.label.ifBlank { type.displayName },
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
                     Surface(
-                        shape = RoundedCornerShape(6.dp),
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                        modifier = Modifier.size(width = 60.dp, height = 16.dp)
-                    ) {}
-                } else if (resolvedReachable == false) {
-                    Surface(
-                        shape = CircleShape,
-                        color = type.primaryColor.copy(alpha = 0.1f),
-                        modifier = Modifier.size(36.dp)
+                        shape = RoundedCornerShape(8.dp),
+                        color = statusBackground
                     ) {
-                        IconButton(onClick = onRefresh) {
-                            val rotation by animateFloatAsState(
-                                targetValue = if (isPinging) 360f else 0f,
-                                animationSpec = if (isPinging) infiniteRepeatable(tween(1000, easing = LinearEasing)) else tween(300),
-                                label = "refresh_rotation"
+                        Row(
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(6.dp)
+                                    .background(statusAccent, CircleShape)
                             )
-                            Icon(
-                                imageVector = Icons.Default.Refresh,
-                                contentDescription = stringResource(R.string.refresh),
-                                tint = type.primaryColor,
-                                modifier = Modifier.graphicsLayer(rotationZ = rotation)
+                            Text(
+                                text = statusLabel,
+                                style = MaterialTheme.typography.labelSmall,
+                                color = statusAccent,
+                                fontWeight = FontWeight.Bold
                             )
                         }
                     }
-                } else if (resolvedReachable == null) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        strokeWidth = 2.dp,
-                        color = type.primaryColor
-                    )
-                }
-            }
-
-            Text(
-                text = instance.label.ifBlank { type.displayName },
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Surface(
-                    shape = RoundedCornerShape(8.dp),
-                    color = statusBackground
-                ) {
-                    Row(
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(6.dp)
-                                .background(statusAccent, CircleShape)
-                        )
-                        Text(
-                            text = statusLabel,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = statusAccent,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-                }
-                if (isPreferred) {
-                    Surface(
-                        shape = CircleShape,
-                        color = type.primaryColor.copy(alpha = 0.12f),
-                        modifier = Modifier.size(22.dp)
-                    ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = Icons.Default.Star,
-                                contentDescription = stringResource(R.string.home_default_badge),
-                                tint = type.primaryColor,
-                                modifier = Modifier.size(12.dp)
-                            )
+                    if (isPreferred) {
+                        Surface(
+                            shape = CircleShape,
+                            color = type.primaryColor.copy(alpha = 0.12f),
+                            modifier = Modifier.size(22.dp)
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = stringResource(R.string.home_default_badge),
+                                    tint = type.primaryColor,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
                         }
                     }
                 }
@@ -472,61 +529,96 @@ private fun isLikelyTailscaleUrl(url: String): Boolean {
     }.getOrDefault(false)
 }
 
+private const val TAILSCALE_ICON_URL = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png"
+
 @Composable
 private fun ConnectInstanceCard(
     type: ServiceType,
+    useCyberpunkCards: Boolean,
     onClick: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val cardColor = if (useCyberpunkCards) {
+        if (isDarkTheme) Color(0xFF10161F) else Color(0xFFFBFCFF)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainerLow
+    }
+    val cardBorder = if (useCyberpunkCards) {
+        BorderStroke(
+            1.25.dp,
+            type.primaryColor.copy(alpha = if (isDarkTheme) 0.82f else 0.58f)
+        )
+    } else {
+        null
+    }
+    val brandColor = type.primaryColor
+    val cardBrush = remember(brandColor, useCyberpunkCards, isDarkTheme) {
+        if (useCyberpunkCards) {
+            Brush.linearGradient(
+                colors = listOf(
+                    brandColor.copy(alpha = if (isDarkTheme) 0.13f else 0.075f),
+                    Color.Transparent
+                ),
+                start = Offset(0f, 0f),
+                end = Offset(580f, 520f)
+            )
+        } else {
+            null
+        }
+    }
+
     Surface(
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        shape = RoundedCornerShape(18.dp),
+        color = cardColor,
+        border = cardBorder
     ) {
-        Column(
-            modifier = Modifier
-                .clickable(onClick = onClick)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        Box {
+            if (cardBrush != null) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(cardBrush)
+                )
+            }
+
+            Column(
+                modifier = Modifier
+                    .clickable(onClick = onClick)
+                    .padding(14.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                ServiceIcon(
-                    type = type,
-                    size = 56.dp,
-                    cornerRadius = 14.dp,
-                    modifier = Modifier.size(56.dp)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(
-                            Icons.Default.Add, 
-                            contentDescription = stringResource(R.string.settings_add_instance),
-                            tint = type.primaryColor,
-                            modifier = Modifier.size(28.dp)
+                    ServiceIcon(
+                        type = type,
+                        size = 52.dp,
+                        cornerRadius = 13.dp,
+                        modifier = Modifier.size(52.dp)
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+                }
+
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.home_connect_service, type.displayName),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.weight(1f, fill = false)
                         )
                     }
                 }
-                
-                Spacer(modifier = Modifier.weight(1f))
-            }
 
-            Column {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.home_connect_service, type.displayName),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                        modifier = Modifier.weight(1f, fill = false)
-                    )
-                }
+                Spacer(modifier = Modifier.height(6.dp))
             }
-
-            Spacer(modifier = Modifier.height(18.dp))
         }
     }
 }
@@ -547,15 +639,30 @@ fun TailscaleCard(isConnected: Boolean) {
         ) {
             Surface(
                 shape = RoundedCornerShape(12.dp),
-                color = Color.Black,
+                color = MaterialTheme.colorScheme.surfaceContainer,
                 modifier = Modifier.size(44.dp)
             ) {
                 Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        Icons.Default.Security,
+                    SubcomposeAsyncImage(
+                        model = TAILSCALE_ICON_URL,
                         contentDescription = stringResource(R.string.tailscale_open),
-                        tint = Color.White,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(26.dp),
+                        contentScale = ContentScale.Fit,
+                        loading = {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(14.dp),
+                                strokeWidth = 1.8.dp,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        },
+                        error = {
+                            Icon(
+                                Icons.Default.Security,
+                                contentDescription = stringResource(R.string.tailscale_open),
+                                tint = if (isConnected) StatusGreen else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
                     )
                 }
             }

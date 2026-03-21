@@ -7,6 +7,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -32,7 +33,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +66,44 @@ import java.time.format.DateTimeFormatter
 import kotlinx.coroutines.launch
 
 private val HealthchecksGreen = Color(0xFF16A34A)
+
+private fun healthchecksPageBackground(isDarkTheme: Boolean, accent: Color): Brush = if (isDarkTheme) {
+    Brush.verticalGradient(
+        listOf(
+            Color(0xFF0A110D),
+            Color(0xFF0F1913),
+            accent.copy(alpha = 0.045f),
+            Color(0xFF0A120E)
+        )
+    )
+} else {
+    Brush.verticalGradient(
+        listOf(
+            Color(0xFFF7FCF8),
+            Color(0xFFF1F9F4),
+            accent.copy(alpha = 0.03f),
+            Color(0xFFF5FBF7)
+        )
+    )
+}
+
+private fun healthchecksCardColor(isDarkTheme: Boolean, accent: Color): Color {
+    val neutral = if (isDarkTheme) Color(0xFF121A16) else Color(0xFFF3F8F4)
+    val tintAmount = if (isDarkTheme) 0.17f else 0.10f
+    return lerp(neutral, accent, tintAmount)
+}
+
+private fun healthchecksRaisedCardColor(isDarkTheme: Boolean, accent: Color): Color {
+    val neutral = if (isDarkTheme) Color(0xFF18211D) else Color(0xFFF9FCFA)
+    val tintAmount = if (isDarkTheme) 0.13f else 0.08f
+    return lerp(neutral, accent, tintAmount)
+}
+
+private fun healthchecksBorderTone(isDarkTheme: Boolean, accent: Color): Color {
+    val neutral = if (isDarkTheme) Color(0xFF2E3C35) else Color(0xFFBED4C8)
+    val tintAmount = if (isDarkTheme) 0.34f else 0.22f
+    return lerp(neutral, accent, tintAmount)
+}
 
 enum class HealthchecksStatusFilter(val status: String, val labelRes: Int) {
     ALL("all", R.string.healthchecks_all),
@@ -101,6 +144,11 @@ fun HealthchecksDashboardScreen(
 
     val isReadOnly = checks.isNotEmpty() && checks.all { it.uuid == null }
     val serviceColor = ServiceType.HEALTHCHECKS.primaryColor
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val pageBrush = remember(isDarkTheme) { healthchecksPageBackground(isDarkTheme, serviceColor) }
+    val pageGlow = remember(isDarkTheme) {
+        if (isDarkTheme) serviceColor.copy(alpha = 0.085f) else serviceColor.copy(alpha = 0.04f)
+    }
 
     LaunchedEffect(Unit) { viewModel.fetchAll() }
 
@@ -155,90 +203,115 @@ fun HealthchecksDashboardScreen(
                             leadingIcon = { Icon(Icons.Default.Badge, contentDescription = null) }
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Transparent
     ) { paddingValues ->
-        when (val state = uiState) {
-            is UiState.Loading, is UiState.Idle -> {
-                Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = serviceColor)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(pageBrush)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(pageGlow, Color.Transparent),
+                            center = Offset(160f, 90f),
+                            radius = 560f
+                        )
+                    )
+            )
+
+            when (val state = uiState) {
+                is UiState.Loading, is UiState.Idle -> {
+                    Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator(color = serviceColor)
+                    }
                 }
-            }
-            is UiState.Error -> {
-                ErrorScreen(
-                    message = state.message,
-                    onRetry = { state.retryAction?.invoke() ?: viewModel.fetchAll() },
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
-            is UiState.Offline -> {
-                ErrorScreen(
-                    message = "",
-                    onRetry = { viewModel.fetchAll() },
-                    isOffline = true,
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
-            is UiState.Success -> {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(14.dp)
-                ) {
-                    if (instances.isNotEmpty()) {
+                is UiState.Error -> {
+                    ErrorScreen(
+                        message = state.message,
+                        onRetry = { state.retryAction?.invoke() ?: viewModel.fetchAll() },
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
+                is UiState.Offline -> {
+                    ErrorScreen(
+                        message = "",
+                        onRetry = { viewModel.fetchAll() },
+                        isOffline = true,
+                        modifier = Modifier.padding(paddingValues)
+                    )
+                }
+                is UiState.Success -> {
+                    LazyColumn(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        if (instances.isNotEmpty()) {
+                            item {
+                                ServiceInstancePicker(
+                                    instances = instances,
+                                    selectedInstanceId = viewModel.instanceId,
+                                    onInstanceSelected = { instance ->
+                                        viewModel.setPreferredInstance(instance.id)
+                                        onNavigateToInstance(instance.id)
+                                    }
+                                )
+                            }
+                        }
+
                         item {
-                            ServiceInstancePicker(
-                                instances = instances,
-                                selectedInstanceId = viewModel.instanceId,
-                                onInstanceSelected = { instance ->
-                                    viewModel.setPreferredInstance(instance.id)
-                                    onNavigateToInstance(instance.id)
-                                }
+                            HealthchecksOverviewCard(
+                                checks = checks,
+                                onSelect = { filter -> onNavigateToChecks(filter) }
                             )
                         }
-                    }
 
-                    item {
-                        HealthchecksOverviewCard(
-                            checks = checks,
-                            onSelect = { filter -> onNavigateToChecks(filter) }
-                        )
-                    }
-
-                    if (isReadOnly) {
-                        item {
-                            Surface(
-                                color = MaterialTheme.colorScheme.errorContainer,
-                                shape = RoundedCornerShape(18.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(14.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        if (isReadOnly) {
+                            item {
+                                Surface(
+                                    color = MaterialTheme.colorScheme.errorContainer.copy(alpha = if (isDarkTheme) 0.24f else 0.8f),
+                                    shape = RoundedCornerShape(18.dp),
+                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = if (isDarkTheme) 0.38f else 0.28f))
                                 ) {
-                                    Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
-                                    Column {
-                                        Text(
-                                            text = stringResource(R.string.healthchecks_read_only_title),
-                                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                            color = MaterialTheme.colorScheme.onErrorContainer
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.healthchecks_read_only_message),
-                                            style = MaterialTheme.typography.labelMedium,
-                                            color = MaterialTheme.colorScheme.onErrorContainer
-                                        )
+                                    Row(
+                                        modifier = Modifier.padding(14.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                    ) {
+                                        Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
+                                        Column {
+                                            Text(
+                                                text = stringResource(R.string.healthchecks_read_only_title),
+                                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                                                color = MaterialTheme.colorScheme.onErrorContainer
+                                            )
+                                            Text(
+                                                text = stringResource(R.string.healthchecks_read_only_message),
+                                                style = MaterialTheme.typography.labelMedium,
+                                                color = MaterialTheme.colorScheme.onErrorContainer
+                                            )
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
 
-                    // Dashboard mirrors iOS: overview card only (checks list lives in its own screen).
+                        // Dashboard mirrors iOS: overview card only (checks list lives in its own screen).
+                    }
                 }
             }
         }
@@ -974,6 +1047,8 @@ private fun HealthchecksOverviewCard(
     checks: List<HealthchecksCheck>,
     onSelect: (HealthchecksStatusFilter) -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val serviceAccent = ServiceType.HEALTHCHECKS.primaryColor
     val total = checks.size
     val up = checks.count { it.status == "up" }
     val grace = checks.count { it.status == "grace" }
@@ -1021,9 +1096,8 @@ private fun HealthchecksOverviewCard(
 
     Surface(
         shape = RoundedCornerShape(26.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
-        tonalElevation = 2.dp,
-        shadowElevation = 1.dp,
+        color = healthchecksCardColor(isDarkTheme, serviceAccent),
+        border = BorderStroke(1.dp, healthchecksBorderTone(isDarkTheme, serviceAccent).copy(alpha = if (isDarkTheme) 0.72f else 0.58f)),
         modifier = Modifier.animateContentSize()
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1049,7 +1123,7 @@ private fun HealthchecksOverviewCard(
                 }
             }
 
-            HorizontalDivider(color = MaterialTheme.colorScheme.surfaceContainerHighest)
+            HorizontalDivider(color = healthchecksBorderTone(isDarkTheme, serviceAccent).copy(alpha = if (isDarkTheme) 0.58f else 0.48f))
             Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 tiles.chunked(2).forEach { row ->
                     Row(
@@ -1085,10 +1159,11 @@ private fun SummaryTile(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 1.dp,
+        color = healthchecksRaisedCardColor(isDarkTheme, color),
+        border = BorderStroke(1.dp, healthchecksBorderTone(isDarkTheme, color).copy(alpha = if (isDarkTheme) 0.64f else 0.52f)),
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
@@ -1101,7 +1176,7 @@ private fun SummaryTile(
         ) {
             Surface(
                 shape = RoundedCornerShape(10.dp),
-                color = color.copy(alpha = 0.16f)
+                color = color.copy(alpha = if (isDarkTheme) 0.22f else 0.16f)
             ) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.padding(6.dp))
             }

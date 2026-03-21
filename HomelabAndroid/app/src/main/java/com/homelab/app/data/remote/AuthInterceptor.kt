@@ -154,6 +154,22 @@ class AuthInterceptor @Inject constructor(
                     builder.addHeader("X-Api-Key", instance.apiKey)
                 }
             }
+            ServiceType.JELLYSTAT -> {
+                if (!instance.apiKey.isNullOrBlank()) {
+                    builder.addHeader("X-API-Token", instance.apiKey)
+                }
+            }
+            ServiceType.PATCHMON -> {
+                if (!hasAuthorization) {
+                    val tokenKey = instance.username.orEmpty()
+                    val tokenSecret = instance.password.orEmpty()
+                    if (tokenKey.isNotBlank() || tokenSecret.isNotBlank()) {
+                        val creds = "$tokenKey:$tokenSecret"
+                        val encoded = java.util.Base64.getEncoder().encodeToString(creds.toByteArray(Charsets.UTF_8))
+                        builder.addHeader("Authorization", "Basic $encoded")
+                    }
+                }
+            }
             else -> {}
         }
     }

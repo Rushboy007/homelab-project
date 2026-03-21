@@ -1,5 +1,6 @@
 package com.homelab.app.ui.nginxpm.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -14,6 +15,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -22,6 +26,36 @@ import com.homelab.app.R
 import com.homelab.app.data.remote.dto.nginxpm.NpmProxyHost
 import com.homelab.app.ui.theme.StatusGreen
 import com.homelab.app.ui.theme.StatusRed
+
+private fun npmCardColor(
+    isDarkTheme: Boolean,
+    accent: Color? = null,
+    tint: Float = if (isDarkTheme) 0.10f else 0.07f
+): Color {
+    val base = if (isDarkTheme) Color(0xFF271C16) else Color(0xFFFFF0E8)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.22f)) } ?: base
+}
+
+private fun npmRaisedCardColor(
+    isDarkTheme: Boolean,
+    accent: Color? = null,
+    tint: Float = if (isDarkTheme) 0.08f else 0.05f
+): Color {
+    val base = if (isDarkTheme) Color(0xFF33251E) else Color(0xFFFFF6F1)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.18f)) } ?: base
+}
+
+private fun npmBorderTone(
+    isDarkTheme: Boolean,
+    accent: Color? = null,
+    tint: Float = if (isDarkTheme) 0.28f else 0.20f
+): Color {
+    val base = if (isDarkTheme) Color(0xFF5A4336) else Color(0xFFE2BFA8)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.35f)) } ?: base
+}
+
+private fun npmBorderColor(isDarkTheme: Boolean): Color =
+    npmBorderTone(isDarkTheme).copy(alpha = if (isDarkTheme) 0.72f else 0.58f)
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -32,6 +66,7 @@ fun ProxyHostCard(
     onDelete: () -> Unit = {},
     onToggle: ((Boolean) -> Unit)? = null
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     var showMenu by remember { mutableStateOf(false) }
 
     val statusResId = when {
@@ -44,10 +79,12 @@ fun ProxyHostCard(
         proxyHost.isOnline -> StatusGreen
         else -> StatusRed
     }
+    val cardAccent = statusColor
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = cardAccent),
+        border = BorderStroke(1.dp, npmBorderTone(isDarkTheme, accent = cardAccent).copy(alpha = if (isDarkTheme) 0.72f else 0.58f)),
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
@@ -83,7 +120,7 @@ fun ProxyHostCard(
 
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = statusColor.copy(alpha = 0.1f)
+                        color = npmRaisedCardColor(isDarkTheme, accent = statusColor, tint = 0.10f)
                     ) {
                         Text(
                             text = stringResource(statusResId),
@@ -184,9 +221,12 @@ fun FeatureChip(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     text: String
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val chipColor = featureChipColor(text)
     Surface(
         shape = RoundedCornerShape(8.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant
+        color = npmRaisedCardColor(isDarkTheme, accent = chipColor, tint = if (isDarkTheme) 0.12f else 0.08f),
+        border = BorderStroke(1.dp, npmBorderTone(isDarkTheme, accent = chipColor).copy(alpha = if (isDarkTheme) 0.62f else 0.52f))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
@@ -197,13 +237,23 @@ fun FeatureChip(
                 icon,
                 contentDescription = text,
                 modifier = Modifier.size(12.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                tint = chipColor
             )
             Text(
                 text = text,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = chipColor
             )
         }
     }
 }
+
+@Composable
+private fun featureChipColor(text: String): Color =
+    when (text.lowercase()) {
+        "ssl" -> StatusGreen
+        "http/2" -> Color(0xFF2196F3)
+        "cache" -> Color(0xFFFFB74D)
+        "block exploits" -> Color(0xFFF44336)
+        else -> Color(0xFF8E8E93)
+    }

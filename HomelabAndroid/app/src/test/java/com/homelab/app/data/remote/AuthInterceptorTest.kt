@@ -123,6 +123,38 @@ class AuthInterceptorTest {
         verify { eventBus.emitAuthError("instance-2") }
     }
 
+    @Test
+    fun `adds jellystat api token header from stored api key`() {
+        val eventBus = mockk<GlobalEventBus>(relaxed = true)
+        val instancesRepository = mockk<ServiceInstancesRepository>()
+        val (interceptor) = createInterceptor(eventBus, instancesRepository)
+        val chain = mockk<Interceptor.Chain>()
+        val capturedRequest = slot<Request>()
+        val request = Request.Builder()
+            .url("https://example.com/stats/getViewsByLibraryType?days=30")
+            .header("X-Homelab-Service", "Jellystat")
+            .header("X-Homelab-Instance-Id", "instance-jelly")
+            .build()
+
+        coEvery { instancesRepository.getInstance("instance-jelly") } returns ServiceInstance(
+            id = "instance-jelly",
+            type = ServiceType.JELLYSTAT,
+            label = "Jellystat Main",
+            url = "https://jellystat.local",
+            apiKey = "jelly-api-key"
+        )
+        every { chain.request() } returns request
+        every { chain.proceed(capture(capturedRequest)) } answers {
+            response(capturedRequest.captured, 200)
+        }
+
+        interceptor.intercept(chain)
+
+        assertEquals("jelly-api-key", capturedRequest.captured.header("X-API-Token"))
+        assertNull(capturedRequest.captured.header("X-Homelab-Service"))
+        assertNull(capturedRequest.captured.header("X-Homelab-Instance-Id"))
+    }
+
     private fun response(request: Request, code: Int): Response {
         return Response.Builder()
             .request(request)

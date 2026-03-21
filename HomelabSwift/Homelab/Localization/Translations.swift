@@ -62,6 +62,8 @@ struct Translations {
     let serviceHealthchecks: String
     let serviceGitea: String
     let serviceNpm: String
+    let servicePatchmon: String
+    let serviceJellystat: String
     let servicePortainerDesc: String
     let servicePiholeDesc: String
     let serviceAdguardDesc: String
@@ -69,6 +71,8 @@ struct Translations {
     let serviceHealthchecksDesc: String
     let serviceGiteaDesc: String
     let serviceNpmDesc: String
+    let servicePatchmonDesc: String
+    let serviceJellystatDesc: String
 
     // Login
     let loginTitle: String
@@ -78,6 +82,8 @@ struct Translations {
     let loginUsername: String
     let loginEmail: String
     let loginPassword: String
+    let loginTokenKey: String
+    let loginTokenSecret: String
     let loginConnect: String
     let loginConnecting: String
     let loginErrorUrl: String
@@ -88,6 +94,8 @@ struct Translations {
     let loginHintGitea2FA: String
     let loginHintPortainer: String
     let loginHintHealthchecks: String
+    let loginHintPatchmon: String
+    let loginHintJellystat: String
     let loginApiKey: String
     let done: String
 
@@ -498,6 +506,65 @@ struct Translations {
     let npmSecurity: String
     let loginHintNpm: String
 
+    // PatchMon
+    let patchmonHosts: String
+    let patchmonSecurity: String
+    let patchmonUpdates: String
+    let patchmonNoHosts: String
+    let patchmonStatusActive: String
+    let patchmonStatusPending: String
+    let patchmonReboot: String
+    let patchmonLastUpdate: String
+    let patchmonOverview: String
+    let patchmonSystem: String
+    let patchmonPackages: String
+    let patchmonReports: String
+    let patchmonRepositories: String
+    let patchmonAgentQueue: String
+    let patchmonNotes: String
+    let patchmonIntegrations: String
+    let patchmonHostGroups: String
+    let patchmonAllGroups: String
+    let patchmonOpenDetails: String
+    let patchmonNoHostsInGroup: String
+    let patchmonUpdatesOnly: String
+    let patchmonShowAllPackages: String
+    let patchmonNoPackages: String
+    let patchmonNoReports: String
+    let patchmonNoJobs: String
+    let patchmonNoNotes: String
+    let patchmonNoIntegrations: String
+    let patchmonDocker: String
+    let patchmonMachineId: String
+    let patchmonAgentVersion: String
+    let patchmonArchitecture: String
+    let patchmonKernel: String
+    let patchmonInstalledKernel: String
+    let patchmonUptime: String
+    let patchmonLoadAverage: String
+    let patchmonGateway: String
+    let patchmonDnsServers: String
+    let patchmonInterfaces: String
+    let patchmonQueueWaiting: String
+    let patchmonQueueActive: String
+    let patchmonQueueDelayed: String
+    let patchmonQueueFailed: String
+    let patchmonCores: String
+    let patchmonSwap: String
+    let patchmonExecutionTime: String
+    let patchmonErrorBadRequest: String
+    let patchmonErrorForbidden: String
+    let patchmonErrorNotFound: String
+    let patchmonErrorRateLimited: String
+    let patchmonErrorServer: String
+    let patchmonErrorInvalidCredentials: String
+    let patchmonErrorIpNotAllowed: String
+    let patchmonErrorAccessDenied: String
+    let patchmonErrorHostNotFound: String
+    let patchmonErrorInvalidHostId: String
+    let patchmonErrorDeleteConstraint: String
+    let patchmonErrorRetrying: String
+
     // Nginx Proxy Manager – CRUD
     let npmOverview: String
     let npmSslCertificates: String
@@ -628,6 +695,8 @@ struct Translations {
     let settingsSupportDesc: String
     let settingsCopied: String
     let settingsThemeAuto: String
+    let settingsHomeCyberpunkCards: String
+    let settingsHomeCyberpunkCardsDesc: String
     let settingsContacts: String
     let settingsContactTelegram: String
     let settingsContactReddit: String
@@ -681,6 +750,26 @@ struct Translations {
     // Multi-instance
     let badgeDefault: String
     let dashboardInstances: String
+    let jellystatWatchTimeHome: String
+    let jellystatOverviewSubtitle: String
+    let jellystatWatchTime: String
+    let jellystatViews: String
+    let jellystatWindowDaysFormat: String
+    let jellystatActiveDays: String
+    let jellystatDaysWithPlayback: String
+    let jellystatTopLibrary: String
+    let jellystatNoActivity: String
+    let jellystatAvgPerDay: String
+    let jellystatAverageWatchTime: String
+    let jellystatMediaTypeBreakdown: String
+    let jellystatSongs: String
+    let jellystatMovies: String
+    let jellystatEpisodes: String
+    let jellystatOther: String
+    let jellystatRecentTrend: String
+    let jellystatNoDataForPeriod: String
+    let jellystatNoData: String
+    let jellystatViewsSuffix: String
     let loginEditTitle: String
     let loginEditSubtitle: String
     let loginLabel: String

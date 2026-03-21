@@ -26,7 +26,7 @@ struct ServiceLoginView: View {
 
     private var isEditing: Bool { existingInstance != nil }
     private var serviceColor: Color { serviceType.colors.primary }
-    private var needsUsername: Bool { serviceType == .beszel || serviceType == .gitea || serviceType == .nginxProxyManager || serviceType == .adguardHome }
+    private var needsUsername: Bool { serviceType == .beszel || serviceType == .gitea || serviceType == .nginxProxyManager || serviceType == .adguardHome || serviceType == .patchmon }
 
     var body: some View {
         NavigationStack {
@@ -69,9 +69,7 @@ struct ServiceLoginView: View {
 
     private var headerSection: some View {
         VStack(spacing: 16) {
-            Image(systemName: serviceType.symbolName)
-                .font(.largeTitle)
-                .foregroundStyle(serviceColor)
+            ServiceIconView(type: serviceType, size: 46)
                 .frame(width: 80, height: 80)
                 .background(serviceType.colors.bg, in: RoundedRectangle(cornerRadius: 24, style: .continuous))
 
@@ -169,7 +167,7 @@ struct ServiceLoginView: View {
                 keyboardType: .URL
             )
 
-            if serviceType == .portainer || serviceType == .healthchecks {
+            if serviceType == .portainer || serviceType == .healthchecks || serviceType == .jellystat {
                 InputField(
                     icon: "key.fill",
                     placeholder: localizer.t.loginApiKey,
@@ -184,8 +182,8 @@ struct ServiceLoginView: View {
                 if needsUsername {
                     let isEmailField = serviceType == .beszel || serviceType == .nginxProxyManager
                     InputField(
-                        icon: isEmailField ? "envelope.fill" : "person.fill",
-                        placeholder: isEmailField ? localizer.t.loginEmail : localizer.t.loginUsername,
+                        icon: serviceType == .patchmon ? "key.fill" : (isEmailField ? "envelope.fill" : "person.fill"),
+                        placeholder: serviceType == .patchmon ? localizer.t.loginTokenKey : (isEmailField ? localizer.t.loginEmail : localizer.t.loginUsername),
                         text: $username,
                         keyboardType: isEmailField ? .emailAddress : .default
                     )
@@ -193,7 +191,9 @@ struct ServiceLoginView: View {
 
                 InputField(
                     icon: "lock.fill",
-                    placeholder: isEditing ? localizer.t.loginPasswordIfChanging : localizer.t.loginPassword,
+                    placeholder: isEditing
+                        ? localizer.t.loginPasswordIfChanging
+                        : (serviceType == .patchmon ? localizer.t.loginTokenSecret : localizer.t.loginPassword),
                     text: $password,
                     isSecure: !showPassword,
                     showToggle: true,
@@ -236,6 +236,8 @@ struct ServiceLoginView: View {
         case .gitea:             return localizer.t.loginHintGitea2FA
         case .nginxProxyManager: return localizer.t.loginHintNpm
         case .healthchecks:      return localizer.t.loginHintHealthchecks
+        case .patchmon:          return localizer.t.loginHintPatchmon
+        case .jellystat:         return localizer.t.loginHintJellystat
         default: return nil
         }
     }
@@ -350,6 +352,24 @@ struct ServiceLoginView: View {
             return ServiceInstance(
                 id: existingInstanceId ?? UUID(),
                 type: .healthchecks,
+                label: label,
+                url: url,
+                token: "",
+                username: existingInstance?.username,
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+
+        case .jellystat:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let client = JellystatAPIClient(instanceId: existingInstanceId ?? UUID())
+            try await client.authenticate(url: url, apiKey: key, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .jellystat,
                 label: label,
                 url: url,
                 token: "",
@@ -499,6 +519,36 @@ struct ServiceLoginView: View {
                 username: identity,
                 fallbackUrl: fallbackUrl,
                 password: storedPassword
+            )
+
+        case .patchmon:
+            let tokenKey = normalizedOptional(username) ?? existingInstance?.username
+            let tokenSecret = normalizedOptional(password)
+            guard let tokenKey, !tokenKey.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            if existingInstance != nil && url != existingInstance?.url && tokenSecret == nil {
+                throw APIError.custom(localizer.t.loginErrorPasswordRequired)
+            }
+            let resolvedSecret: String
+            if let tokenSecret, !tokenSecret.isEmpty {
+                let client = PatchmonAPIClient(instanceId: existingInstanceId ?? UUID())
+                try await client.authenticate(url: url, tokenKey: tokenKey, tokenSecret: tokenSecret, fallbackUrl: fallbackUrl)
+                resolvedSecret = tokenSecret
+            } else if let existingSecret = existingInstance?.password, !existingSecret.isEmpty {
+                resolvedSecret = existingSecret
+            } else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .patchmon,
+                label: label,
+                url: url,
+                token: existingInstance?.token ?? "",
+                username: tokenKey,
+                fallbackUrl: fallbackUrl,
+                password: resolvedSecret
             )
         }
     }

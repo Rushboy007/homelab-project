@@ -22,10 +22,12 @@ val ServiceType.primaryColor: Color
         ServiceType.PORTAINER -> Color(0xFF13B5EA)
         ServiceType.PIHOLE -> Color(0xFFCD2326)
         ServiceType.ADGUARD_HOME -> Color(0xFF34C759)
+        ServiceType.JELLYSTAT -> Color(0xFFC93DF6)
         ServiceType.BESZEL -> Color(0xFF8B5CF6)
         ServiceType.GITEA -> Color(0xFF609926)
         ServiceType.NGINX_PROXY_MANAGER -> Color(0xFFF15B2A)
         ServiceType.HEALTHCHECKS -> Color(0xFF16A34A)
+        ServiceType.PATCHMON -> Color(0xFF0EA5E9)
         ServiceType.UNKNOWN -> if (isThemeDark()) Color.LightGray else Color.Gray
     }
 
@@ -35,10 +37,12 @@ val ServiceType.backgroundColor: Color
         ServiceType.PORTAINER -> Color(0xFF13B5EA).copy(alpha = 0.12f)
         ServiceType.PIHOLE -> Color(0xFFCD2326).copy(alpha = 0.12f)
         ServiceType.ADGUARD_HOME -> Color(0xFF34C759).copy(alpha = 0.12f)
+        ServiceType.JELLYSTAT -> Color(0xFFC93DF6).copy(alpha = 0.12f)
         ServiceType.BESZEL -> Color(0xFF8B5CF6).copy(alpha = 0.12f)
         ServiceType.GITEA -> Color(0xFF609926).copy(alpha = 0.12f)
         ServiceType.NGINX_PROXY_MANAGER -> Color(0xFFF15B2A).copy(alpha = 0.12f)
         ServiceType.HEALTHCHECKS -> Color(0xFF16A34A).copy(alpha = 0.12f)
+        ServiceType.PATCHMON -> Color(0xFF0EA5E9).copy(alpha = 0.12f)
         ServiceType.UNKNOWN -> if (isThemeDark()) Color(0xFF334155) else Color(0xFFF1F5F9)
     }
 
@@ -47,11 +51,30 @@ val ServiceType.iconUrl: String
         ServiceType.PORTAINER -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png"
         ServiceType.PIHOLE -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png"
         ServiceType.ADGUARD_HOME -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/adguard-home.png"
+        ServiceType.JELLYSTAT -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png"
         ServiceType.BESZEL -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png"
         ServiceType.GITEA -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png"
         ServiceType.NGINX_PROXY_MANAGER -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png"
         ServiceType.HEALTHCHECKS -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png"
+        ServiceType.PATCHMON -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchmon.png"
         ServiceType.UNKNOWN -> ""
+    }
+
+val ServiceType.iconCandidates: List<String>
+    get() {
+        val primary = iconUrl.trim()
+        if (primary.isEmpty()) return emptyList()
+
+        val candidates = LinkedHashSet<String>()
+        candidates += primary
+
+        val jsDelivrPrefix = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/"
+        if (primary.startsWith(jsDelivrPrefix)) {
+            val slug = primary.removePrefix(jsDelivrPrefix)
+            candidates += "https://raw.githubusercontent.com/selfhst/icons/main/png/$slug"
+        }
+
+        return candidates.toList()
     }
 
 val ServiceType.fallbackIcon: ImageVector
@@ -59,9 +82,11 @@ val ServiceType.fallbackIcon: ImageVector
         ServiceType.PORTAINER -> Icons.Default.Widgets
         ServiceType.PIHOLE -> Icons.Default.Security
         ServiceType.ADGUARD_HOME -> Icons.Default.Security
+        ServiceType.JELLYSTAT -> Icons.Default.Storage
         ServiceType.BESZEL -> Icons.Default.Storage
         ServiceType.GITEA -> Icons.Default.Source
         ServiceType.NGINX_PROXY_MANAGER -> Icons.Default.Widgets
         ServiceType.HEALTHCHECKS -> Icons.Default.CheckCircle
+        ServiceType.PATCHMON -> Icons.Default.Storage
         ServiceType.UNKNOWN -> Icons.Default.Widgets
     }

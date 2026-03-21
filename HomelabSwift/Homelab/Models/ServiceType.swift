@@ -8,6 +8,8 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
     case healthchecks
     case gitea
     case nginxProxyManager
+    case patchmon
+    case jellystat
 
     public var id: String { rawValue }
 
@@ -20,6 +22,8 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return "Healthchecks"
         case .gitea:              return "Gitea"
         case .nginxProxyManager:  return "Nginx Proxy Manager"
+        case .patchmon:           return "PatchMon"
+        case .jellystat:          return "Jellystat"
         }
     }
 
@@ -34,6 +38,8 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return t.serviceHealthchecksDesc
         case .gitea:              return t.serviceGiteaDesc
         case .nginxProxyManager:  return t.serviceNpmDesc
+        case .patchmon:           return t.servicePatchmonDesc
+        case .jellystat:          return t.serviceJellystatDesc
         }
     }
 
@@ -46,6 +52,8 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return "heart.text.square.fill"
         case .gitea:              return "arrow.triangle.branch"
         case .nginxProxyManager:  return "globe"
+        case .patchmon:           return "shippingbox.circle.fill"
+        case .jellystat:          return "chart.line.uptrend.xyaxis"
         }
     }
 
@@ -58,6 +66,8 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png"
         case .gitea:              return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png"
         case .nginxProxyManager:  return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png"
+        case .patchmon:           return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchmon.png"
+        case .jellystat:          return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png"
         }
     }
 
@@ -71,12 +81,28 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       slug = "healthchecks"
         case .gitea:              slug = "gitea"
         case .nginxProxyManager:  slug = "nginx-proxy-manager"
+        case .patchmon:           slug = "patchmon"
+        case .jellystat:          slug = "jellystat"
         }
         let urls = [
             "https://cdn.jsdelivr.net/gh/selfhst/icons/png/\(slug).png",
             "https://raw.githubusercontent.com/selfhst/icons/main/png/\(slug).png"
         ]
         return urls.compactMap(URL.init(string:))
+    }
+
+    public var localIconAssetName: String {
+        switch self {
+        case .portainer:          return "service-portainer"
+        case .pihole:             return "service-pi-hole"
+        case .adguardHome:        return "service-adguard-home"
+        case .beszel:             return "service-beszel"
+        case .healthchecks:       return "service-healthchecks"
+        case .gitea:              return "service-gitea"
+        case .nginxProxyManager:  return "service-nginx-proxy-manager"
+        case .patchmon:           return "service-patchmon"
+        case .jellystat:          return "service-jellystat"
+        }
     }
 
     public var colors: ServiceColorSet {
@@ -88,6 +114,8 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return ServiceColorSet(primary: Color(hex: "#16A34A"), dark: Color(hex: "#15803D"), bg: Color(hex: "#16A34A").opacity(0.09))
         case .gitea:              return ServiceColorSet(primary: Color(hex: "#609926"), dark: Color(hex: "#4A7A1E"), bg: Color(hex: "#609926").opacity(0.09))
         case .nginxProxyManager:  return ServiceColorSet(primary: Color(hex: "#F15B2A"), dark: Color(hex: "#C9481F"), bg: Color(hex: "#F15B2A").opacity(0.09))
+        case .patchmon:           return ServiceColorSet(primary: Color(hex: "#2563EB"), dark: Color(hex: "#1D4ED8"), bg: Color(hex: "#2563EB").opacity(0.09))
+        case .jellystat:          return ServiceColorSet(primary: Color(hex: "#C93DF6"), dark: Color(hex: "#A92ED0"), bg: Color(hex: "#C93DF6").opacity(0.11))
         }
     }
 }

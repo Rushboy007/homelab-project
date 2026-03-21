@@ -41,6 +41,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -71,6 +73,12 @@ private enum class QueryLogStatusFilter(val labelRes: Int) {
 }
 
 private const val ALL_CLIENT = "__all__"
+
+@Composable
+private fun piholeQueryCardColor(): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    return if (isDarkTheme) Color(0xFF24191A) else Color(0xFFFDEEEF)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -234,7 +242,7 @@ private fun QueryLogRow(entry: PiholeQueryLogEntry) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = piholeQueryCardColor()
     ) {
         Row(
             modifier = Modifier

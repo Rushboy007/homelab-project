@@ -3,6 +3,7 @@ package com.homelab.app.ui.portainer
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -28,6 +29,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -49,6 +52,26 @@ import com.homelab.app.ui.theme.primaryColor
 import com.homelab.app.util.ServiceType
 import com.homelab.app.util.ResourceFormatters
 import java.time.Instant
+
+@Composable
+private fun portainerDetailCardColor(
+    accent: Color? = null,
+    tint: Float = 0.08f
+): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val base = if (isDarkTheme) Color(0xFF121C2A) else Color(0xFFF4F4F1)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.22f)) } ?: base
+}
+
+@Composable
+private fun portainerDetailRaisedColor(
+    accent: Color? = null,
+    tint: Float = 0.06f
+): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val base = if (isDarkTheme) Color(0xFF1A2638) else Color(0xFFF9F9F7)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.18f)) } ?: base
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -122,15 +145,17 @@ fun ContainerDetailScreen(
 
                 // Tabs + Content card
                 val haptic = LocalHapticFeedback.current
+                val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+                val shellAccent = if (isDarkTheme) ServiceType.PORTAINER.primaryColor else null
                 Surface(
                     shape = RoundedCornerShape(18.dp),
-                    color = MaterialTheme.colorScheme.surfaceContainerLow,
+                    color = portainerDetailCardColor(accent = shellAccent, tint = if (isDarkTheme) 0.09f else 0f),
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Column {
                         Surface(
                             shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.surfaceContainerHighest,
+                            color = portainerDetailRaisedColor(accent = shellAccent, tint = if (isDarkTheme) 0.06f else 0f),
                             tonalElevation = 0.dp,
                             shadowElevation = 0.dp,
                             modifier = Modifier
@@ -267,10 +292,16 @@ private fun ContainerHeaderCard(
     val uptimeLabel = uptimeSeconds?.let {
         ResourceFormatters.formatUptimeHours(it.toDouble(), androidx.compose.ui.platform.LocalContext.current)
     } ?: detail.state.status.ifBlank { stringResource(R.string.not_available) }
+    val statusColor = when {
+        detail.state.paused -> Color(0xFFFFB74D)
+        detail.state.running -> Color(0xFF4CAF50)
+        else -> Color(0xFFF44336)
+    }
 
     Surface(
         shape = RoundedCornerShape(18.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = portainerDetailCardColor(accent = statusColor, tint = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.10f else 0.06f),
+        border = BorderStroke(1.dp, statusColor.copy(alpha = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.68f else 0.52f)),
         modifier = modifier
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -345,9 +376,11 @@ private data class ActionSegment(
 @Composable
 private fun ActionSegmentGroup(actions: List<ActionSegment>) {
     if (actions.isEmpty()) return
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val shellAccent = if (isDarkTheme) ServiceType.PORTAINER.primaryColor else null
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = portainerDetailRaisedColor(accent = shellAccent, tint = if (isDarkTheme) 0.06f else 0f),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp
     ) {
@@ -411,15 +444,17 @@ private fun InfoSection(
 
 @Composable
 private fun VolumeChip(mount: com.homelab.app.data.remote.dto.portainer.ContainerMount) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val chipAccent = if (isDarkTheme) MaterialTheme.colorScheme.primary else null
     Surface(
         shape = RoundedCornerShape(10.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer
+        color = portainerDetailRaisedColor(accent = chipAccent, tint = if (isDarkTheme) 0.10f else 0f)
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     shape = RoundedCornerShape(6.dp),
-                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    color = portainerDetailRaisedColor(accent = chipAccent, tint = if (isDarkTheme) 0.12f else 0f)
                 ) {
                     Text(
                         text = mount.type,
@@ -483,7 +518,7 @@ private fun StatsTabContent(stats: com.homelab.app.data.remote.dto.portainer.Con
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer
+            color = portainerDetailRaisedColor(accent = Color(0xFF64B5F6), tint = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.10f else 0.06f)
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
@@ -510,7 +545,7 @@ private fun StatsTabContent(stats: com.homelab.app.data.remote.dto.portainer.Con
 
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainer
+            color = portainerDetailRaisedColor(accent = Color(0xFFFFB74D), tint = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.10f else 0.06f)
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 Text(
@@ -543,7 +578,7 @@ private fun StatsTabContent(stats: com.homelab.app.data.remote.dto.portainer.Con
         if (stats.networks != null && stats.networks.isNotEmpty()) {
             Surface(
                 shape = RoundedCornerShape(16.dp),
-                color = MaterialTheme.colorScheme.surfaceContainer
+                color = portainerDetailRaisedColor(accent = Color(0xFF81C784), tint = if (MaterialTheme.colorScheme.background.luminance() < 0.45f) 0.10f else 0.06f)
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                     Text(

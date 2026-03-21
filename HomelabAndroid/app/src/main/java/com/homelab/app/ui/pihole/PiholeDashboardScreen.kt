@@ -24,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -45,6 +46,30 @@ import com.homelab.app.ui.common.ErrorScreen
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
+
+@Composable
+private fun piholeCardColor(): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    return if (isDarkTheme) Color(0xFF24191A) else Color(0xFFFDEEEF)
+}
+
+@Composable
+private fun piholeRaisedCardColor(): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    return if (isDarkTheme) Color(0xFF312122) else Color(0xFFFBE7E9)
+}
+
+@Composable
+private fun piholeNeutralCardColor(): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    return if (isDarkTheme) Color(0xFF241F1F) else Color(0xFFF4F4F1)
+}
+
+@Composable
+private fun piholeNeutralRaisedColor(): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    return if (isDarkTheme) Color(0xFF2E2828) else Color(0xFFF9F9F7)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -313,7 +338,7 @@ private fun BlockingCard(
                 }
             ),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = piholeCardColor()
     ) {
         Row(
             modifier = Modifier.padding(18.dp),
@@ -370,7 +395,7 @@ private fun DomainManagementLink(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = piholeCardColor()
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -397,7 +422,7 @@ private fun QueryLogLink(onClick: () -> Unit) {
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = piholeCardColor()
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -425,7 +450,7 @@ private fun PiholeToolsCard(
 ) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = piholeCardColor()
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             // Gravity summary
@@ -561,7 +586,7 @@ private fun StatCard(icon: androidx.compose.ui.graphics.vector.ImageVector, icon
     Surface(
         modifier = Modifier,
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = piholeCardColor()
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Surface(shape = RoundedCornerShape(10.dp), color = iconBg.copy(alpha = 0.1f), modifier = Modifier.size(36.dp)) {
@@ -585,7 +610,7 @@ private fun QueryActivitySection(stats: com.homelab.app.data.remote.dto.pihole.P
         )
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLow
+            color = piholeNeutralCardColor()
         ) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 ActivityBar(label = stringResource(R.string.pihole_blocked), value = stats.queries.blocked, max = maxQuery, color = StatusRed)
@@ -610,7 +635,7 @@ private fun ActivityBar(label: String, value: Int, max: Int, color: Color) {
         val pct = value.toFloat() / max.toFloat()
         Surface(
             shape = RoundedCornerShape(3.dp),
-            color = MaterialTheme.colorScheme.surfaceVariant,
+            color = piholeNeutralRaisedColor(),
             modifier = Modifier.fillMaxWidth().height(6.dp)
         ) {
             Row {
@@ -624,7 +649,7 @@ private fun ActivityBar(label: String, value: Int, max: Int, color: Color) {
 private fun GravitySection(stats: com.homelab.app.data.remote.dto.pihole.PiholeStats) {
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow
+        color = piholeCardColor()
     ) {
         Row(
             modifier = Modifier.padding(16.dp).fillMaxWidth(),
@@ -659,7 +684,7 @@ private fun TopListSection(title: String, items: List<PiholeTopItem>, rankColor:
         
         Surface(
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.surfaceContainerLow
+            color = piholeCardColor()
         ) {
             Column {
                 items.forEachIndexed { idx, item ->
@@ -694,12 +719,12 @@ private fun TopDomainsSection(topDomains: List<PiholeTopItem>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             Text(text = stringResource(R.string.pihole_top_domains), style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Surface(shape = RoundedCornerShape(8.dp), color = MaterialTheme.colorScheme.surfaceVariant) {
+            Surface(shape = RoundedCornerShape(8.dp), color = piholeRaisedCardColor()) {
                 Text(stringResource(R.string.pihole_total_suffix).format(formatNum(total)), style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold), color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp))
             }
         }
         
-        Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Surface(shape = RoundedCornerShape(16.dp), color = piholeCardColor()) {
             Column {
                 topDomains.forEachIndexed { idx, item ->
                     Row(
@@ -736,7 +761,7 @@ private fun TopClientsSection(topClients: List<PiholeTopClient>) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(text = stringResource(R.string.pihole_top_clients), style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold), color = MaterialTheme.colorScheme.onSurfaceVariant)
         
-        Surface(shape = RoundedCornerShape(16.dp), color = MaterialTheme.colorScheme.surfaceContainerLow) {
+        Surface(shape = RoundedCornerShape(16.dp), color = piholeCardColor()) {
             Column {
                 topClients.forEachIndexed { idx, client ->
                     Row(

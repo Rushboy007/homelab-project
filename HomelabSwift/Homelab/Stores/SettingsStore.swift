@@ -43,6 +43,12 @@ final class SettingsStore {
         }
     }
 
+    var homeCyberpunkCardsEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(homeCyberpunkCardsEnabled, forKey: Keys.homeCyberpunkCardsEnabled)
+        }
+    }
+
     var lastBackgroundDate: Date? = nil
 
     // MARK: - Keys
@@ -54,6 +60,7 @@ final class SettingsStore {
         static let serviceOrder = "homelab_service_order"
         static let biometricEnabled = "homelab_biometric_enabled"
         static let hasCompletedOnboarding = "homelab_has_completed_onboarding"
+        static let homeCyberpunkCardsEnabled = "homelab_home_cyberpunk_cards_enabled"
     }
 
     // MARK: - Init
@@ -73,6 +80,7 @@ final class SettingsStore {
 
         self.biometricEnabled = UserDefaults.standard.bool(forKey: Keys.biometricEnabled)
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: Keys.hasCompletedOnboarding)
+        self.homeCyberpunkCardsEnabled = UserDefaults.standard.object(forKey: Keys.homeCyberpunkCardsEnabled) as? Bool ?? false
     }
 
     // MARK: - Service Visibility

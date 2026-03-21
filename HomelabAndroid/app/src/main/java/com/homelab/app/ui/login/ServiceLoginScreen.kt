@@ -66,6 +66,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -182,6 +183,8 @@ fun ServiceLoginScreen(
                 ServiceType.GITEA -> stringResource(R.string.login_hint_gitea_multi)
                 ServiceType.NGINX_PROXY_MANAGER -> stringResource(R.string.login_hint_npm)
                 ServiceType.HEALTHCHECKS -> stringResource(R.string.login_hint_healthchecks)
+                ServiceType.JELLYSTAT -> stringResource(R.string.login_hint_jellystat)
+                ServiceType.PATCHMON -> stringResource(R.string.login_hint_patchmon)
                 else -> null
             }
 
@@ -264,6 +267,35 @@ fun ServiceLoginScreen(
                         androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(10.dp))
                         Text(
                             text = stringResource(R.string.login_healthchecks_api_key_help),
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                    }
+                }
+            }
+
+            if (serviceType == ServiceType.PATCHMON) {
+                androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
+                Surface(
+                    color = MaterialTheme.colorScheme.secondaryContainer,
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 12.dp)
+                ) {
+                    androidx.compose.foundation.layout.Row(
+                        modifier = Modifier.padding(14.dp),
+                        verticalAlignment = Alignment.Top
+                    ) {
+                        Icon(
+                            Icons.Default.Info,
+                            contentDescription = stringResource(R.string.patchmon_login_help),
+                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = stringResource(R.string.patchmon_login_help),
                             style = MaterialTheme.typography.labelMedium,
                             color = MaterialTheme.colorScheme.onSecondaryContainer
                         )
@@ -354,7 +386,11 @@ fun ServiceLoginScreen(
                 shape = RoundedCornerShape(14.dp)
             )
 
-            if (serviceType == ServiceType.PORTAINER || serviceType == ServiceType.HEALTHCHECKS) {
+            if (
+                serviceType == ServiceType.PORTAINER ||
+                serviceType == ServiceType.HEALTHCHECKS ||
+                serviceType == ServiceType.JELLYSTAT
+            ) {
                 SecretField(
                     value = apiKey,
                     onValueChange = { apiKey = it },
@@ -365,11 +401,16 @@ fun ServiceLoginScreen(
             } else {
                 if (serviceType != ServiceType.PIHOLE) {
                     val isEmailField = serviceType == ServiceType.BESZEL || serviceType == ServiceType.NGINX_PROXY_MANAGER
+                    val usernameLabel = when {
+                        serviceType == ServiceType.PATCHMON -> stringResource(R.string.patchmon_token_key)
+                        isEmailField -> stringResource(R.string.login_email_label)
+                        else -> stringResource(R.string.login_username_label)
+                    }
                     OutlinedTextField(
                         value = username,
                         onValueChange = { username = it },
-                        label = { Text(if (isEmailField) stringResource(R.string.login_email_label) else stringResource(R.string.login_username_label)) },
-                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = if (isEmailField) stringResource(R.string.login_email_label) else stringResource(R.string.login_username_label)) },
+                        label = { Text(usernameLabel) },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = usernameLabel) },
                         singleLine = true,
                         keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
                             keyboardType = if (isEmailField) KeyboardType.Email else KeyboardType.Text,
@@ -385,7 +426,11 @@ fun ServiceLoginScreen(
                 SecretField(
                     value = password,
                     onValueChange = { password = it },
-                    label = stringResource(R.string.login_password_hint),
+                    label = if (serviceType == ServiceType.PATCHMON) {
+                        stringResource(R.string.patchmon_token_secret)
+                    } else {
+                        stringResource(R.string.login_password_hint)
+                    },
                     showSecret = showSecret,
                     onToggleSecret = { showSecret = !showSecret },
                     placeholder = if (isEditing) stringResource(R.string.login_keep_secret_placeholder) else null
@@ -426,7 +471,12 @@ fun ServiceLoginScreen(
                         strokeWidth = 2.dp
                     )
                 } else {
-                    Text(submitLabel, style = MaterialTheme.typography.titleMedium)
+                    Text(
+                        text = submitLabel,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
                 }
             }
         }

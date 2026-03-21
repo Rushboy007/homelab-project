@@ -25,10 +25,12 @@ class SseClient @Inject constructor(
                 ServiceType.PORTAINER -> "Portainer"
                 ServiceType.PIHOLE -> "Pihole"
                 ServiceType.ADGUARD_HOME -> "AdGuardHome"
+                ServiceType.JELLYSTAT -> "Jellystat"
                 ServiceType.BESZEL -> "Beszel"
                 ServiceType.GITEA -> "Gitea"
                 ServiceType.HEALTHCHECKS -> "Healthchecks"
                 ServiceType.NGINX_PROXY_MANAGER -> "NginxProxyManager"
+                ServiceType.PATCHMON -> "PatchMon"
                 ServiceType.UNKNOWN -> "Unknown"
             })
             .build()

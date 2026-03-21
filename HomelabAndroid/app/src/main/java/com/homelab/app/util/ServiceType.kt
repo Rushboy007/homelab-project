@@ -10,9 +10,11 @@ enum class ServiceType(val displayName: String) {
     PORTAINER("Portainer"),
     PIHOLE("Pi-hole"),
     ADGUARD_HOME("AdGuard Home"),
+    JELLYSTAT("Jellystat"),
     BESZEL("Beszel"),
     GITEA("Gitea"),
     NGINX_PROXY_MANAGER("Nginx Proxy Manager"),
     HEALTHCHECKS("Healthchecks"),
+    PATCHMON("PatchMon"),
     UNKNOWN("Unknown")
 }

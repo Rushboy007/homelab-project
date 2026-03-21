@@ -15,6 +15,7 @@ struct HomeView: View {
     @State private var summaryRefreshID = UUID()
 
     private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
+    private let tailscaleIconURL = URL(string: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png")
 
     private var visibleTypes: [ServiceType] {
         settingsStore.serviceOrder.filter { !settingsStore.isServiceHidden($0) }
@@ -22,6 +23,18 @@ struct HomeView: View {
 
     private var hasServices: Bool {
         visibleTypes.contains { servicesStore.hasInstances(for: $0) }
+    }
+
+    private var gridEntries: [ServiceGridEntry] {
+        visibleTypes.flatMap { type -> [ServiceGridEntry] in
+            let instances = servicesStore.instances(for: type)
+            if instances.isEmpty {
+                return [ServiceGridEntry.disconnected(type: type)]
+            }
+            return instances.map { instance in
+                ServiceGridEntry.connected(type: type, instance: instance)
+            }
+        }
     }
 
     private var hasUnreachableService: Bool {
@@ -140,13 +153,28 @@ struct HomeView: View {
             HStack(spacing: 16) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
-                        .fill(servicesStore.isTailscaleConnected ? AppTheme.running : Color.black)
+                        .fill(AppTheme.surface.opacity(0.95))
                         .frame(width: 44, height: 44)
 
-                    Image(systemName: servicesStore.isTailscaleConnected ? "shield.checkered" : "network.badge.shield.half.filled")
-                        .font(.title3)
-                        .foregroundStyle(.white)
-                        .accessibilityHidden(true)
+                    AsyncImage(url: tailscaleIconURL) { phase in
+                        switch phase {
+                        case .success(let image):
+                            image
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 26, height: 26)
+                        case .failure:
+                            Image(systemName: servicesStore.isTailscaleConnected ? "shield.checkered" : "network.badge.shield.half.filled")
+                                .font(.title3)
+                                .foregroundStyle(servicesStore.isTailscaleConnected ? AppTheme.running : AppTheme.textMuted)
+                        case .empty:
+                            ProgressView()
+                                .scaleEffect(0.7)
+                        @unknown default:
+                            EmptyView()
+                        }
+                    }
+                    .accessibilityHidden(true)
                 }
 
                 VStack(alignment: .leading, spacing: 2) {
@@ -192,9 +220,9 @@ struct HomeView: View {
     private var serviceGrid: some View {
         GlassGroup(spacing: 16) {
             LazyVGrid(columns: columns, spacing: 14) {
-                ForEach(visibleTypes) { type in
-                    let instances = servicesStore.instances(for: type)
-                    if instances.isEmpty {
+                ForEach(gridEntries) { entry in
+                    switch entry {
+                    case .disconnected(let type):
                         Button {
                             HapticManager.medium()
                             showLogin = type
@@ -208,30 +236,30 @@ struct HomeView: View {
                                 isPinging: false,
                                 summary: nil,
                                 isSummaryLoading: false,
+                                useCyberpunkCardStyle: settingsStore.homeCyberpunkCardsEnabled,
                                 t: localizer.t
                             )
                         }
                         .buttonStyle(.plain)
-                    } else {
-                        ForEach(instances) { instance in
-                            let isPreferred = servicesStore.preferredInstance(for: type)?.id == instance.id
-                            NavigationLink(value: HomeServiceRoute(type: type, instanceId: instance.id)) {
-                                ServiceCardContent(
-                                    type: type,
-                                    label: instance.displayLabel,
-                                    isConnected: true,
-                                    isPreferred: isPreferred,
-                                    reachable: servicesStore.reachability(for: instance.id),
-                                    isPinging: servicesStore.isPinging(instanceId: instance.id),
-                                    summary: summaryData[instance.id],
-                                    isSummaryLoading: summaryData[instance.id] == nil && summaryLoading,
-                                    t: localizer.t
-                                ) {
-                                    Task { await servicesStore.checkReachability(for: instance.id) }
-                                }
+                    case .connected(let type, let instance):
+                        let isPreferred = servicesStore.preferredInstance(for: type)?.id == instance.id
+                        NavigationLink(value: HomeServiceRoute(type: type, instanceId: instance.id)) {
+                            ServiceCardContent(
+                                type: type,
+                                label: instance.displayLabel,
+                                isConnected: true,
+                                isPreferred: isPreferred,
+                                reachable: servicesStore.reachability(for: instance.id),
+                                isPinging: servicesStore.isPinging(instanceId: instance.id),
+                                summary: summaryData[instance.id],
+                                isSummaryLoading: summaryData[instance.id] == nil && summaryLoading,
+                                useCyberpunkCardStyle: settingsStore.homeCyberpunkCardsEnabled,
+                                t: localizer.t
+                            ) {
+                                Task { await servicesStore.checkReachability(for: instance.id) }
                             }
-                            .buttonStyle(.plain)
                         }
+                        .buttonStyle(.plain)
                     }
                 }
             }
@@ -257,6 +285,8 @@ struct HomeView: View {
         case .healthchecks:      HealthchecksDashboard(instanceId: route.instanceId)
         case .gitea:             GiteaDashboard(instanceId: route.instanceId)
         case .nginxProxyManager: NpmDashboard(instanceId: route.instanceId)
+        case .patchmon:          PatchmonDashboard(instanceId: route.instanceId)
+        case .jellystat:         JellystatDashboard(instanceId: route.instanceId)
         }
     }
 
@@ -316,16 +346,54 @@ struct HomeView: View {
                 guard let client = await servicesStore.npmClient(instanceId: instanceId) else { return nil }
                 let report = try await client.getHostReport()
                 return ServiceSummaryInfo(value: "\(report.proxy)", subValue: "/ \(report.total)", label: localizer.t.npmProxyHosts)
+            case .patchmon:
+                guard let client = await servicesStore.patchmonClient(instanceId: instanceId) else { return nil }
+                let response = try await client.getHosts()
+                let securityUpdates = response.hosts.reduce(0) { $0 + $1.securityUpdatesCount }
+                let totalHosts = response.total ?? response.hosts.count
+                return ServiceSummaryInfo(value: "\(securityUpdates)", subValue: "/ \(totalHosts)", label: localizer.t.patchmonSecurity)
+            case .jellystat:
+                guard let client = await servicesStore.jellystatClient(instanceId: instanceId) else { return nil }
+                let summary = try await client.getWatchSummary(days: 7)
+                return ServiceSummaryInfo(value: formatWatchTime(summary.totalHours), label: localizer.t.jellystatWatchTimeHome)
             }
         } catch {
             return nil
         }
+    }
+
+    private func formatWatchTime(_ hours: Double) -> String {
+        if hours > 0, hours < 1 {
+            let minutes = Int((hours * 60).rounded(.down))
+            if minutes <= 0 {
+                return "<1m"
+            }
+            return "\(minutes)m"
+        }
+        if hours >= 100 {
+            return String(format: "%.0fh", hours)
+        }
+        return String(format: "%.1fh", hours)
     }
 }
 
 private struct HomeServiceRoute: Hashable {
     let type: ServiceType
     let instanceId: UUID
+}
+
+private enum ServiceGridEntry: Identifiable {
+    case disconnected(type: ServiceType)
+    case connected(type: ServiceType, instance: ServiceInstance)
+
+    var id: String {
+        switch self {
+        case .disconnected(let type):
+            return "disconnected-\(type.rawValue)"
+        case .connected(_, let instance):
+            return "connected-\(instance.id.uuidString)"
+        }
+    }
 }
 
 struct ServiceSummaryInfo {
@@ -389,6 +457,8 @@ private struct ServiceOrderSheet: View {
 }
 
 private struct ServiceCardContent: View {
+    @Environment(\.colorScheme) private var colorScheme
+
     let type: ServiceType
     let label: String
     let isConnected: Bool
@@ -397,18 +467,57 @@ private struct ServiceCardContent: View {
     let isPinging: Bool
     let summary: ServiceSummaryInfo?
     let isSummaryLoading: Bool
+    let useCyberpunkCardStyle: Bool
     let t: Translations
     var onRefresh: (() -> Void)? = nil
     
-    private var cardTint: Color? {
+    private var cardShape: RoundedRectangle {
+        RoundedRectangle(cornerRadius: AppTheme.cardRadius, style: .continuous)
+    }
+
+    private var defaultCardTint: Color? {
         if isConnected && reachable == false {
             return type.colors.primary.opacity(0.06)
         }
         return nil
     }
 
+    private var cardGradient: LinearGradient {
+        let dark = colorScheme == .dark
+        let topAlpha: Double = dark ? (reachable == false ? 0.11 : 0.07) : (reachable == false ? 0.08 : 0.05)
+        let bottomAlpha: Double = dark ? (reachable == false ? 0.04 : 0.015) : (reachable == false ? 0.025 : 0.01)
+        return LinearGradient(
+            colors: [
+                type.colors.primary.opacity(topAlpha),
+                type.colors.dark.opacity(bottomAlpha),
+                Color.clear
+            ],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+    }
+
+    private var cardBorderColor: Color {
+        let dark = colorScheme == .dark
+        if reachable == false {
+            return type.colors.primary.opacity(dark ? 0.9 : 0.76)
+        }
+        if !isConnected {
+            return type.colors.primary.opacity(dark ? 0.62 : 0.5)
+        }
+        return type.colors.primary.opacity(dark ? 0.74 : 0.6)
+    }
+
+    private var cardGlassTint: Color? {
+        let dark = colorScheme == .dark
+        if reachable == false {
+            return type.colors.primary.opacity(dark ? 0.08 : 0.06)
+        }
+        return type.colors.primary.opacity(dark ? 0.05 : 0.03)
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
+        let cardCore = VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top) {
                 ServiceIconView(type: type, size: 34)
                 .frame(width: 56, height: 56)
@@ -435,11 +544,12 @@ private struct ServiceCardContent: View {
                         Text(summary.label.sentenceCased())
                             .font(.caption2)
                             .foregroundStyle(AppTheme.textMuted)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.7)
-                            .fixedSize(horizontal: false, vertical: true)
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.72)
+                            .multilineTextAlignment(.trailing)
+                            .frame(maxWidth: .infinity, alignment: .trailing)
                     }
-                    .frame(maxWidth: 110, alignment: .trailing)
+                    .frame(maxWidth: 122, alignment: .trailing)
                 } else if isConnected && reachable == true && isSummaryLoading {
                     SkeletonLoader(height: 16, cornerRadius: 4)
                         .frame(width: 60)
@@ -486,7 +596,27 @@ private struct ServiceCardContent: View {
         .frame(maxWidth: .infinity, minHeight: 140, alignment: .leading)
         .padding(14)
         .contentShape(Rectangle())
-        .glassCard(tint: cardTint)
+
+        Group {
+            if useCyberpunkCardStyle {
+                cardCore
+                    .background(cardGradient, in: cardShape)
+                    .glassCard(tint: cardGlassTint)
+                    .overlay {
+                        cardShape
+                            .stroke(cardBorderColor, lineWidth: 2.1)
+                            .shadow(color: type.colors.primary.opacity(colorScheme == .dark ? 0.4 : 0.26), radius: 10)
+                            .overlay {
+                                cardShape
+                                    .inset(by: 1.5)
+                                    .stroke(type.colors.primary.opacity(colorScheme == .dark ? 0.52 : 0.36), lineWidth: 1.1)
+                            }
+                    }
+            } else {
+                cardCore
+                    .glassCard(tint: defaultCardTint)
+            }
+        }
         .task {
             if isConnected, reachable == nil, !isPinging {
                 onRefresh?()
@@ -549,12 +679,18 @@ struct ServiceIconView: View {
     let type: ServiceType
     let size: CGFloat
 
-    @State private var index: Int = 0
+    private var candidates: [URL] { type.iconCandidates }
+    private var localAssetName: String { type.localIconAssetName }
 
     var body: some View {
         ZStack {
-            if type.iconCandidates.indices.contains(index) {
-                AsyncImage(url: type.iconCandidates[index]) { phase in
+            if let local = UIImage(named: localAssetName) {
+                Image(uiImage: local)
+                    .resizable()
+                    .renderingMode(.original)
+                    .scaledToFit()
+            } else if let primary = candidates.first {
+                AsyncImage(url: primary) { phase in
                     switch phase {
                     case .success(let image):
                         image
@@ -562,25 +698,42 @@ struct ServiceIconView: View {
                             .renderingMode(.original)
                             .scaledToFit()
                     case .failure:
-                        if index < type.iconCandidates.count - 1 {
-                            Color.clear
-                                .onAppear { index += 1 }
-                        } else {
-                            fallbackView
-                        }
+                        secondaryIconView
                     default:
                         ProgressView()
                             .scaleEffect(0.7)
                             .tint(type.colors.primary)
                     }
                 }
-                .id(index)
             } else {
                 fallbackView
             }
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    @ViewBuilder
+    private var secondaryIconView: some View {
+        if candidates.count > 1 {
+            AsyncImage(url: candidates[1]) { phase in
+                switch phase {
+                case .success(let image):
+                    image
+                        .resizable()
+                        .renderingMode(.original)
+                        .scaledToFit()
+                case .failure:
+                    fallbackView
+                default:
+                    ProgressView()
+                        .scaleEffect(0.7)
+                        .tint(type.colors.primary)
+                }
+            }
+        } else {
+            fallbackView
+        }
     }
 
     private var fallbackView: some View {

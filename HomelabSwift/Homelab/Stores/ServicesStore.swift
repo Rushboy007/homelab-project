@@ -10,6 +10,8 @@ private final class ServiceClientManager {
     private var healthchecksClients: [UUID: HealthchecksAPIClient] = [:]
     private var giteaClients: [UUID: GiteaAPIClient] = [:]
     private var npmClients: [UUID: NginxProxyManagerAPIClient] = [:]
+    private var patchmonClients: [UUID: PatchmonAPIClient] = [:]
+    private var jellystatClients: [UUID: JellystatAPIClient] = [:]
 
     func portainerClient(id: UUID) -> PortainerAPIClient {
         if let client = portainerClients[id] {
@@ -74,6 +76,24 @@ private final class ServiceClientManager {
         return client
     }
 
+    func patchmonClient(id: UUID) -> PatchmonAPIClient {
+        if let client = patchmonClients[id] {
+            return client
+        }
+        let client = PatchmonAPIClient(instanceId: id)
+        patchmonClients[id] = client
+        return client
+    }
+
+    func jellystatClient(id: UUID) -> JellystatAPIClient {
+        if let client = jellystatClients[id] {
+            return client
+        }
+        let client = JellystatAPIClient(instanceId: id)
+        jellystatClients[id] = client
+        return client
+    }
+
     func removeClient(id: UUID, type: ServiceType) {
         switch type {
         case .portainer:
@@ -90,6 +110,10 @@ private final class ServiceClientManager {
             giteaClients.removeValue(forKey: id)
         case .nginxProxyManager:
             npmClients.removeValue(forKey: id)
+        case .patchmon:
+            patchmonClients.removeValue(forKey: id)
+        case .jellystat:
+            jellystatClients.removeValue(forKey: id)
         }
     }
 }
@@ -315,6 +339,16 @@ final class ServicesStore {
         return clientManager.npmClient(id: instance.id)
     }
 
+    func patchmonClient(instanceId: UUID) async -> PatchmonAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .patchmon else { return nil }
+        return clientManager.patchmonClient(id: instance.id)
+    }
+
+    func jellystatClient(instanceId: UUID) async -> JellystatAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .jellystat else { return nil }
+        return clientManager.jellystatClient(id: instance.id)
+    }
+
     func checkReachability(for instanceId: UUID) async {
         guard let instance = instancesById[instanceId], pingingByInstanceId[instanceId] != true else { return }
 
@@ -338,6 +372,10 @@ final class ServicesStore {
             ok = await clientManager.giteaClient(id: instanceId).ping()
         case .nginxProxyManager:
             ok = await clientManager.npmClient(id: instanceId).ping()
+        case .patchmon:
+            ok = await clientManager.patchmonClient(id: instanceId).ping()
+        case .jellystat:
+            ok = await clientManager.jellystatClient(id: instanceId).ping()
         }
 
         reachabilityByInstanceId[instanceId] = ok
@@ -472,12 +510,16 @@ final class ServicesStore {
         }
 
         // Beszel/Gitea/NPM: auto-refresh handled by client retry logic — don't delete
-        if current.type == .beszel || current.type == .gitea || current.type == .nginxProxyManager || current.type == .adguardHome {
+        if current.type == .beszel || current.type == .gitea || current.type == .nginxProxyManager || current.type == .adguardHome || current.type == .patchmon {
             if let username = current.username, !username.isEmpty,
                let password = current.password, !password.isEmpty {
                 // Credentials exist — client retry will handle re-auth
                 return
             }
+        }
+
+        if current.type == .jellystat, let apiKey = current.apiKey, !apiKey.isEmpty {
+            return
         }
 
         deleteInstance(id: instanceId)
@@ -546,6 +588,23 @@ final class ServicesStore {
         case .nginxProxyManager:
             let client = clientManager.npmClient(id: instance.id)
             await client.configure(url: instance.url, token: instance.token, fallbackUrl: instance.fallbackUrl)
+
+        case .patchmon:
+            let client = clientManager.patchmonClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                tokenKey: instance.username ?? "",
+                tokenSecret: instance.password ?? "",
+                fallbackUrl: instance.fallbackUrl
+            )
+
+        case .jellystat:
+            let client = clientManager.jellystatClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                apiKey: instance.apiKey ?? "",
+                fallbackUrl: instance.fallbackUrl
+            )
         }
     }
 

@@ -15,6 +15,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,6 +32,12 @@ import com.homelab.app.ui.theme.primaryColor
 import com.homelab.app.util.ServiceType
 import com.homelab.app.util.UiState
 import com.homelab.app.ui.common.ErrorScreen
+
+@Composable
+private fun piholeDomainCardColor(): Color {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    return if (isDarkTheme) Color(0xFF24191A) else Color(0xFFFDEEEF)
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -168,7 +176,7 @@ fun PiholeDomainListScreen(
                                 ) {
                                     Surface(
                                         shape = RoundedCornerShape(12.dp),
-                                        color = MaterialTheme.colorScheme.surfaceContainerLow,
+                                        color = piholeDomainCardColor(),
                                         modifier = Modifier.fillMaxWidth()
                                     ) {
                                         Row(

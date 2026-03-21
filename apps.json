@@ -11,7 +11,7 @@
       "bundleIdentifier": "homelab.foreverhomelab",
       "developerName": "JohnnWi",
       "subtitle": "Your homelab, in your pocket.",
-      "localizedDescription": "A premium, fully native iOS app for monitoring and managing your personal Homelab ecosystem.\n\nIntegrated services:\n• Portainer — Monitor Docker containers, CPU/Memory usage, Start/Stop/Restart\n• Pi-hole — Real-time query stats, blocked domains, toggle ad-blocking\n• Beszel — System monitor with CPU, Memory, Disk usage across nodes\n• Gitea — Browse repos, contribution heatmaps, syntax-highlighted code\n• Nginx Proxy Manager — Proxy hosts, redirections, SSL certificates\n• Tailscale — VPN connectivity status and quick launch\n• AdGuard Home — DNS query stats, filters, blocked services, rewrites\n• Bookmarks — Save and organize your homelab links\n\nFeatures:\n• Multi-instance support for all services\n• Multilingual: English, Italian, French, Spanish, German\n• Liquid Glass UI design\n• Face ID / biometric unlock",
+      "localizedDescription": "A premium, fully native iOS app for monitoring and managing your personal Homelab ecosystem.\n\nIntegrated services:\n• Portainer — Monitor Docker containers, CPU/Memory usage, Start/Stop/Restart\n• Pi-hole — Real-time query stats, blocked domains, toggle ad-blocking\n• Beszel — System monitor with CPU, Memory, Disk usage across nodes\n• Gitea — Browse repos, contribution heatmaps, syntax-highlighted code\n• Nginx Proxy Manager — Proxy hosts, redirections, SSL certificates\n• Tailscale — VPN connectivity status and quick launch\n• AdGuard Home — DNS query stats, filters, blocked services, rewrites\n• Healthcheck — Monitor uptime, response times, notifications\n• Patchmon — Track software updates and patches across your infrastructure\n• Bookmarks — Save and organize your homelab links\n\nFeatures:\n• Multi-instance support for all services\n• Cyberpunk visual mode for service cards\n• Multilingual: English, Italian, French, Spanish, German\n• Liquid Glass UI design\n• Face ID / biometric unlock",
       "iconURL": "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/media-docs/app-icon.png",
       "tintColor": "#4A90D9",
       "category": "utilities",
@@ -21,6 +21,8 @@
         "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/media-docs/foto-ios/IMG_9193.PNG",
         "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/media-docs/foto-ios/IMG_9190.PNG",
         "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/media-docs/foto-ios/IMG_9199.PNG",
+        "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/media-docs/foto-ios/IMG_9275.PNG",
+        "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/media-docs/foto-ios/IMG_9238.PNG",
         "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/media-docs/foto-ios/IMG_9200.jpg"
       ],
       "versions": [

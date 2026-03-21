@@ -3,6 +3,7 @@
 package com.homelab.app.ui.nginxpm
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -22,7 +23,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -58,6 +63,58 @@ private const val TAB_SSL = 6
 private const val TAB_USERS = 7
 private const val TAB_AUDIT_LOGS = 8
 
+private fun npmPageBackground(isDarkTheme: Boolean, accent: Color): Brush = if (isDarkTheme) {
+    Brush.verticalGradient(
+        listOf(
+            Color(0xFF110D0A),
+            Color(0xFF1A130E),
+            accent.copy(alpha = 0.055f),
+            Color(0xFF120E0A)
+        )
+    )
+} else {
+    Brush.verticalGradient(
+        listOf(
+            Color(0xFFFFFAF7),
+            Color(0xFFFFF4EE),
+            accent.copy(alpha = 0.03f),
+            Color(0xFFFFF8F3)
+        )
+    )
+}
+
+private fun npmCardColor(
+    isDarkTheme: Boolean,
+    accent: Color? = null,
+    tint: Float = if (isDarkTheme) 0.10f else 0.07f
+): Color {
+    val base = if (isDarkTheme) Color(0xFF271C16) else Color(0xFFFFF0E8)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.22f)) } ?: base
+}
+
+private fun npmRaisedCardColor(
+    isDarkTheme: Boolean,
+    accent: Color? = null,
+    tint: Float = if (isDarkTheme) 0.08f else 0.05f
+): Color {
+    val base = if (isDarkTheme) Color(0xFF33251E) else Color(0xFFFFF6F1)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.18f)) } ?: base
+}
+
+private fun npmBorderTone(
+    isDarkTheme: Boolean,
+    accent: Color? = null,
+    tint: Float = if (isDarkTheme) 0.28f else 0.20f
+): Color {
+    val base = if (isDarkTheme) Color(0xFF5A4336) else Color(0xFFE2BFA8)
+    return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.35f)) } ?: base
+}
+
+private fun npmBorderColor(
+    isDarkTheme: Boolean,
+    accent: Color? = null
+): Color = npmBorderTone(isDarkTheme, accent = accent).copy(alpha = if (isDarkTheme) 0.72f else 0.58f)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NpmDashboardScreen(
@@ -70,6 +127,11 @@ fun NpmDashboardScreen(
     val selectedTab by viewModel.selectedTab.collectAsStateWithLifecycle()
     val isPerformingAction by viewModel.isPerformingAction.collectAsStateWithLifecycle()
     val npmColor = ServiceType.NGINX_PROXY_MANAGER.primaryColor
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val pageBrush = remember(isDarkTheme) { npmPageBackground(isDarkTheme, npmColor) }
+    val pageGlow = remember(isDarkTheme) {
+        if (isDarkTheme) npmColor.copy(alpha = 0.1f) else npmColor.copy(alpha = 0.045f)
+    }
     val snackbarHostState = remember { SnackbarHostState() }
 
     BackHandler(enabled = selectedTab != TAB_MENU) {
@@ -159,7 +221,13 @@ fun NpmDashboardScreen(
                     IconButton(onClick = { viewModel.fetchDashboard() }) {
                         Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         },
         floatingActionButton = {
@@ -184,45 +252,62 @@ fun NpmDashboardScreen(
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Transparent
     ) { paddingValues ->
-        Column(modifier = Modifier.padding(paddingValues)) {
-            if (isPerformingAction) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = NpmOrange
-                )
-            }
-
-            when (val state = dashboardState) {
-                is UiState.Loading, is UiState.Idle -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator(color = npmColor)
-                    }
-                }
-                is UiState.Error -> {
-                    ErrorScreen(
-                        message = state.message,
-                        onRetry = { viewModel.fetchDashboard() }
-                    )
-                }
-                is UiState.Offline -> {
-                    ErrorScreen(
-                        message = "",
-                        onRetry = { viewModel.fetchDashboard() },
-                        isOffline = true
-                    )
-                }
-                is UiState.Success -> {
-                    val data = state.data
-                    when (selectedTab) {
-                        TAB_MENU -> DashboardMenu(
-                            data = data,
-                            instances = instances,
-                            viewModel = viewModel,
-                            onNavigateToInstance = onNavigateToInstance,
-                            onTabSelect = { viewModel.selectTab(it) }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(pageBrush)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(pageGlow, Color.Transparent),
+                            center = Offset(160f, 90f),
+                            radius = 560f
                         )
+                    )
+            )
+
+            Column(modifier = Modifier.padding(paddingValues)) {
+                if (isPerformingAction) {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                        color = NpmOrange
+                    )
+                }
+
+                when (val state = dashboardState) {
+                    is UiState.Loading, is UiState.Idle -> {
+                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator(color = npmColor)
+                        }
+                    }
+                    is UiState.Error -> {
+                        ErrorScreen(
+                            message = state.message,
+                            onRetry = { viewModel.fetchDashboard() }
+                        )
+                    }
+                    is UiState.Offline -> {
+                        ErrorScreen(
+                            message = "",
+                            onRetry = { viewModel.fetchDashboard() },
+                            isOffline = true
+                        )
+                    }
+                    is UiState.Success -> {
+                        val data = state.data
+                        when (selectedTab) {
+                            TAB_MENU -> DashboardMenu(
+                                data = data,
+                                instances = instances,
+                                viewModel = viewModel,
+                                onNavigateToInstance = onNavigateToInstance,
+                                onTabSelect = { viewModel.selectTab(it) }
+                            )
                         TAB_PROXY_HOSTS -> ProxyHostsTab(
                             proxyHosts = data.proxyHosts,
                             onEdit = { editingProxyHost = it; showProxyHostForm = true },
@@ -307,101 +392,102 @@ fun NpmDashboardScreen(
                         TAB_AUDIT_LOGS -> AuditLogsTab(auditLogs = data.auditLogs)
                     }
 
-                    // Form bottom sheets
-                    if (showProxyHostForm) {
-                        NpmProxyHostForm(
-                            existing = editingProxyHost,
-                            certificates = data.certificates,
-                            accessLists = data.accessLists,
-                            isLoading = isPerformingAction,
-                            onDismiss = { showProxyHostForm = false; editingProxyHost = null },
-                            onSave = { request ->
-                                val id = editingProxyHost?.id
-                                if (id != null) viewModel.updateProxyHost(id, request)
-                                else viewModel.createProxyHost(request)
-                            }
-                        )
-                    }
-                    if (showRedirectionForm) {
-                        NpmRedirectionHostForm(
-                            existing = editingRedirection,
-                            certificates = data.certificates,
-                            accessLists = data.accessLists,
-                            isLoading = isPerformingAction,
-                            onDismiss = { showRedirectionForm = false; editingRedirection = null },
-                            onSave = { request ->
-                                val id = editingRedirection?.id
-                                if (id != null) viewModel.updateRedirectionHost(id, request)
-                                else viewModel.createRedirectionHost(request)
-                            }
-                        )
-                    }
-                    if (showStreamForm) {
-                        NpmStreamForm(
-                            existing = editingStream,
-                            isLoading = isPerformingAction,
-                            onDismiss = { showStreamForm = false; editingStream = null },
-                            onSave = { request ->
-                                val id = editingStream?.id
-                                if (id != null) viewModel.updateStream(id, request)
-                                else viewModel.createStream(request)
-                            }
-                        )
-                    }
-                    if (showDeadHostForm) {
-                        NpmDeadHostForm(
-                            existing = editingDeadHost,
-                            certificates = data.certificates,
-                            isLoading = isPerformingAction,
-                            onDismiss = { showDeadHostForm = false; editingDeadHost = null },
-                            onSave = { request ->
-                                val id = editingDeadHost?.id
-                                if (id != null) viewModel.updateDeadHost(id, request)
-                                else viewModel.createDeadHost(request)
-                            }
-                        )
-                    }
-                    if (showCertificateForm) {
-                        NpmCertificateForm(
-                            isLoading = isPerformingAction,
-                            onDismiss = { showCertificateForm = false },
-                            onSave = { request -> viewModel.createCertificate(request) }
-                        )
-                    }
-                    if (showAccessListForm) {
-                        NpmAccessListForm(
-                            editing = editingAccessList,
-                            onDismiss = {
-                                showAccessListForm = false
-                                editingAccessList = null
-                            },
-                            onSave = { name, items, clients ->
-                                val existing = editingAccessList
-                                if (existing != null) {
-                                    viewModel.updateAccessList(existing.id, name, items, clients)
-                                } else {
-                                    viewModel.createAccessList(name, items, clients)
+                        // Form bottom sheets
+                        if (showProxyHostForm) {
+                            NpmProxyHostForm(
+                                existing = editingProxyHost,
+                                certificates = data.certificates,
+                                accessLists = data.accessLists,
+                                isLoading = isPerformingAction,
+                                onDismiss = { showProxyHostForm = false; editingProxyHost = null },
+                                onSave = { request ->
+                                    val id = editingProxyHost?.id
+                                    if (id != null) viewModel.updateProxyHost(id, request)
+                                    else viewModel.createProxyHost(request)
                                 }
-                            }
-                        )
-                    }
-                    if (showUserForm) {
-                        NpmUserForm(
-                            editing = editingUser,
-                            isLoading = isPerformingAction,
-                            onDismiss = {
-                                showUserForm = false
-                                editingUser = null
-                            },
-                            onSave = { request ->
-                                val existing = editingUser
-                                if (existing != null) {
-                                    viewModel.updateUser(existing.id, request)
-                                } else {
-                                    viewModel.createUser(request)
+                            )
+                        }
+                        if (showRedirectionForm) {
+                            NpmRedirectionHostForm(
+                                existing = editingRedirection,
+                                certificates = data.certificates,
+                                accessLists = data.accessLists,
+                                isLoading = isPerformingAction,
+                                onDismiss = { showRedirectionForm = false; editingRedirection = null },
+                                onSave = { request ->
+                                    val id = editingRedirection?.id
+                                    if (id != null) viewModel.updateRedirectionHost(id, request)
+                                    else viewModel.createRedirectionHost(request)
                                 }
-                            }
-                        )
+                            )
+                        }
+                        if (showStreamForm) {
+                            NpmStreamForm(
+                                existing = editingStream,
+                                isLoading = isPerformingAction,
+                                onDismiss = { showStreamForm = false; editingStream = null },
+                                onSave = { request ->
+                                    val id = editingStream?.id
+                                    if (id != null) viewModel.updateStream(id, request)
+                                    else viewModel.createStream(request)
+                                }
+                            )
+                        }
+                        if (showDeadHostForm) {
+                            NpmDeadHostForm(
+                                existing = editingDeadHost,
+                                certificates = data.certificates,
+                                isLoading = isPerformingAction,
+                                onDismiss = { showDeadHostForm = false; editingDeadHost = null },
+                                onSave = { request ->
+                                    val id = editingDeadHost?.id
+                                    if (id != null) viewModel.updateDeadHost(id, request)
+                                    else viewModel.createDeadHost(request)
+                                }
+                            )
+                        }
+                        if (showCertificateForm) {
+                            NpmCertificateForm(
+                                isLoading = isPerformingAction,
+                                onDismiss = { showCertificateForm = false },
+                                onSave = { request -> viewModel.createCertificate(request) }
+                            )
+                        }
+                        if (showAccessListForm) {
+                            NpmAccessListForm(
+                                editing = editingAccessList,
+                                onDismiss = {
+                                    showAccessListForm = false
+                                    editingAccessList = null
+                                },
+                                onSave = { name, items, clients ->
+                                    val existing = editingAccessList
+                                    if (existing != null) {
+                                        viewModel.updateAccessList(existing.id, name, items, clients)
+                                    } else {
+                                        viewModel.createAccessList(name, items, clients)
+                                    }
+                                }
+                            )
+                        }
+                        if (showUserForm) {
+                            NpmUserForm(
+                                editing = editingUser,
+                                isLoading = isPerformingAction,
+                                onDismiss = {
+                                    showUserForm = false
+                                    editingUser = null
+                                },
+                                onSave = { request ->
+                                    val existing = editingUser
+                                    if (existing != null) {
+                                        viewModel.updateUser(existing.id, request)
+                                    } else {
+                                        viewModel.createUser(request)
+                                    }
+                                }
+                            )
+                        }
                     }
                 }
             }
@@ -483,6 +569,7 @@ private fun UserCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     val displayName = when {
         !user.name.isNullOrBlank() -> user.name
         !user.nickname.isNullOrBlank() -> user.nickname
@@ -494,7 +581,8 @@ private fun UserCard(
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = if (user.isDisabled == true) StatusRed else ServiceType.NGINX_PROXY_MANAGER.primaryColor, tint = if (isDarkTheme) 0.08f else 0.05f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = if (user.isDisabled == true) StatusRed else ServiceType.NGINX_PROXY_MANAGER.primaryColor)),
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(onClick = onEdit, onLongClick = { showMenu = true })
@@ -516,7 +604,8 @@ private fun UserCard(
                         if (user.isDisabled == true) {
                             Surface(
                                 shape = RoundedCornerShape(12.dp),
-                                color = MaterialTheme.colorScheme.surfaceVariant
+                                color = npmRaisedCardColor(isDarkTheme, accent = StatusRed, tint = if (isDarkTheme) 0.10f else 0.07f),
+                                border = BorderStroke(1.dp, npmBorderTone(isDarkTheme, accent = StatusRed).copy(alpha = if (isDarkTheme) 0.62f else 0.52f))
                             ) {
                                 Text(
                                     text = stringResource(R.string.npm_disabled),
@@ -596,6 +685,7 @@ private fun AuditLogsTab(auditLogs: List<NpmAuditLog>) {
 
 @Composable
 private fun AuditLogCard(log: NpmAuditLog) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     val actionColor = auditActionColor(log.action)
     val objectLabel = listOfNotNull(
         log.objectType?.replace('-', ' ')?.replaceFirstChar { it.uppercase() },
@@ -611,14 +701,15 @@ private fun AuditLogCard(log: NpmAuditLog) {
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = actionColor, tint = if (isDarkTheme) 0.10f else 0.06f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = actionColor)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = actionColor.copy(alpha = 0.16f)
+                    color = npmRaisedCardColor(isDarkTheme, accent = actionColor, tint = if (isDarkTheme) 0.12f else 0.08f)
                 ) {
                     Text(
                         text = stringResource(auditActionLabelId(log.action)),
@@ -738,6 +829,7 @@ private fun AccessListCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     var showMenu by remember { mutableStateOf(false) }
 
     val usersCount = accessList.items?.size ?: 0
@@ -746,7 +838,8 @@ private fun AccessListCard(
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = if (hasAnyEntries) NpmOrange else null, tint = if (isDarkTheme) 0.09f else 0.06f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = if (hasAnyEntries) NpmOrange else null)),
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = { showMenu = true })
@@ -784,11 +877,11 @@ private fun AccessListCard(
                             )
                         }
                     }
-                    if (hasAnyEntries) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = NpmOrange.copy(alpha = 0.1f)
-                        ) {
+                        if (hasAnyEntries) {
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = npmRaisedCardColor(isDarkTheme, accent = NpmOrange, tint = if (isDarkTheme) 0.10f else 0.07f)
+                            ) {
                             Text(
                                 text = stringResource(R.string.npm_access_list),
                                 modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
@@ -908,9 +1001,11 @@ private fun RowScope.DashboardMenuCard(
     item: DashboardMenuItem,
     onClick: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = item.color, tint = if (isDarkTheme) 0.12f else 0.08f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = item.color)),
         modifier = Modifier
             .weight(1f)
             .height(86.dp)
@@ -959,9 +1054,11 @@ private fun DashboardHeroCard(
     onStreams: () -> Unit,
     onDeadHosts: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Surface(
         shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = NpmOrange, tint = if (isDarkTheme) 0.10f else 0.07f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = NpmOrange)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -1037,9 +1134,11 @@ private fun HeroStatChip(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = MaterialTheme.colorScheme.surfaceContainer,
+        color = npmRaisedCardColor(isDarkTheme, accent = color, tint = if (isDarkTheme) 0.12f else 0.08f),
+        border = BorderStroke(1.dp, npmBorderTone(isDarkTheme, accent = color).copy(alpha = if (isDarkTheme) 0.62f else 0.52f)),
         tonalElevation = 0.dp,
         shadowElevation = 0.dp,
         modifier = modifier.clickable(onClick = onClick)
@@ -1142,12 +1241,14 @@ private fun RedirectionHostCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     var showMenu by remember { mutableStateOf(false) }
     val statusColor = if (host.isEnabled) StatusGreen else MaterialTheme.colorScheme.onSurfaceVariant
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = if (host.isEnabled) NpmOrange else MaterialTheme.colorScheme.onSurfaceVariant, tint = if (isDarkTheme) 0.09f else 0.06f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = if (host.isEnabled) NpmOrange else MaterialTheme.colorScheme.onSurfaceVariant)),
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = { showMenu = true })
@@ -1171,7 +1272,7 @@ private fun RedirectionHostCard(
                             maxLines = 1, overflow = TextOverflow.Ellipsis
                         )
                     }
-                    Surface(shape = RoundedCornerShape(12.dp), color = NpmOrange.copy(alpha = 0.1f)) {
+                    Surface(shape = RoundedCornerShape(12.dp), color = npmRaisedCardColor(isDarkTheme, accent = NpmOrange, tint = if (isDarkTheme) 0.10f else 0.07f)) {
                         Text(
                             "${host.forwardHttpCode}",
                             modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
@@ -1237,6 +1338,7 @@ private fun StreamCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     var showMenu by remember { mutableStateOf(false) }
     val statusColor = when {
         !stream.isEnabled -> MaterialTheme.colorScheme.onSurfaceVariant
@@ -1246,7 +1348,8 @@ private fun StreamCard(
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = statusColor, tint = if (isDarkTheme) 0.10f else 0.06f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = statusColor)),
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = { showMenu = true })
@@ -1322,12 +1425,14 @@ private fun DeadHostCard(
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     var showMenu by remember { mutableStateOf(false) }
     val statusColor = if (host.isEnabled) StatusGreen else MaterialTheme.colorScheme.onSurfaceVariant
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = if (host.isEnabled) StatusRed else MaterialTheme.colorScheme.onSurfaceVariant, tint = if (isDarkTheme) 0.08f else 0.05f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = if (host.isEnabled) StatusRed else MaterialTheme.colorScheme.onSurfaceVariant)),
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(onClick = onClick, onLongClick = { showMenu = true })
@@ -1397,6 +1502,7 @@ private fun CertificateCard(
     onRenew: () -> Unit,
     onDelete: () -> Unit
 ) {
+    val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
     val formattedDate = cert.expiresOn?.let { exp ->
         try {
             val instant = Instant.parse(exp)
@@ -1416,7 +1522,8 @@ private fun CertificateCard(
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = npmCardColor(isDarkTheme, accent = if (cert.isExpired) StatusRed else if (cert.isLetsEncrypt) StatusGreen else NpmOrange, tint = if (isDarkTheme) 0.10f else 0.06f),
+        border = BorderStroke(1.dp, npmBorderColor(isDarkTheme, accent = if (cert.isExpired) StatusRed else if (cert.isLetsEncrypt) StatusGreen else NpmOrange)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -1444,14 +1551,15 @@ private fun CertificateCard(
 
                 Surface(
                     shape = RoundedCornerShape(12.dp),
-                    color = if (cert.isLetsEncrypt) StatusGreen.copy(alpha = 0.1f)
-                    else MaterialTheme.colorScheme.surfaceVariant
+                    color = if (cert.isLetsEncrypt) npmRaisedCardColor(isDarkTheme, accent = StatusGreen, tint = if (isDarkTheme) 0.10f else 0.07f)
+                    else npmRaisedCardColor(isDarkTheme, accent = NpmOrange, tint = if (isDarkTheme) 0.08f else 0.05f),
+                    border = BorderStroke(1.dp, npmBorderTone(isDarkTheme, accent = if (cert.isLetsEncrypt) StatusGreen else NpmOrange).copy(alpha = if (isDarkTheme) 0.62f else 0.52f))
                 ) {
                     Text(
                         if (cert.isLetsEncrypt) stringResource(R.string.npm_letsencrypt) else stringResource(R.string.npm_custom_cert),
                         modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
                         style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                        color = if (cert.isLetsEncrypt) StatusGreen else MaterialTheme.colorScheme.onSurfaceVariant
+                        color = if (cert.isLetsEncrypt) StatusGreen else NpmOrange
                     )
                 }
             }
