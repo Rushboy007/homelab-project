@@ -40,10 +40,10 @@ A premium, fully native dual-platform solution for monitoring and managing your 
       </a>
     </td>
     <td>
-      <b>10 integrated services</b><br>
+      <b>11 integrated services</b><br>
       Portainer, Pi-hole, Beszel, Gitea, Tailscale,<br>
       Nginx Proxy Manager, AdGuard DNS,<br>
-      Healthcheck, Patchmon, Bookmarks<br><br>
+      Healthcheck, Patchmon, Jellystat, Bookmarks<br><br>
       <b>2 native apps</b><br>
       Swift 6 + SwiftUI (iOS)<br>
       Kotlin + Jetpack Compose (Android)<br><br>
@@ -341,6 +341,9 @@ Monitor the uptime and health of your services. View check statuses, response ti
 
 ### 🩹 Patchmon
 Track software updates and patches across your infrastructure. Monitor version status, pending updates, and keep your homelab systems up to date from one place.
+
+### 🍿 Jellystat
+Monitor your Jellyfin media server usage. Track active streams, playback statistics, and library activity from a clean native interface.
 
 ### 🔖 Bookmarks
 Keep all your most-used homelab links in one place with a native bookmarks feature that supports organization, quick access, and a cleaner daily workflow.
