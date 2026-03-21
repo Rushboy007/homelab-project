@@ -27,6 +27,14 @@
       ],
       "versions": [
         {
+          "version": "0.7.1",
+          "date": "2026-03-21",
+          "localizedDescription": "## What's New in v0.7.1\n\n### Bug Fix\n- **Nginx Proxy Manager**: Fixed token expiration issue — the authentication token now refreshes automatically in the background, preventing failed requests.\n\n**Full Changelog**: https://github.com/JohnnWi/homelab-project/compare/v0.7.0...v0.7.1",
+          "downloadURL": "https://github.com/JohnnWi/homelab-project/releases/download/v0.7.1/Homelab.ipa",
+          "size": 7910721,
+          "minOSVersion": "18.0"
+        },
+        {
           "version": "0.7.0",
           "date": "2026-03-21",
           "localizedDescription": "What's New in v0.7.0:\n\n- New Service: Patchmon — Track software updates and patches\n- New Service: Jellystat — Monitor Jellyfin media server usage\n- Cyberpunk mode — unique visual theme for service cards\n- Android UI redesign for multiple services\n- Various bug fixes and stability improvements",
@@ -69,6 +77,16 @@
     }
   ],
   "news": [
+    {
+      "title": "v0.7.1 — What's New in v0.7.1",
+      "identifier": "release-0.7.1",
+      "caption": "What's New in v0.7.1 Bug Fix - **Nginx Proxy Manager**: Fixed token expiration issue — the authentication token now refreshes automatically in the background, preventing failed requests.",
+      "date": "2026-03-21",
+      "tintColor": "#4A90D9",
+      "notify": true,
+      "url": "https://github.com/JohnnWi/homelab-project/releases/tag/v0.7.1",
+      "appID": "homelab.foreverhomelab"
+    },
     {
       "title": "v0.7.0 — Patchmon, Jellystat & Cyberpunk Mode",
       "identifier": "release-0.7.0",
