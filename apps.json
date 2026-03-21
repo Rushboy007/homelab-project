@@ -27,6 +27,14 @@
       ],
       "versions": [
         {
+          "version": "0.7.2",
+          "date": "2026-03-21",
+          "localizedDescription": "## What's New in v0.7.2\n\n### New Feature\n- **In-app update banner**: the app now checks for new versions and shows a notification in Settings when an update is available\n\n### Bug Fixes\n- Fixed cyberpunk mode color inconsistencies\n- Fixed button alignment issues across multiple views\n\n### Other\n- Added `app-version.json` manifest for remote version checking\n- Updated all translations (EN, IT, FR, ES, DE)\n\n**Full Changelog**: https://github.com/JohnnWi/homelab-project/compare/v0.7.1...v0.7.2",
+          "downloadURL": "https://github.com/JohnnWi/homelab-project/releases/download/v0.7.2/Homelab.ipa",
+          "size": 7925910,
+          "minOSVersion": "18.0"
+        },
+        {
           "version": "0.7.1",
           "date": "2026-03-21",
           "localizedDescription": "## What's New in v0.7.1\n\n### Bug Fix\n- **Nginx Proxy Manager**: Fixed token expiration issue — the authentication token now refreshes automatically in the background, preventing failed requests.\n\n**Full Changelog**: https://github.com/JohnnWi/homelab-project/compare/v0.7.0...v0.7.1",
@@ -77,6 +85,16 @@
     }
   ],
   "news": [
+    {
+      "title": "v0.7.2 — What's New in v0.7.2",
+      "identifier": "release-0.7.2",
+      "caption": "What's New in v0.7.2 New Feature - **In-app update banner**: the app now checks for new versions and shows a notification in Settings when an update is available",
+      "date": "2026-03-21",
+      "tintColor": "#4A90D9",
+      "notify": true,
+      "url": "https://github.com/JohnnWi/homelab-project/releases/tag/v0.7.2",
+      "appID": "homelab.foreverhomelab"
+    },
     {
       "title": "v0.7.1 — What's New in v0.7.1",
       "identifier": "release-0.7.1",
