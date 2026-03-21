@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.animation.*
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,12 +36,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.layout.ContentScale
 import coil3.compose.AsyncImage
+import com.homelab.app.BuildConfig
 import com.homelab.app.R
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homelab.app.ui.components.ServiceIcon
@@ -63,6 +66,8 @@ fun SettingsScreen(
     val hiddenServices by viewModel.hiddenServices.collectAsStateWithLifecycle()
     val serviceOrder by viewModel.serviceOrder.collectAsStateWithLifecycle()
     val homeCyberpunkCardsEnabled by viewModel.homeCyberpunkCardsEnabled.collectAsStateWithLifecycle()
+    val updateBannerState by viewModel.updateBannerState.collectAsStateWithLifecycle()
+    val uriHandler = LocalUriHandler.current
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -85,6 +90,71 @@ fun SettingsScreen(
                     modifier = Modifier.padding(bottom = 8.dp)
                 )
             }
+
+            updateBannerState?.let { update ->
+                item {
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.SystemUpdate,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    text = stringResource(R.string.settings_update_banner_title),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                            }
+
+                            Text(
+                                text = stringResource(
+                                    R.string.settings_update_banner_body,
+                                    update.latestVersion,
+                                    update.currentVersion
+                                ),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.85f)
+                            )
+
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                FilledTonalButton(
+                                    onClick = { uriHandler.openUri(update.updateUrl) }
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.settings_update_action),
+                                        maxLines = 1
+                                    )
+                                }
+                                OutlinedButton(
+                                    onClick = { viewModel.dismissUpdateBanner() }
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.settings_update_dismiss),
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            val appVersion = BuildConfig.VERSION_NAME
 
             // --- DONATION ---
             item {
@@ -192,7 +262,14 @@ fun SettingsScreen(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Row(
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .toggleable(
+                                value = homeCyberpunkCardsEnabled,
+                                role = Role.Switch,
+                                onValueChange = viewModel::setHomeCyberpunkCardsEnabled
+                            )
+                            .padding(16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
@@ -216,7 +293,7 @@ fun SettingsScreen(
                         }
                         Switch(
                             checked = homeCyberpunkCardsEnabled,
-                            onCheckedChange = { viewModel.setHomeCyberpunkCardsEnabled(it) }
+                            onCheckedChange = null
                         )
                     }
                 }
@@ -625,8 +702,6 @@ fun SettingsScreen(
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
                 )
 
-                val uriHandler = LocalUriHandler.current
-
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -649,6 +724,43 @@ fun SettingsScreen(
                         onClick = { uriHandler.openUri("https://github.com/JohnnWi/homelab-project") },
                         modifier = Modifier.weight(1f)
                     )
+                }
+            }
+
+            item {
+                Text(
+                    text = stringResource(R.string.settings_version_label),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp, start = 8.dp)
+                )
+
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = MaterialTheme.colorScheme.surfaceContainer,
+                    tonalElevation = 0.dp,
+                    shadowElevation = 0.dp,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Info,
+                            contentDescription = stringResource(R.string.settings_version_label),
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Text(
+                            text = appVersion,
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
 
@@ -716,6 +828,7 @@ fun ServiceSettingsSection(
     onSetDefault: (ServiceInstance) -> Unit
 ) {
     var pendingDelete by remember { mutableStateOf<ServiceInstance?>(null) }
+    val serviceTitle = serviceDisplayNameForSettings(type)
 
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainerLow,
@@ -733,28 +846,18 @@ fun ServiceSettingsSection(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         Text(
-                            text = type.displayName,
+                            text = serviceTitle,
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f),
+                            maxLines = 2,
+                            overflow = TextOverflow.Ellipsis
                         )
-                        if (isHidden) {
-                            Surface(
-                                shape = RoundedCornerShape(999.dp),
-                                color = MaterialTheme.colorScheme.surfaceContainerHighest
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.settings_hidden_badge),
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
                         Surface(
                             shape = RoundedCornerShape(10.dp),
                             color = MaterialTheme.colorScheme.secondaryContainer
@@ -765,6 +868,24 @@ fun ServiceSettingsSection(
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSecondaryContainer,
                                 fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                    if (isHidden) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Surface(
+                            shape = RoundedCornerShape(999.dp),
+                            color = MaterialTheme.colorScheme.surfaceContainerHighest
+                        ) {
+                            Text(
+                                text = stringResource(R.string.settings_hidden_badge),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                softWrap = false
                             )
                         }
                     }
@@ -853,7 +974,7 @@ fun ServiceSettingsSection(
         AlertDialog(
             onDismissRequest = { pendingDelete = null },
             icon = { Icon(Icons.Default.Warning, contentDescription = stringResource(R.string.delete)) },
-            title = { Text(stringResource(R.string.settings_delete_instance_title, instance.label.ifBlank { type.displayName })) },
+            title = { Text(stringResource(R.string.settings_delete_instance_title, instance.label.ifBlank { serviceTitle })) },
             text = { Text(stringResource(R.string.settings_delete_instance_message)) },
             confirmButton = {
                 Button(
@@ -882,6 +1003,22 @@ fun ServiceSettingsSection(
                 }
             }
         )
+    }
+}
+
+@Composable
+private fun serviceDisplayNameForSettings(type: ServiceType): String {
+    return when (type) {
+        ServiceType.PORTAINER -> stringResource(R.string.service_portainer)
+        ServiceType.PIHOLE -> stringResource(R.string.service_pihole)
+        ServiceType.ADGUARD_HOME -> stringResource(R.string.service_adguard_home)
+        ServiceType.JELLYSTAT -> stringResource(R.string.service_jellystat)
+        ServiceType.BESZEL -> stringResource(R.string.service_beszel)
+        ServiceType.GITEA -> stringResource(R.string.service_gitea)
+        ServiceType.NGINX_PROXY_MANAGER -> stringResource(R.string.service_nginx_proxy_manager_short)
+        ServiceType.HEALTHCHECKS -> stringResource(R.string.service_healthchecks)
+        ServiceType.PATCHMON -> stringResource(R.string.service_patchmon)
+        ServiceType.UNKNOWN -> type.displayName
     }
 }
 
@@ -919,9 +1056,10 @@ private fun ServiceInstanceRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            text = instance.label.ifBlank { instance.type.displayName },
+                            text = instance.label.ifBlank { serviceDisplayNameForSettings(instance.type) },
                             style = MaterialTheme.typography.bodyLarge,
                             fontWeight = FontWeight.Bold,
+                            modifier = Modifier.weight(1f),
                             maxLines = 1,
                             overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                         )
@@ -935,7 +1073,9 @@ private fun ServiceInstanceRow(
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
                                     style = MaterialTheme.typography.labelSmall,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    softWrap = false
                                 )
                             }
                         }

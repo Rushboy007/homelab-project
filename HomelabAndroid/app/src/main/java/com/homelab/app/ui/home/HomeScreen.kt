@@ -157,6 +157,9 @@ fun HomeScreen(
     val hasTailscaleInstance = instancesByType.values.flatten().any { instance ->
         isLikelyTailscaleUrl(instance.url)
     }
+    val hasUnreachableInstance = instancesByType.values
+        .flatten()
+        .any { instance -> reachability[instance.id] == false }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -214,7 +217,7 @@ fun HomeScreen(
                 }
             }
 
-            if (isTailscaleConnected || hasTailscaleInstance) {
+            if (isTailscaleConnected || hasTailscaleInstance || hasUnreachableInstance) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     TailscaleCard(isConnected = isTailscaleConnected)
                 }

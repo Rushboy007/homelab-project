@@ -140,6 +140,11 @@
     <string name="settings_disconnect">Desconectar</string>
     <string name="settings_fallback_url">URL de respaldo (p. ej. Cloudflare)</string>
     <string name="settings_contacts_label">Contactos</string>
+    <string name="settings_version_label">Versión</string>
+    <string name="settings_update_banner_title">Nueva versión disponible</string>
+    <string name="settings_update_banner_body">Última %1$s • Instalada %2$s</string>
+    <string name="settings_update_action">Actualizar</string>
+    <string name="settings_update_dismiss">Ocultar</string>
     <string name="settings_contact_telegram">Telegram</string>
     <string name="settings_contact_reddit">Reddit</string>
     <string name="settings_contact_github">GitHub</string>
@@ -462,6 +467,7 @@
     <string name="warning">Advertencia</string>
     <!-- Nginx Proxy Manager -->
     <string name="service_nginx_proxy_manager">Nginx Proxy Manager</string>
+    <string name="service_nginx_proxy_manager_short">Nginx PM</string>
     <string name="npm_proxy_hosts">Hosts</string>
     <string name="npm_redirections">Redirecciones</string>
     <string name="npm_streams">Streams</string>

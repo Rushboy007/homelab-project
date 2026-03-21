@@ -90,12 +90,20 @@ jobs:
 
           echo "Updated apps.json to version $VERSION"
 
+      - name: Update app-version.json
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          VERSION="${RELEASE_TAG#v}"
+          jq --arg ver "$VERSION" '.latest = $ver' app-version.json > app_ver_tmp.json && mv app_ver_tmp.json app-version.json
+          echo "Updated app-version.json to version $VERSION"
+
       - name: Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add apps.json
+          git add apps.json app-version.json
           git diff --cached --quiet && echo "No changes" && exit 0
-          git commit -m "Update AltStore source to ${{ github.event.release.tag_name }}"
+          git commit -m "Update AltStore source and app-version to ${{ github.event.release.tag_name }}"
           git pull --rebase origin main
           git push origin HEAD:main

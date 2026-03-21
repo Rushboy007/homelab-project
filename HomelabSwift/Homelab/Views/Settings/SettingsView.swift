@@ -37,6 +37,7 @@ struct SettingsView: View {
                             }
                             .padding(.top, 8)
 
+                            updateBannerSection
                             donationSection
                             themeSection
                             homeStyleSection
@@ -45,6 +46,7 @@ struct SettingsView: View {
                             debugSection
                             servicesSection
                             contactsSection
+                            versionSection
                         }
                     }
                     .padding(16)
@@ -62,6 +64,11 @@ struct SettingsView: View {
             }
             .onTapGesture { endEditing() }
             .navigationBarHidden(true)
+        }
+        .onAppear {
+            Task {
+                await settingsStore.checkForUpdatesIfNeeded()
+            }
         }
         .sheet(item: $showInstanceEditor) { context in
             ServiceLoginView(serviceType: context.serviceType, existingInstanceId: context.instanceId)
@@ -120,6 +127,51 @@ struct SettingsView: View {
         }
         .padding(16)
         .glassCard(tint: AppTheme.accent.opacity(0.1))
+    }
+
+    @ViewBuilder
+    private var updateBannerSection: some View {
+        if let latest = settingsStore.availableUpdateVersion {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 10) {
+                    Image(systemName: "arrow.down.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(AppTheme.accent)
+                    Text(localizer.t.settingsUpdateBannerTitle)
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(AppTheme.accent)
+                    Spacer()
+                }
+
+                Text(String(format: localizer.t.settingsUpdateBannerBody, latest, appVersion))
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 10) {
+                    Button {
+                        if let urlString = settingsStore.availableUpdateURL,
+                           let url = URL(string: urlString) {
+                            UIApplication.shared.open(url)
+                        }
+                    } label: {
+                        Label(localizer.t.settingsUpdateAction, systemImage: "arrow.up.right.circle.fill")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(AppTheme.accent)
+
+                    Button {
+                        settingsStore.dismissUpdateBanner()
+                    } label: {
+                        Text(localizer.t.settingsUpdateDismiss)
+                            .font(.subheadline.weight(.semibold))
+                    }
+                    .buttonStyle(.bordered)
+                }
+            }
+            .padding(16)
+            .glassCard(tint: AppTheme.accent.opacity(0.08))
+        }
     }
 
     private var themeSection: some View {
@@ -304,6 +356,34 @@ struct SettingsView: View {
                 )
             }
             .glassCard()
+        }
+    }
+
+    private var versionSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(localizer.t.settingsVersion.sentenceCased())
+                .font(.caption2)
+                .fontWeight(.bold)
+                .foregroundStyle(AppTheme.accent)
+                .padding(.leading, 8)
+                .padding(.top, 16)
+
+            HStack(spacing: 12) {
+                Image(systemName: "app.badge")
+                    .font(.title3)
+                    .foregroundStyle(AppTheme.accent)
+                    .frame(width: 32, height: 32)
+                    .background(AppTheme.accent.opacity(0.1), in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+
+                Text(appVersion)
+                    .font(.system(.body, design: .monospaced).weight(.semibold))
+                    .foregroundStyle(.primary)
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .glassCard(tint: AppTheme.accent.opacity(0.05))
         }
     }
 
@@ -791,6 +871,14 @@ struct SettingsView: View {
         case .light: return localizer.t.settingsThemeLight
         case .system: return localizer.t.settingsThemeAuto
         }
+    }
+
+    private var appVersion: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        if let version, !version.isEmpty {
+            return version
+        }
+        return "—"
     }
 
 }

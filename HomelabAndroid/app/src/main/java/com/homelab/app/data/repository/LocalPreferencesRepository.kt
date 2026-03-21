@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.homelab.app.util.ServiceType
@@ -60,6 +61,10 @@ class LocalPreferencesRepository @Inject constructor(
     private val BESZEL_SHOW_MEMORY_KEY = booleanPreferencesKey("beszel_show_memory")
     private val BESZEL_SHOW_NETWORK_KEY = booleanPreferencesKey("beszel_show_network")
     private val HOME_CYBERPUNK_CARDS_KEY = booleanPreferencesKey("home_cyberpunk_cards")
+    private val DISMISSED_UPDATE_VERSION_KEY = stringPreferencesKey("dismissed_update_version")
+    private val UPDATE_LAST_CHECKED_AT_KEY = longPreferencesKey("update_last_checked_at")
+    private val UPDATE_AVAILABLE_VERSION_KEY = stringPreferencesKey("update_available_version")
+    private val UPDATE_AVAILABLE_URL_KEY = stringPreferencesKey("update_available_url")
 
     val themeMode: Flow<ThemeMode> = dataStore.data
         .catch { exception ->
@@ -212,6 +217,82 @@ class LocalPreferencesRepository @Inject constructor(
     suspend fun setHomeCyberpunkCardsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[HOME_CYBERPUNK_CARDS_KEY] = enabled
+        }
+    }
+
+    val dismissedUpdateVersion: Flow<String?> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[DISMISSED_UPDATE_VERSION_KEY] }
+
+    suspend fun setDismissedUpdateVersion(version: String?) {
+        dataStore.edit { preferences ->
+            if (version.isNullOrBlank()) {
+                preferences.remove(DISMISSED_UPDATE_VERSION_KEY)
+            } else {
+                preferences[DISMISSED_UPDATE_VERSION_KEY] = version
+            }
+        }
+    }
+
+    val updateLastCheckedAt: Flow<Long?> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[UPDATE_LAST_CHECKED_AT_KEY] }
+
+    suspend fun setUpdateLastCheckedAt(timestampMillis: Long?) {
+        dataStore.edit { preferences ->
+            if (timestampMillis == null) {
+                preferences.remove(UPDATE_LAST_CHECKED_AT_KEY)
+            } else {
+                preferences[UPDATE_LAST_CHECKED_AT_KEY] = timestampMillis
+            }
+        }
+    }
+
+    val updateAvailableVersion: Flow<String?> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[UPDATE_AVAILABLE_VERSION_KEY] }
+
+    val updateAvailableUrl: Flow<String?> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[UPDATE_AVAILABLE_URL_KEY] }
+
+    suspend fun setAvailableUpdate(version: String?, url: String?) {
+        dataStore.edit { preferences ->
+            if (version.isNullOrBlank()) {
+                preferences.remove(UPDATE_AVAILABLE_VERSION_KEY)
+                preferences.remove(UPDATE_AVAILABLE_URL_KEY)
+            } else {
+                preferences[UPDATE_AVAILABLE_VERSION_KEY] = version
+                if (url.isNullOrBlank()) {
+                    preferences.remove(UPDATE_AVAILABLE_URL_KEY)
+                } else {
+                    preferences[UPDATE_AVAILABLE_URL_KEY] = url
+                }
+            }
         }
     }
 

@@ -145,6 +145,11 @@
     <string name="settings_disconnect">Disconnetti</string>
     <string name="settings_fallback_url">Fallback URL (Es. Cloudflare)</string>
     <string name="settings_contacts_label">Contatti</string>
+    <string name="settings_version_label">Versione</string>
+    <string name="settings_update_banner_title">Nuova versione disponibile</string>
+    <string name="settings_update_banner_body">Ultima %1$s • Installata %2$s</string>
+    <string name="settings_update_action">Aggiorna</string>
+    <string name="settings_update_dismiss">Nascondi</string>
     <string name="settings_contact_telegram">Telegram</string>
     <string name="settings_contact_reddit">Reddit</string>
     <string name="settings_contact_github">GitHub</string>
@@ -525,6 +530,7 @@
 
     <!-- Nginx Proxy Manager -->
     <string name="service_nginx_proxy_manager">Nginx Proxy Manager</string>
+    <string name="service_nginx_proxy_manager_short">Nginx PM</string>
     <string name="npm_proxy_hosts">Host</string>
     <string name="npm_redirections">Redirect</string>
     <string name="npm_streams">Stream</string>

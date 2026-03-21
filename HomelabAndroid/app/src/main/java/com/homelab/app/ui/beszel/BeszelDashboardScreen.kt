@@ -3,6 +3,7 @@ package com.homelab.app.ui.beszel
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -23,7 +24,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,6 +52,47 @@ import com.homelab.app.ui.components.ServiceInstancePicker
 import java.text.NumberFormat
 import java.util.*
 
+private fun beszelPageBackground(isDarkTheme: Boolean, accent: Color): Brush = if (isDarkTheme) {
+    Brush.verticalGradient(
+        listOf(
+            Color(0xFF0B0E12),
+            Color(0xFF11161C),
+            accent.copy(alpha = 0.007f),
+            Color(0xFF0A0D11)
+        )
+    )
+} else {
+    Brush.verticalGradient(
+        listOf(
+            Color(0xFFF8F9FC),
+            Color(0xFFF5F7FA),
+            accent.copy(alpha = 0.010f),
+            Color(0xFFF7F8FB)
+        )
+    )
+}
+
+private fun beszelNeutralCardColor(isDarkTheme: Boolean): Color =
+    if (isDarkTheme) Color(0xFF12171F) else Color(0xFFF5F7FA)
+
+private fun beszelNeutralRaisedColor(isDarkTheme: Boolean): Color =
+    if (isDarkTheme) Color(0xFF171E2A) else Color(0xFFF9FAFC)
+
+private fun beszelNeutralBorderColor(isDarkTheme: Boolean): Color =
+    if (isDarkTheme) Color(0xFF33455D) else Color(0xFFD4DCE8)
+
+private fun beszelCardColor(isDarkTheme: Boolean, accent: Color): Color =
+    accent.copy(alpha = if (isDarkTheme) 0.018f else 0.020f)
+        .compositeOver(beszelNeutralCardColor(isDarkTheme))
+
+private fun beszelRaisedColor(isDarkTheme: Boolean, accent: Color): Color =
+    accent.copy(alpha = if (isDarkTheme) 0.034f else 0.030f)
+        .compositeOver(beszelNeutralRaisedColor(isDarkTheme))
+
+private fun beszelBorderColor(isDarkTheme: Boolean, accent: Color): Color =
+    accent.copy(alpha = if (isDarkTheme) 0.085f else 0.070f)
+        .compositeOver(beszelNeutralBorderColor(isDarkTheme))
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BeszelDashboardScreen(
@@ -58,6 +103,12 @@ fun BeszelDashboardScreen(
 ) {
     val systemsState by viewModel.systemsState.collectAsStateWithLifecycle()
     val instances by viewModel.instances.collectAsStateWithLifecycle()
+    val beszelAccent = ServiceType.BESZEL.primaryColor
+    val isDarkTheme = isThemeDark()
+    val pageBrush = remember(isDarkTheme) { beszelPageBackground(isDarkTheme, beszelAccent) }
+    val pageGlow = remember(isDarkTheme) {
+        if (isDarkTheme) beszelAccent.copy(alpha = 0.012f) else beszelAccent.copy(alpha = 0.014f)
+    }
 
     LaunchedEffect(Unit) {
         viewModel.fetchSystems()
@@ -76,72 +127,106 @@ fun BeszelDashboardScreen(
                     IconButton(onClick = { viewModel.fetchSystems() }) {
                         Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+                    actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             )
         },
-        containerColor = MaterialTheme.colorScheme.background
+        containerColor = Color.Transparent
     ) { paddingValues ->
-        when (val state = systemsState) {
-            is UiState.Loading, is UiState.Idle -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator(color = ServiceType.BESZEL.primaryColor)
-                }
-            }
-            is UiState.Error -> {
-                ErrorScreen(
-                    message = state.message,
-                    onRetry = { viewModel.fetchSystems() },
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
-            is UiState.Offline -> {
-                ErrorScreen(
-                    message = "",
-                    onRetry = { viewModel.fetchSystems() },
-                    isOffline = true,
-                    modifier = Modifier.padding(paddingValues)
-                )
-            }
-            is UiState.Success -> {
-                val systems = state.data
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(1),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                    contentPadding = PaddingValues(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        ServiceInstancePicker(
-                            instances = instances,
-                            selectedInstanceId = viewModel.instanceId,
-                            onInstanceSelected = { instance ->
-                                viewModel.setPreferredInstance(instance.id)
-                                onNavigateToInstance(instance.id)
-                            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(pageBrush)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(pageGlow, Color.Transparent),
+                            center = Offset(180f, 120f),
+                            radius = 640f
                         )
+                    )
+            )
+
+            when (val state = systemsState) {
+                is UiState.Loading, is UiState.Idle -> {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = ServiceType.BESZEL.primaryColor)
                     }
+                }
 
-                    item(span = { GridItemSpan(maxLineSpan) }) {
-                        OverviewCard(systems = systems)
-                    }
+                is UiState.Error -> {
+                    ErrorScreen(
+                        message = state.message,
+                        onRetry = { viewModel.fetchSystems() },
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    )
+                }
 
-                    // Removed standalone settings icon for a more compact layout.
+                is UiState.Offline -> {
+                    ErrorScreen(
+                        message = "",
+                        onRetry = { viewModel.fetchSystems() },
+                        isOffline = true,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                    )
+                }
 
-                    if (systems.isEmpty()) {
+                is UiState.Success -> {
+                    val systems = state.data
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(1),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            Box(modifier = Modifier.fillMaxWidth().padding(top = 60.dp), contentAlignment = Alignment.Center) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    Icon(Icons.Default.Dns, contentDescription = stringResource(R.string.beszel_no_systems), modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                                    Text(stringResource(R.string.beszel_no_systems), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            ServiceInstancePicker(
+                                instances = instances,
+                                selectedInstanceId = viewModel.instanceId,
+                                onInstanceSelected = { instance ->
+                                    viewModel.setPreferredInstance(instance.id)
+                                    onNavigateToInstance(instance.id)
+                                }
+                            )
+                        }
+
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            OverviewCard(systems = systems)
+                        }
+
+                        if (systems.isEmpty()) {
+                            item(span = { GridItemSpan(maxLineSpan) }) {
+                                Box(modifier = Modifier.fillMaxWidth().padding(top = 60.dp), contentAlignment = Alignment.Center) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        Icon(Icons.Default.Dns, contentDescription = stringResource(R.string.beszel_no_systems), modifier = Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                        Text(stringResource(R.string.beszel_no_systems), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                    }
                                 }
                             }
-                        }
-                    } else {
-                        items(systems, key = { it.id }) { sys ->
-                            SystemCard(system = sys, onClick = { onNavigateToSystem(sys.id) })
+                        } else {
+                            items(systems, key = { it.id }) { sys ->
+                                SystemCard(system = sys, onClick = { onNavigateToSystem(sys.id) })
+                            }
                         }
                     }
                 }
@@ -155,10 +240,12 @@ private fun OverviewCard(systems: List<BeszelSystem>) {
     val onlineCount = systems.count { it.isOnline }
     val offlineCount = systems.size - onlineCount
     val beszelColor = ServiceType.BESZEL.primaryColor
+    val isDarkTheme = isThemeDark()
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = beszelCardColor(isDarkTheme, beszelColor),
+        border = BorderStroke(1.dp, beszelBorderColor(isDarkTheme, beszelColor)),
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
@@ -167,7 +254,7 @@ private fun OverviewCard(systems: List<BeszelSystem>) {
         ) {
             Surface(
                 shape = RoundedCornerShape(14.dp),
-                color = beszelColor.copy(alpha = 0.1f),
+                color = beszelRaisedColor(isDarkTheme, beszelColor),
                 modifier = Modifier.size(48.dp)
             ) {
                 Icon(Icons.Default.Dns, contentDescription = stringResource(R.string.beszel_monitored_servers), tint = beszelColor, modifier = Modifier.padding(12.dp))
@@ -198,6 +285,7 @@ private fun SystemCard(system: BeszelSystem, onClick: () -> Unit) {
     val statusColor = if (isUp) StatusGreen else StatusRed
     val beszelColor = ServiceType.BESZEL.primaryColor
     val memoryColor = StatusPurple // Purple matching iOS
+    val isDarkTheme = isThemeDark()
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -210,7 +298,8 @@ private fun SystemCard(system: BeszelSystem, onClick: () -> Unit) {
 
     Surface(
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colorScheme.surfaceContainerLow,
+        color = beszelCardColor(isDarkTheme, beszelColor),
+        border = BorderStroke(1.dp, beszelBorderColor(isDarkTheme, beszelColor).copy(alpha = if (isDarkTheme) 0.50f else 0.52f)),
         modifier = Modifier
             .fillMaxWidth()
             .scale(scale)
@@ -233,7 +322,7 @@ private fun SystemCard(system: BeszelSystem, onClick: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     Surface(
                         shape = RoundedCornerShape(12.dp),
-                        color = statusColor.copy(alpha = 0.1f)
+                        color = statusColor.copy(alpha = if (isDarkTheme) 0.14f else 0.06f)
                     ) {
                         Row(modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp), horizontalArrangement = Arrangement.spacedBy(4.dp), verticalAlignment = Alignment.CenterVertically) {
                             Icon(if (isUp) Icons.Default.Wifi else Icons.Default.WifiOff, contentDescription = stringResource(if (isUp) R.string.home_status_online else R.string.home_status_offline), modifier = Modifier.size(12.dp), tint = statusColor)

@@ -688,6 +688,10 @@ struct Translations {
     let settingsDisconnectMessage: String
     let settingsAbout: String
     let settingsVersion: String
+    let settingsUpdateBannerTitle: String
+    let settingsUpdateBannerBody: String
+    let settingsUpdateAction: String
+    let settingsUpdateDismiss: String
     let settingsConnected: String
     let settingsNotConnected: String
     let settingsFallbackUrl: String

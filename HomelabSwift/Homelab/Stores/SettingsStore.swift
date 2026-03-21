@@ -49,6 +49,30 @@ final class SettingsStore {
         }
     }
 
+    private(set) var availableUpdateVersion: String? = nil {
+        didSet {
+            UserDefaults.standard.set(availableUpdateVersion, forKey: Keys.availableUpdateVersion)
+        }
+    }
+
+    private(set) var availableUpdateURL: String? = nil {
+        didSet {
+            UserDefaults.standard.set(availableUpdateURL, forKey: Keys.availableUpdateURL)
+        }
+    }
+
+    private var dismissedUpdateVersion: String? {
+        didSet {
+            UserDefaults.standard.set(dismissedUpdateVersion, forKey: Keys.dismissedUpdateVersion)
+        }
+    }
+
+    private var lastUpdateCheckAt: Date? {
+        didSet {
+            UserDefaults.standard.set(lastUpdateCheckAt?.timeIntervalSince1970, forKey: Keys.lastUpdateCheckAt)
+        }
+    }
+
     var lastBackgroundDate: Date? = nil
 
     // MARK: - Keys
@@ -61,7 +85,15 @@ final class SettingsStore {
         static let biometricEnabled = "homelab_biometric_enabled"
         static let hasCompletedOnboarding = "homelab_has_completed_onboarding"
         static let homeCyberpunkCardsEnabled = "homelab_home_cyberpunk_cards_enabled"
+        static let dismissedUpdateVersion = "homelab_dismissed_update_version"
+        static let lastUpdateCheckAt = "homelab_last_update_check_at"
+        static let availableUpdateVersion = "homelab_available_update_version"
+        static let availableUpdateURL = "homelab_available_update_url"
     }
+
+    private static let updateFeedURL = URL(string: "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/app-version.json")
+    private static let defaultUpdatePage = "https://github.com/JohnnWi/homelab-project/releases"
+    private static let updateCheckInterval: TimeInterval = 6 * 60 * 60
 
     // MARK: - Init
 
@@ -81,6 +113,17 @@ final class SettingsStore {
         self.biometricEnabled = UserDefaults.standard.bool(forKey: Keys.biometricEnabled)
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: Keys.hasCompletedOnboarding)
         self.homeCyberpunkCardsEnabled = UserDefaults.standard.object(forKey: Keys.homeCyberpunkCardsEnabled) as? Bool ?? false
+        self.dismissedUpdateVersion = UserDefaults.standard.string(forKey: Keys.dismissedUpdateVersion)
+        self.availableUpdateVersion = UserDefaults.standard.string(forKey: Keys.availableUpdateVersion)
+        self.availableUpdateURL = UserDefaults.standard.string(forKey: Keys.availableUpdateURL)
+
+        if let timestamp = UserDefaults.standard.object(forKey: Keys.lastUpdateCheckAt) as? TimeInterval {
+            self.lastUpdateCheckAt = Date(timeIntervalSince1970: timestamp)
+        } else {
+            self.lastUpdateCheckAt = nil
+        }
+
+        reconcileCachedUpdateState()
     }
 
     // MARK: - Service Visibility
@@ -131,11 +174,109 @@ final class SettingsStore {
         biometricEnabled = false
     }
 
+    func checkForUpdatesIfNeeded(force: Bool = false) async {
+        if !force, let lastUpdateCheckAt, Date().timeIntervalSince(lastUpdateCheckAt) < Self.updateCheckInterval {
+            return
+        }
+        guard let url = Self.updateFeedURL else { return }
+
+        do {
+            let (data, response) = try await URLSession.shared.data(from: url)
+            guard let http = response as? HTTPURLResponse, (200...299).contains(http.statusCode) else { return }
+            let feed = try JSONDecoder().decode(AppVersionFeed.self, from: data)
+            lastUpdateCheckAt = Date()
+            apply(feed: feed)
+        } catch {
+            // Keep existing state when update feed is temporarily unreachable.
+        }
+    }
+
+    func dismissUpdateBanner() {
+        guard let availableUpdateVersion else { return }
+        dismissedUpdateVersion = availableUpdateVersion
+        self.availableUpdateVersion = nil
+        self.availableUpdateURL = nil
+    }
+
+    private func apply(feed: AppVersionFeed) {
+        let latest = feed.latest.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !latest.isEmpty else {
+            availableUpdateVersion = nil
+            availableUpdateURL = nil
+            return
+        }
+
+        let current = appVersion
+        guard compareVersions(latest, current) == .orderedDescending else {
+            availableUpdateVersion = nil
+            availableUpdateURL = nil
+            return
+        }
+
+        if dismissedUpdateVersion == latest {
+            availableUpdateVersion = nil
+            availableUpdateURL = nil
+            return
+        }
+
+        availableUpdateVersion = latest
+        availableUpdateURL = feed.iosURL ?? Self.defaultUpdatePage
+    }
+
+    private func reconcileCachedUpdateState() {
+        guard let latest = availableUpdateVersion?.trimmingCharacters(in: .whitespacesAndNewlines), !latest.isEmpty else {
+            availableUpdateVersion = nil
+            availableUpdateURL = nil
+            return
+        }
+
+        if compareVersions(latest, appVersion) != .orderedDescending || dismissedUpdateVersion == latest {
+            availableUpdateVersion = nil
+            availableUpdateURL = nil
+            return
+        }
+
+        if availableUpdateURL?.isEmpty != false {
+            availableUpdateURL = Self.defaultUpdatePage
+        }
+    }
+
+    private var appVersion: String {
+        let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
+        return (version?.isEmpty == false) ? version! : "0.0.0"
+    }
+
+    private func compareVersions(_ lhs: String, _ rhs: String) -> ComparisonResult {
+        let left = lhs.split(separator: ".").map { Int($0) ?? 0 }
+        let right = rhs.split(separator: ".").map { Int($0) ?? 0 }
+        let count = max(left.count, right.count)
+        for index in 0..<count {
+            let l = index < left.count ? left[index] : 0
+            let r = index < right.count ? right[index] : 0
+            if l != r {
+                return l < r ? .orderedAscending : .orderedDescending
+            }
+        }
+        return .orderedSame
+    }
+
     private static func normalizedServiceOrder(_ order: [ServiceType]) -> [ServiceType] {
         var seen = Set<ServiceType>()
         let unique = order.filter { seen.insert($0).inserted }
         let missing = ServiceType.allCases.filter { !unique.contains($0) }
         return unique + missing
+    }
+}
+
+private struct AppVersionFeed: Decodable {
+    let latest: String
+    let iosURL: String?
+    let androidURL: String?
+
+    enum CodingKeys: String, CodingKey {
+        case latest
+        case iosURL = "ios_url"
+        case androidURL = "android_url"
     }
 }
 
