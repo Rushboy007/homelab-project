@@ -35,8 +35,8 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 <table>
   <tr>
     <td>
-      <a href="https://www.star-history.com/#JohnnWi/homelab-project&type=date&legend=top-left">
-        <img src="https://api.star-history.com/svg?repos=JohnnWi/homelab-project&type=date&legend=top-left" width="400" />
+      <a href="https://www.star-history.com/#JohnnWi/homelab-project&amp;type=date&amp;legend=top-left">
+        <img src="https://api.star-history.com/svg?repos=JohnnWi/homelab-project&amp;type=date&amp;legend=top-left" width="400" />
       </a>
     </td>
     <td>
