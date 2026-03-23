@@ -27,6 +27,14 @@
       ],
       "versions": [
         {
+          "version": "0.8.0",
+          "date": "2026-03-23",
+          "localizedDescription": "## What's New in v0.8.0\n\n### New Service: Plex\n- Monitor your Plex Media Server from your phone\n- View libraries, total items (Movies, Shows, Episodes, Music)\n- Active sessions with real-time playback info (resolution, bitrate, user)\n- Recently added media overview\n- Server info with version and platform details\n\n### Other\n- Vibe-coding disclaimer added to README\n- Star history chart restored\n- Updated to 12 integrated services\n\n**Full Changelog**: https://github.com/JohnnWi/homelab-project/compare/v0.7.2...v0.8.0",
+          "downloadURL": "https://github.com/JohnnWi/homelab-project/releases/download/v0.8.0/Homelab.ipa",
+          "size": 8037625,
+          "minOSVersion": "18.0"
+        },
+        {
           "version": "0.7.2",
           "date": "2026-03-21",
           "localizedDescription": "## What's New in v0.7.2\n\n### New Feature\n- **In-app update banner**: the app now checks for new versions and shows a notification in Settings when an update is available\n\n### Bug Fixes\n- Fixed cyberpunk mode color inconsistencies\n- Fixed button alignment issues across multiple views\n\n### Other\n- Added `app-version.json` manifest for remote version checking\n- Updated all translations (EN, IT, FR, ES, DE)\n\n**Full Changelog**: https://github.com/JohnnWi/homelab-project/compare/v0.7.1...v0.7.2",
@@ -85,6 +93,16 @@
     }
   ],
   "news": [
+    {
+      "title": "v0.8.0 — What's New in v0.8.0",
+      "identifier": "release-0.8.0",
+      "caption": "What's New in v0.8.0 New Service: Plex - Monitor your Plex Media Server from your phone",
+      "date": "2026-03-23",
+      "tintColor": "#4A90D9",
+      "notify": true,
+      "url": "https://github.com/JohnnWi/homelab-project/releases/tag/v0.8.0",
+      "appID": "homelab.foreverhomelab"
+    },
     {
       "title": "v0.7.2 — What's New in v0.7.2",
       "identifier": "release-0.7.2",
