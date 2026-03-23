@@ -12,6 +12,7 @@ private final class ServiceClientManager {
     private var npmClients: [UUID: NginxProxyManagerAPIClient] = [:]
     private var patchmonClients: [UUID: PatchmonAPIClient] = [:]
     private var jellystatClients: [UUID: JellystatAPIClient] = [:]
+    private var plexClients: [UUID: PlexAPIClient] = [:]
 
     func portainerClient(id: UUID) -> PortainerAPIClient {
         if let client = portainerClients[id] {
@@ -94,6 +95,15 @@ private final class ServiceClientManager {
         return client
     }
 
+    func plexClient(id: UUID) -> PlexAPIClient {
+        if let client = plexClients[id] {
+            return client
+        }
+        let client = PlexAPIClient(instanceId: id)
+        plexClients[id] = client
+        return client
+    }
+
     func removeClient(id: UUID, type: ServiceType) {
         switch type {
         case .portainer:
@@ -114,6 +124,8 @@ private final class ServiceClientManager {
             patchmonClients.removeValue(forKey: id)
         case .jellystat:
             jellystatClients.removeValue(forKey: id)
+        case .plex:
+            plexClients.removeValue(forKey: id)
         }
     }
 }
@@ -349,6 +361,11 @@ final class ServicesStore {
         return clientManager.jellystatClient(id: instance.id)
     }
 
+    func plexClient(instanceId: UUID) async -> PlexAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .plex else { return nil }
+        return clientManager.plexClient(id: instance.id)
+    }
+
     func checkReachability(for instanceId: UUID) async {
         guard let instance = instancesById[instanceId], pingingByInstanceId[instanceId] != true else { return }
 
@@ -376,6 +393,8 @@ final class ServicesStore {
             ok = await clientManager.patchmonClient(id: instanceId).ping()
         case .jellystat:
             ok = await clientManager.jellystatClient(id: instanceId).ping()
+        case .plex:
+            ok = await clientManager.plexClient(id: instanceId).ping()
         }
 
         reachabilityByInstanceId[instanceId] = ok
@@ -522,6 +541,10 @@ final class ServicesStore {
             return
         }
 
+        if current.type == .plex, let apiKey = current.apiKey, !apiKey.isEmpty {
+            return
+        }
+
         deleteInstance(id: instanceId)
     }
 
@@ -618,6 +641,14 @@ final class ServicesStore {
             await client.configure(
                 url: instance.url,
                 apiKey: instance.apiKey ?? "",
+                fallbackUrl: instance.fallbackUrl
+            )
+
+        case .plex:
+            let client = clientManager.plexClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                token: instance.apiKey ?? "",
                 fallbackUrl: instance.fallbackUrl
             )
         }

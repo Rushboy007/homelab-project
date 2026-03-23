@@ -800,6 +800,22 @@
     <string name="patchmon_error_server">Errore server PatchMon. Riprova più tardi.</string>
     <string name="patchmon_error_connection">Impossibile raggiungere il server PatchMon.</string>
 
+    <!-- Plex -->
+    <string name="service_plex">Plex</string>
+    <string name="plex_overview_subtitle">Statistiche Media Server</string>
+    <string name="plex_active_sessions">Sessioni Attive</string>
+    <string name="plex_total_items">Elementi Totali</string>
+    <string name="plex_movies">Film</string>
+    <string name="plex_shows">Serie TV</string>
+    <string name="plex_episodes">Episodi</string>
+    <string name="plex_music">Musica</string>
+    <string name="plex_libraries">Librerie</string>
+    <string name="plex_recently_added">Aggiunti di Recente</string>
+    <string name="plex_no_recent_items">Nessun elemento recente trovato.</string>
+    <string name="plex_watch_history">Cronologia Riproduzioni</string>
+    <string name="plex_no_data">Nessun dato disponibile dal server Plex.</string>
+    <string name="login_hint_plex">Inserisci l\'URL del tuo server Plex e il tuo X-Plex-Token.</string>
+
     <plurals name="patchmon_report_updates_count">
         <item quantity="one">%d aggiornamento</item>
         <item quantity="other">%d aggiornamenti</item>

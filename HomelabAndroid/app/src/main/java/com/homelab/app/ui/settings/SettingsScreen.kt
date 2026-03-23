@@ -1018,6 +1018,7 @@ private fun serviceDisplayNameForSettings(type: ServiceType): String {
         ServiceType.NGINX_PROXY_MANAGER -> stringResource(R.string.service_nginx_proxy_manager_short)
         ServiceType.HEALTHCHECKS -> stringResource(R.string.service_healthchecks)
         ServiceType.PATCHMON -> stringResource(R.string.service_patchmon)
+        ServiceType.PLEX -> stringResource(R.string.service_plex)
         ServiceType.UNKNOWN -> type.displayName
     }
 }

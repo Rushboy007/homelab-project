@@ -31,6 +31,7 @@ class SseClient @Inject constructor(
                 ServiceType.HEALTHCHECKS -> "Healthchecks"
                 ServiceType.NGINX_PROXY_MANAGER -> "NginxProxyManager"
                 ServiceType.PATCHMON -> "PatchMon"
+                ServiceType.PLEX -> "Plex"
                 ServiceType.UNKNOWN -> "Unknown"
             })
             .build()

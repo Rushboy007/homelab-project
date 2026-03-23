@@ -9,6 +9,10 @@
 
 A premium, fully native dual-platform solution for monitoring and managing your personal Homelab ecosystem. This project features two distinct, purpose-built native applications sharing the same design soul but optimized for their respective platforms.
 
+> **Disclaimer:** This is a **vibe-coding** project built for fun and personal use. It is provided as-is with no guarantees. The author assumes no responsibility for any issues, data loss, or damages resulting from the use of this software.
+
+[![Star History Chart](https://api.star-history.com/svg?repos=JohnnWi/homelab-project&type=Date)](https://star-history.com/#JohnnWi/homelab-project&Date)
+
 ---
 
 ## Table of Contents
@@ -26,7 +30,7 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 
 ## Highlights
 
-- **11 integrated services** — Portainer, Pi-hole, Beszel, Gitea, Nginx Proxy Manager, AdGuard DNS, Healthcheck, Patchmon, Jellystat, Tailscale, Bookmarks.
+- **12 integrated services** — Portainer, Pi-hole, Beszel, Gitea, Nginx Proxy Manager, AdGuard DNS, Healthcheck, Patchmon, Jellystat, Plex, Tailscale, Bookmarks.
 - **Multi-instance support** — Add multiple instances of the same service and switch between them seamlessly.
 - **Cyberpunk mode** — Toggle a unique cyberpunk visual theme for your service cards.
 - **Multilingual** — English, Italian, French, Spanish, German — auto-detected from your system language.
@@ -61,15 +65,17 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
     <th>Healthcheck</th>
     <th>Patchmon</th>
     <th>Jellystat</th>
+    <th>Plex</th>
     <th>Bookmarks</th>
   </tr>
   <tr>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9200.jpg" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9218.PNG" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9238.PNG" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9269.PNG" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9275.PNG" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9201.PNG" width="130" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9200.jpg" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9218.PNG" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9238.PNG" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9269.PNG" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9275.PNG" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-ios/plex.PNG" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9201.PNG" width="115" /></td>
   </tr>
 </table>
 
@@ -137,6 +143,13 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
   </tr>
 </table>
 
+**Plex**
+<table>
+  <tr>
+    <td align="center"><img src="media-docs/foto-ios/plex.PNG" width="180" /></td>
+  </tr>
+</table>
+
 </details>
 
 ---
@@ -168,15 +181,17 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
     <th>Healthcheck</th>
     <th>Patchmon</th>
     <th>Jellystat</th>
+    <th>Plex</th>
     <th>Bookmarks</th>
   </tr>
   <tr>
-    <td align="center"><img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-android/adguard1.jpg" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-android/healthcheck1.jpg" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-21_01-00-34.jpg" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_2_2026-03-21_01-00-34.jpg" width="130" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="130" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-android/adguard1.jpg" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-android/healthcheck1.jpg" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-21_01-00-34.jpg" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_2_2026-03-21_01-00-34.jpg" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-android/plex.jpg" width="115" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="115" /></td>
   </tr>
 </table>
 
@@ -250,6 +265,13 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
 <table>
   <tr>
     <td align="center"><img src="media-docs/foto-android/photo_2_2026-03-21_01-00-34.jpg" width="180" /></td>
+  </tr>
+</table>
+
+**Plex**
+<table>
+  <tr>
+    <td align="center"><img src="media-docs/foto-android/plex.jpg" width="180" /></td>
   </tr>
 </table>
 
@@ -339,6 +361,9 @@ Track software updates and patches across your infrastructure. Monitor version s
 
 ### 🍿 Jellystat
 Monitor your Jellyfin media server usage. Track active streams, playback statistics, and library activity from a clean native interface.
+
+### 🎬 Plex
+Monitor your Plex Media Server. View libraries, recently added media, active sessions, and server status from a native mobile interface.
 
 ### 🔖 Bookmarks
 Keep all your most-used homelab links in one place with a native bookmarks feature that supports organization, quick access, and a cleaner daily workflow.

@@ -13,6 +13,8 @@
 		03B92E43E53FDB090D96A183 /* NpmProxyHostForm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F2913EA81E6CCF74EFC883C /* NpmProxyHostForm.swift */; };
 		05260E0A1A5781AC8EAE7011 /* EditBookmarkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9CB770E60C2FE5FB6640BE98 /* EditBookmarkView.swift */; };
 		06B033BE66307E6CC8E75459 /* JellystatDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C74A7F7C1CB466CC7223840 /* JellystatDashboard.swift */; };
+		AA11223344556677AABBCCDD /* PlexAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB11223344556677AABBCCDD /* PlexAPIClient.swift */; };
+		CC11223344556677AABBCCDD /* PlexDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD11223344556677AABBCCDD /* PlexDashboard.swift */; };
 		0E5566DAE01FB0E9F10E98C8 /* StatusBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F5B6FAE42892F4BEB3097FD /* StatusBadge.swift */; };
 		0F634D9389BDB5467A64C25E /* GlassStatCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 735477DB04233B4FDA23469D /* GlassStatCard.swift */; };
 		10FBD548812295AB0814803D /* HealthchecksModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AD139A00611FED93C43C0833 /* HealthchecksModels.swift */; };
@@ -202,6 +204,8 @@
 		AD139A00611FED93C43C0833 /* HealthchecksModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthchecksModels.swift; sourceTree = "<group>"; };
 		AE1461ABFFED5C380B73195B /* AdGuardHomeFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdGuardHomeFiltersView.swift; sourceTree = "<group>"; };
 		B0D364FA7AED9BAC9B522C01 /* JellystatAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellystatAPIClient.swift; sourceTree = "<group>"; };
+		BB11223344556677AABBCCDD /* PlexAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlexAPIClient.swift; sourceTree = "<group>"; };
+		DD11223344556677AABBCCDD /* PlexDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlexDashboard.swift; sourceTree = "<group>"; };
 		B0F5CFB96CB606EB9EC34EBB /* AdGuardHomeAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdGuardHomeAPIClient.swift; sourceTree = "<group>"; };
 		B1CB48124608D3A220C3A444 /* Translations+OtherLanguages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Translations+OtherLanguages.swift"; sourceTree = "<group>"; };
 		B1EBFFF57A15B47F78E81D04 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
@@ -391,6 +395,14 @@
 			path = Jellystat;
 			sourceTree = "<group>";
 		};
+		EE11223344556677AABBCCDD /* Plex */ = {
+			isa = PBXGroup;
+			children = (
+				BB11223344556677AABBCCDD /* PlexAPIClient.swift */,
+			);
+			path = Plex;
+			sourceTree = "<group>";
+		};
 		58F8A8040064B68291A0616F /* ServiceLogin */ = {
 			isa = PBXGroup;
 			children = (
@@ -424,6 +436,14 @@
 				4C74A7F7C1CB466CC7223840 /* JellystatDashboard.swift */,
 			);
 			path = Jellystat;
+			sourceTree = "<group>";
+		};
+		FF11223344556677AABBCCDD /* Plex */ = {
+			isa = PBXGroup;
+			children = (
+				DD11223344556677AABBCCDD /* PlexDashboard.swift */,
+			);
+			path = Plex;
 			sourceTree = "<group>";
 		};
 		69A014381BA51401C9862848 /* Healthchecks */ = {
@@ -570,6 +590,7 @@
 				73413D1CE20FEEB055D5D6DD /* Healthchecks */,
 				873F7F23714AC880CCFDA5BF /* Home */,
 				5C653FDCC31984516D486E0F /* Jellystat */,
+				FF11223344556677AABBCCDD /* Plex */,
 				710B37A9B027F4C732FAA0E0 /* NginxProxyManager */,
 				88CAA1568236FD1297722073 /* Patchmon */,
 				92577B05F8B135054A9B86B6 /* PiHole */,
@@ -623,6 +644,7 @@
 				289C5939524BACC32CDCCF25 /* Gitea */,
 				06347246AD362987E7E3A1D3 /* Healthchecks */,
 				4DF24834910915FEAB043587 /* Jellystat */,
+				EE11223344556677AABBCCDD /* Plex */,
 				23AB1F8E0947D3598E65C623 /* NginxProxyManager */,
 				AEF3A1B12CFF68006D2F06AF /* Patchmon */,
 				D43D23351242B6BFC6E743DC /* PiHole */,
@@ -860,6 +882,8 @@
 				826BA16B6B4D4F31C3CC2B5C /* HomelabApp.swift in Sources */,
 				CD29007C4FB0AD271F85673C /* JellystatAPIClient.swift in Sources */,
 				06B033BE66307E6CC8E75459 /* JellystatDashboard.swift in Sources */,
+				AA11223344556677AABBCCDD /* PlexAPIClient.swift in Sources */,
+				CC11223344556677AABBCCDD /* PlexDashboard.swift in Sources */,
 				6B883FF0F9673181B59F8C83 /* KeychainService.swift in Sources */,
 				EAE1E1F928E990C7105F76A1 /* LoadableState.swift in Sources */,
 				FCBBD24B21419227C44FCC60 /* LockScreenView.swift in Sources */,

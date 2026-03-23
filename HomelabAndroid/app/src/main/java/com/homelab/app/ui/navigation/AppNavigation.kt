@@ -76,6 +76,7 @@ private fun dashboardRoute(type: ServiceType, instanceId: String): String {
         ServiceType.NGINX_PROXY_MANAGER -> "nginxpm/$instanceId/dashboard"
         ServiceType.HEALTHCHECKS -> "healthchecks/$instanceId/dashboard"
         ServiceType.PATCHMON -> "patchmon/$instanceId/dashboard"
+        ServiceType.PLEX -> "plex/$instanceId/dashboard"
         ServiceType.UNKNOWN -> Screen.Home.route
     }
 }
@@ -667,6 +668,23 @@ fun AppNavigation() {
                             }
                         } else {
                             navController.popBackStack()
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "plex/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.plex.PlexDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.PLEX, newInstanceId)) {
+                                popUpTo("plex/$instanceId/dashboard") { inclusive = true }
+                            }
                         }
                     }
                 )

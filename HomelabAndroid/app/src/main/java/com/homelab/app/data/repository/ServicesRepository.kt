@@ -114,8 +114,10 @@ class ServicesRepository @Inject constructor(
                     val address = addresses.nextElement()
                     val hostAddress = address.hostAddress ?: continue
                     if (!address.isLoopbackAddress && hostAddress.startsWith("100.")) {
-                        found = true
-                        break
+                        if (networkInterface.name.startsWith("tun")) {
+                            found = true
+                            break
+                        }
                     }
                 }
                 if (found) break

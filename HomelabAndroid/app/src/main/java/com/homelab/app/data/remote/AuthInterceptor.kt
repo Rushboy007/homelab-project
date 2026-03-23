@@ -221,6 +221,11 @@ class AuthInterceptor @Inject constructor(
                     }
                 }
             }
+            ServiceType.PLEX -> {
+                if (!instance.apiKey.isNullOrBlank()) {
+                    builder.addHeader("X-Plex-Token", instance.apiKey)
+                }
+            }
             else -> {}
         }
     }

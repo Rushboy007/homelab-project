@@ -13,6 +13,7 @@ import com.homelab.app.data.repository.AdGuardHomeRepository
 import com.homelab.app.data.repository.NginxProxyManagerRepository
 import com.homelab.app.data.repository.PatchmonRepository
 import com.homelab.app.data.repository.PiholeRepository
+import com.homelab.app.data.repository.PlexRepository
 import com.homelab.app.data.repository.PortainerRepository
 import com.homelab.app.data.repository.ServiceInstancesRepository
 import com.homelab.app.data.repository.ServicesRepository
@@ -42,7 +43,8 @@ class ServiceLoginViewModel @Inject constructor(
     private val nginxProxyManagerRepository: NginxProxyManagerRepository,
     private val healthchecksRepository: HealthchecksRepository,
     private val jellystatRepository: JellystatRepository,
-    private val patchmonRepository: PatchmonRepository
+    private val patchmonRepository: PatchmonRepository,
+    private val plexRepository: PlexRepository
 ) : ViewModel() {
 
     private val existingInstanceId: String? = savedStateHandle["instanceId"]
@@ -253,6 +255,18 @@ class ServiceLoginViewModel @Inject constructor(
                                 url = cleanUrl,
                                 username = trimmedUsername,
                                 password = tokenSecret,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.PLEX -> {
+                            require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
+                            plexRepository.authenticate(cleanUrl, trimmedApiKey)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                apiKey = trimmedApiKey,
                                 fallbackUrl = cleanFallbackUrl
                             )
                         }

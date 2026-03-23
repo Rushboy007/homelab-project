@@ -10,6 +10,7 @@ enum class ServiceType(val displayName: String) {
     PORTAINER("Portainer"),
     PIHOLE("Pi-hole"),
     ADGUARD_HOME("AdGuard Home"),
+    PLEX("Plex"),
     JELLYSTAT("Jellystat"),
     BESZEL("Beszel"),
     GITEA("Gitea"),

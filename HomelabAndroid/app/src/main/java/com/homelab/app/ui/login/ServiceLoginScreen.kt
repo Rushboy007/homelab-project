@@ -88,7 +88,7 @@ fun ServiceLoginScreen(
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
-    var label by remember { mutableStateOf("") }
+    var label by remember { mutableStateOf(serviceType.displayName) }
     var url by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -185,6 +185,7 @@ fun ServiceLoginScreen(
                 ServiceType.HEALTHCHECKS -> stringResource(R.string.login_hint_healthchecks)
                 ServiceType.JELLYSTAT -> stringResource(R.string.login_hint_jellystat)
                 ServiceType.PATCHMON -> stringResource(R.string.login_hint_patchmon)
+                ServiceType.PLEX -> stringResource(R.string.login_hint_plex)
                 else -> null
             }
 
@@ -389,7 +390,8 @@ fun ServiceLoginScreen(
             if (
                 serviceType == ServiceType.PORTAINER ||
                 serviceType == ServiceType.HEALTHCHECKS ||
-                serviceType == ServiceType.JELLYSTAT
+                serviceType == ServiceType.JELLYSTAT ||
+                serviceType == ServiceType.PLEX
             ) {
                 SecretField(
                     value = apiKey,

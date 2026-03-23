@@ -10,6 +10,7 @@ import com.homelab.app.data.repository.LocalPreferencesRepository
 import com.homelab.app.data.repository.NginxProxyManagerRepository
 import com.homelab.app.data.repository.HealthchecksRepository
 import com.homelab.app.data.repository.PatchmonRepository
+import com.homelab.app.data.repository.PlexRepository
 import com.homelab.app.data.repository.AdGuardHomeRepository
 import com.homelab.app.data.repository.PiholeRepository
 import com.homelab.app.data.repository.PortainerRepository
@@ -40,6 +41,7 @@ class HomeViewModel @Inject constructor(
     private val nginxProxyManagerRepository: NginxProxyManagerRepository,
     private val healthchecksRepository: HealthchecksRepository,
     private val patchmonRepository: PatchmonRepository,
+    private val plexRepository: PlexRepository,
     private val localPreferencesRepository: LocalPreferencesRepository
 ) : ViewModel() {
 
@@ -52,6 +54,7 @@ class HomeViewModel @Inject constructor(
     data class NpmSummary(val proxyHosts: Int, val total: Int)
     data class HealthchecksSummary(val up: Int, val total: Int)
     data class PatchmonSummary(val active: Int, val total: Int)
+    data class PlexSummary(val sessions: Int, val totalItems: Int)
 
     /** Summary info for a single instance card. */
     data class InstanceSummary(val value: String, val subValue: String?, val label: String)
@@ -122,6 +125,9 @@ class HomeViewModel @Inject constructor(
 
     private val _patchmonSummary = MutableStateFlow<PatchmonSummary?>(null)
     val patchmonSummary: StateFlow<PatchmonSummary?> = _patchmonSummary
+
+    private val _plexSummary = MutableStateFlow<PlexSummary?>(null)
+    val plexSummary: StateFlow<PlexSummary?> = _plexSummary
 
     /** Per-instance summary data, keyed by instance ID. */
     private val _instanceSummaries = MutableStateFlow<Map<String, InstanceSummary>>(emptyMap())
@@ -239,6 +245,14 @@ class HomeViewModel @Inject constructor(
                 val active = hosts.count { it.status.equals("active", ignoreCase = true) }
                 _patchmonSummary.value = PatchmonSummary(active, hosts.size)
                 InstanceSummary("$active", "/ ${hosts.size}", "hosts")
+            }
+            ServiceType.PLEX -> {
+                val dashboard = plexRepository.getDashboard(instanceId)
+                val activeSessions = dashboard.activeSessions.size
+                _plexSummary.value = PlexSummary(activeSessions, dashboard.stats.totalItems)
+                
+                val formattedItems = java.text.NumberFormat.getInstance().format(dashboard.stats.totalItems)
+                InstanceSummary(formattedItems, null, "plex_total_items")
             }
             else -> null
         }

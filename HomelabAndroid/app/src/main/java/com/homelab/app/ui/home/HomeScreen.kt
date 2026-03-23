@@ -154,12 +154,22 @@ fun HomeScreen(
     }
 
     val visibleTypes = serviceOrder.filter { !hiddenServices.contains(it.name) }
-    val hasTailscaleInstance = instancesByType.values.flatten().any { instance ->
-        isLikelyTailscaleUrl(instance.url)
-    }
-    val hasUnreachableInstance = instancesByType.values
-        .flatten()
-        .any { instance -> reachability[instance.id] == false }
+    val hasUnreachableInstance = visibleTypes
+        .flatMap { instancesByType[it].orEmpty() }
+        .any { instance ->
+            val r = reachability[instance.id]
+            val s = instanceSummaries[instance.id]
+            val isPinging = pinging[instance.id] == true
+            val isSumLoading = s == null && summaryLoading
+            val resolvedReachable = when {
+                s != null -> true
+                r == false && (isSumLoading || isPinging) -> null
+                r == true -> true
+                r == false -> false
+                else -> null
+            }
+            resolvedReachable == false
+        }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
@@ -217,7 +227,7 @@ fun HomeScreen(
                 }
             }
 
-            if (isTailscaleConnected || hasTailscaleInstance || hasUnreachableInstance) {
+            if (isTailscaleConnected || hasUnreachableInstance) {
                 item(span = { GridItemSpan(maxLineSpan) }) {
                     TailscaleCard(isConnected = isTailscaleConnected)
                 }
@@ -352,6 +362,7 @@ private fun InstanceCard(
             "checks" -> stringResource(R.string.healthchecks_checks)
             "jellystat_watch_time" -> stringResource(R.string.jellystat_watch_time)
             "hosts" -> stringResource(R.string.patchmon_hosts)
+            "plex_total_items" -> stringResource(R.string.plex_total_items)
             else -> s.label
         }.lowercase()
     }
@@ -522,14 +533,6 @@ private fun InstanceCard(
             }
         }
     }
-}
-
-private fun isLikelyTailscaleUrl(url: String): Boolean {
-    if (url.isBlank()) return false
-    return runCatching {
-        val host = Uri.parse(url).host?.lowercase().orEmpty()
-        host.endsWith(".ts.net") || host.startsWith("100.")
-    }.getOrDefault(false)
 }
 
 private const val TAILSCALE_ICON_URL = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png"

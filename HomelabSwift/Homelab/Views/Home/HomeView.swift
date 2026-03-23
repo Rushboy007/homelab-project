@@ -287,6 +287,7 @@ struct HomeView: View {
         case .nginxProxyManager: NpmDashboard(instanceId: route.instanceId)
         case .patchmon:          PatchmonDashboard(instanceId: route.instanceId)
         case .jellystat:         JellystatDashboard(instanceId: route.instanceId)
+        case .plex:              PlexDashboard(instanceId: route.instanceId)
         }
     }
 
@@ -356,6 +357,11 @@ struct HomeView: View {
                 guard let client = await servicesStore.jellystatClient(instanceId: instanceId) else { return nil }
                 let summary = try await client.getWatchSummary(days: 7)
                 return ServiceSummaryInfo(value: formatWatchTime(summary.totalHours), label: localizer.t.jellystatWatchTimeHome)
+            case .plex:
+                guard let client = await servicesStore.plexClient(instanceId: instanceId) else { return nil }
+                let libs = try await client.getLibraries()
+                let totalItems = libs.reduce(0) { $0 + $1.itemCount + $1.episodeCount }
+                return ServiceSummaryInfo(value: Formatters.formatNumber(totalItems), label: localizer.t.plexTotalItems)
             }
         } catch {
             return nil

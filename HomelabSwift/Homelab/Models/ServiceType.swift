@@ -10,6 +10,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
     case nginxProxyManager
     case patchmon
     case jellystat
+    case plex
 
     public var id: String { rawValue }
 
@@ -24,6 +25,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .nginxProxyManager:  return "Nginx Proxy Manager"
         case .patchmon:           return "PatchMon"
         case .jellystat:          return "Jellystat"
+        case .plex:               return "Plex"
         }
     }
 
@@ -40,6 +42,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .nginxProxyManager:  return t.serviceNpmDesc
         case .patchmon:           return t.servicePatchmonDesc
         case .jellystat:          return t.serviceJellystatDesc
+        case .plex:               return t.servicePlexDesc
         }
     }
 
@@ -54,6 +57,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .nginxProxyManager:  return "globe"
         case .patchmon:           return "shippingbox.circle.fill"
         case .jellystat:          return "chart.line.uptrend.xyaxis"
+        case .plex:               return "play.tv"
         }
     }
 
@@ -68,6 +72,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .nginxProxyManager:  return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png"
         case .patchmon:           return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchmon.png"
         case .jellystat:          return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png"
+        case .plex:               return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/plex.png"
         }
     }
 
@@ -83,6 +88,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .nginxProxyManager:  slug = "nginx-proxy-manager"
         case .patchmon:           slug = "patchmon"
         case .jellystat:          slug = "jellystat"
+        case .plex:               slug = "plex"
         }
         let urls = [
             "https://cdn.jsdelivr.net/gh/selfhst/icons/png/\(slug).png",
@@ -102,6 +108,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .nginxProxyManager:  return "service-nginx-proxy-manager"
         case .patchmon:           return "service-patchmon"
         case .jellystat:          return "service-jellystat"
+        case .plex:               return "service-plex"
         }
     }
 
@@ -116,6 +123,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .nginxProxyManager:  return ServiceColorSet(primary: Color(hex: "#F15B2A"), dark: Color(hex: "#C9481F"), bg: Color(hex: "#F15B2A").opacity(0.09))
         case .patchmon:           return ServiceColorSet(primary: Color(hex: "#2563EB"), dark: Color(hex: "#1D4ED8"), bg: Color(hex: "#2563EB").opacity(0.09))
         case .jellystat:          return ServiceColorSet(primary: Color(hex: "#C93DF6"), dark: Color(hex: "#A92ED0"), bg: Color(hex: "#C93DF6").opacity(0.11))
+        case .plex:               return ServiceColorSet(primary: Color(hex: "#E5A00D"), dark: Color(hex: "#CC8E0A"), bg: Color(hex: "#E5A00D").opacity(0.09))
         }
     }
 }

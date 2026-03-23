@@ -202,4 +202,10 @@ object NetworkModule {
     fun provideJellystatApi(retrofit: Retrofit): com.homelab.app.data.remote.api.JellystatApi {
         return retrofit.create(com.homelab.app.data.remote.api.JellystatApi::class.java)
     }
+
+    @Provides
+    @Singleton
+    fun providePlexApi(retrofit: Retrofit): com.homelab.app.data.remote.api.PlexApi {
+        return retrofit.create(com.homelab.app.data.remote.api.PlexApi::class.java)
+    }
 }

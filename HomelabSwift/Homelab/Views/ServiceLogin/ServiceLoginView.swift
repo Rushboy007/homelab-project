@@ -167,7 +167,7 @@ struct ServiceLoginView: View {
                 keyboardType: .URL
             )
 
-            if serviceType == .portainer || serviceType == .healthchecks || serviceType == .jellystat {
+            if serviceType == .portainer || serviceType == .healthchecks || serviceType == .jellystat || serviceType == .plex {
                 InputField(
                     icon: "key.fill",
                     placeholder: localizer.t.loginApiKey,
@@ -238,6 +238,7 @@ struct ServiceLoginView: View {
         case .healthchecks:      return localizer.t.loginHintHealthchecks
         case .patchmon:          return localizer.t.loginHintPatchmon
         case .jellystat:         return localizer.t.loginHintJellystat
+        case .plex:              return localizer.t.loginHintPlex
         default: return nil
         }
     }
@@ -549,6 +550,24 @@ struct ServiceLoginView: View {
                 username: tokenKey,
                 fallbackUrl: fallbackUrl,
                 password: resolvedSecret
+            )
+
+        case .plex:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let client = PlexAPIClient(instanceId: existingInstanceId ?? UUID())
+            try await client.authenticate(url: url, token: key, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .plex,
+                label: label,
+                url: url,
+                token: "",
+                username: existingInstance?.username,
+                apiKey: key,
+                fallbackUrl: fallbackUrl
             )
         }
     }

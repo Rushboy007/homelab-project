@@ -22,6 +22,7 @@ val ServiceType.primaryColor: Color
         ServiceType.PORTAINER -> Color(0xFF13B5EA)
         ServiceType.PIHOLE -> Color(0xFFCD2326)
         ServiceType.ADGUARD_HOME -> Color(0xFF34C759)
+        ServiceType.PLEX -> Color(0xFFE5A00D)
         ServiceType.JELLYSTAT -> Color(0xFFC93DF6)
         ServiceType.BESZEL -> Color(0xFF8B5CF6)
         ServiceType.GITEA -> Color(0xFF609926)
@@ -37,6 +38,7 @@ val ServiceType.backgroundColor: Color
         ServiceType.PORTAINER -> Color(0xFF13B5EA).copy(alpha = 0.12f)
         ServiceType.PIHOLE -> Color(0xFFCD2326).copy(alpha = 0.12f)
         ServiceType.ADGUARD_HOME -> Color(0xFF34C759).copy(alpha = 0.12f)
+        ServiceType.PLEX -> Color(0xFFE5A00D).copy(alpha = 0.12f)
         ServiceType.JELLYSTAT -> Color(0xFFC93DF6).copy(alpha = 0.12f)
         ServiceType.BESZEL -> Color(0xFF8B5CF6).copy(alpha = 0.12f)
         ServiceType.GITEA -> Color(0xFF609926).copy(alpha = 0.12f)
@@ -51,6 +53,7 @@ val ServiceType.iconUrl: String
         ServiceType.PORTAINER -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png"
         ServiceType.PIHOLE -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png"
         ServiceType.ADGUARD_HOME -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/adguard-home.png"
+        ServiceType.PLEX -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/plex.png"
         ServiceType.JELLYSTAT -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png"
         ServiceType.BESZEL -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png"
         ServiceType.GITEA -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png"
@@ -82,6 +85,7 @@ val ServiceType.fallbackIcon: ImageVector
         ServiceType.PORTAINER -> Icons.Default.Widgets
         ServiceType.PIHOLE -> Icons.Default.Security
         ServiceType.ADGUARD_HOME -> Icons.Default.Security
+        ServiceType.PLEX -> Icons.Default.Storage
         ServiceType.JELLYSTAT -> Icons.Default.Storage
         ServiceType.BESZEL -> Icons.Default.Storage
         ServiceType.GITEA -> Icons.Default.Source

@@ -794,6 +794,22 @@
     <string name="patchmon_error_server">PatchMon server error. Please try again later.</string>
     <string name="patchmon_error_connection">Cannot reach PatchMon server.</string>
 
+    <!-- Plex -->
+    <string name="service_plex">Plex</string>
+    <string name="plex_overview_subtitle">Media Server Stats</string>
+    <string name="plex_active_sessions">Active Sessions</string>
+    <string name="plex_total_items">Total Items</string>
+    <string name="plex_movies">Movies</string>
+    <string name="plex_shows">Shows</string>
+    <string name="plex_episodes">Episodes</string>
+    <string name="plex_music">Music</string>
+    <string name="plex_libraries">Libraries</string>
+    <string name="plex_recently_added">Recently Added</string>
+    <string name="plex_no_recent_items">No recent items found.</string>
+    <string name="plex_watch_history">Watch History</string>
+    <string name="plex_no_data">No data available from Plex server.</string>
+    <string name="login_hint_plex">Use the URL of your Plex Server and your X-Plex-Token.</string>
+
     <plurals name="patchmon_report_updates_count">
         <item quantity="one">%d update</item>
         <item quantity="other">%d updates</item>

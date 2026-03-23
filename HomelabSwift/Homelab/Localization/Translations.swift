@@ -73,6 +73,8 @@ struct Translations {
     let serviceNpmDesc: String
     let servicePatchmonDesc: String
     let serviceJellystatDesc: String
+    let servicePlex: String
+    let servicePlexDesc: String
 
     // Login
     let loginTitle: String
@@ -96,6 +98,7 @@ struct Translations {
     let loginHintHealthchecks: String
     let loginHintPatchmon: String
     let loginHintJellystat: String
+    let loginHintPlex: String
     let loginApiKey: String
     let done: String
 
@@ -774,6 +777,21 @@ struct Translations {
     let jellystatNoDataForPeriod: String
     let jellystatNoData: String
     let jellystatViewsSuffix: String
+
+    // Plex
+    let plexOverviewSubtitle: String
+    let plexLibraries: String
+    let plexTotalItems: String
+    let plexActiveSessions: String
+    let plexRecentlyAdded: String
+    let plexWatchHistory: String
+    let plexNoRecentItems: String
+    let plexNoData: String
+    let plexMovies: String
+    let plexShows: String
+    let plexEpisodes: String
+    let plexMusic: String
+
     let loginEditTitle: String
     let loginEditSubtitle: String
     let loginLabel: String
