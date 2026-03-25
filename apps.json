@@ -29,6 +29,14 @@
         {
           "version": "0.8.2",
           "date": "2026-03-25",
+          "localizedDescription": "## What's New in v0.8.2\n\n- **NPMplus Support**: Added compatibility with the NPMplus fork of Nginx Proxy Manager (cookie-based token fallback)\n- **Configured Services Page**: New dedicated page in Settings to view, add, edit, delete, and reorder all your configured services\n- **Update Popup**: Full-screen popup notification on app launch when a new version is available, with changelog display\n- **Settings Reorder**: Reorganized settings layout for better usability — donation card on top, cleaner card styles\n- **Bug Fixes**: Fixed JPEG-as-PNG resource issue on Android, improved build stability\n\n### Platforms\n- 📱 **iOS** (Swift / SwiftUI / Liquid Glass) — requires iOS 18.0+\n- 🤖 **Android** (Kotlin / Jetpack Compose / Material 3) — requires Android 8.0+",
+          "downloadURL": "https://github.com/JohnnWi/homelab-project/releases/download/v0.8.2/Homelab.ipa",
+          "size": 8056006,
+          "minOSVersion": "18.0"
+        },
+        {
+          "version": "0.8.2",
+          "date": "2026-03-25",
           "localizedDescription": "## What's New\n\n- **NPMplus Support**: Added cookie-based token fallback for NPMplus (Nginx Proxy Manager fork with CrowdSec)\n- **Configured Services Page**: New dedicated page in Settings to manage all connected services\n- **Update Popup**: Full-screen popup notification on app launch when a new version is available\n- **Settings Redesigned**: Reordered sections, neutral card style for Debug and Services\n\n## Fixes\n- Fixed `ic_splash_welcome.png` resource (was JPEG with .png extension)\n- Version bumped to 0.8.2 (build 12) on both platforms",
           "downloadURL": "https://github.com/JohnnWi/homelab-project/releases/download/v0.8.2/Homelab.ipa",
           "size": 8056006,
@@ -109,6 +117,16 @@
     }
   ],
   "news": [
+    {
+      "title": "v0.8.2 — What's New in v0.8.2",
+      "identifier": "release-0.8.2",
+      "caption": "What's New in v0.8.2 - **NPMplus Support**: Added compatibility with the NPMplus fork of Nginx Proxy Manager (cookie-based token fallback) - **Configured Services Page**: New dedicated page in Settings to view, add, edit, delete, and reorder all your configured services",
+      "date": "2026-03-25",
+      "tintColor": "#4A90D9",
+      "notify": true,
+      "url": "https://github.com/JohnnWi/homelab-project/releases/tag/v0.8.2",
+      "appID": "homelab.foreverhomelab"
+    },
     {
       "title": "v0.8.2 — What's New",
       "identifier": "release-0.8.2",
