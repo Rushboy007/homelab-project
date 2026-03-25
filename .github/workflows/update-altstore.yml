@@ -59,9 +59,9 @@ jobs:
               minOSVersion: "18.0"
             }')
 
-          # Prepend new version to versions array
+          # Remove any existing entry with the same version, then prepend the new one
           jq --argjson new_ver "$NEW_VERSION" \
-            '.apps[0].versions = [$new_ver] + .apps[0].versions' \
+            '.apps[0].versions = [$new_ver] + [.apps[0].versions[] | select(.version != $new_ver.version)]' \
             apps.json > apps_tmp.json && mv apps_tmp.json apps.json
 
           # Add news entry — strip markdown headers from title/caption
@@ -85,7 +85,7 @@ jobs:
             }')
 
           jq --argjson new_news "$NEW_NEWS" \
-            '.news = [$new_news] + .news' \
+            '.news = [$new_news] + [.news[] | select(.identifier != $new_news.identifier)]' \
             apps.json > apps_tmp.json && mv apps_tmp.json apps.json
 
           echo "Updated apps.json to version $VERSION"
