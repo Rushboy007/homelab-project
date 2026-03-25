@@ -1,6 +1,6 @@
 {
-  "latest": "0.8.2",
-  "ios_url": "https://github.com/JohnnWi/homelab-project/releases",
-  "android_url": "https://github.com/JohnnWi/homelab-project/releases",
-  "changelog": "What's New in v0.8.2\n\n- **NPMplus Support**: Added compatibility with the NPMplus fork of Nginx Proxy Manager (cookie-based token fallback)\n- **Configured Services Page**: New dedicated page in Settings to view, add, edit, delete, and reorder all your configured services\n- **Update Popup**: Full-screen popup notification on app launch when a new version is available, with changelog display\n- **Settings Reorder**: Reorganized settings layout for better usability — donation card on top, cleaner card styles\n- **Bug Fixes**: Fixed JPEG-as-PNG resource issue on Android, improved build stability\n\nPlatforms\n- 📱 **iOS** (Swift / SwiftUI / Liquid Glass) — requires iOS 18.0+\n- 🤖 **Android** (Kotlin / Jetpack Compose / Material 3) — requires Android 8.0+"
+  "latest": "0.9.0",
+  "ios_url": "https://github.com/JohnnWi/homelab-project/releases/download/v0.9.0/Homelab.ipa",
+  "android_url": "https://github.com/JohnnWi/homelab-project/releases/download/v0.9.0/Homelab.apk",
+  "changelog": "What's New in v0.9.0\n\n- **Backup & Restore**: New encrypted backup system — export and import your entire configuration (services, settings, PIN) on both iOS and Android\n- **NPMplus Fix**: Fixed authentication flow for NPMplus (Nginx Proxy Manager fork) on both platforms\n- **PIN Screen**: Fixed layout and interaction issues on the PIN lock screen\n- **Android Battery Fix**: Fixed battery stats not displaying correctly in Beszel\n\nPlatforms\n- 📱 **iOS** (Swift / SwiftUI / Liquid Glass) — requires iOS 18.0+\n- 🤖 **Android** (Kotlin / Jetpack Compose / Material 3) — requires Android 8.0+"
 }
