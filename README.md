@@ -15,22 +15,9 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 
 ---
 
-## Table of Contents
-
-- [Highlights](#highlights)
-- [iOS Version](#-ios-version-swift-native--liquid-glass)
-- [Android Version](#-android-version-kotlin-native--material-expressive-3)
-- [Project & Author](#-project--author)
-- [Install via AltStore / SideStore](#-install-via-altstore--sidestore)
-- [Getting Started](#-getting-started)
-- [Integrated Services](#-integrated-services)
-- [Usage & License](#-usage--license)
-
----
-
 ## Highlights
 
-- **12 integrated services** — Portainer, Pi-hole, Beszel, Gitea, Nginx Proxy Manager, AdGuard DNS, Healthcheck, Patchmon, Jellystat, Plex, Tailscale, Bookmarks.
+- **12 integrated services** — <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png" width="18" style="vertical-align:middle"> Portainer, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png" width="18" style="vertical-align:middle"> Pi-hole, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png" width="18" style="vertical-align:middle"> Beszel, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png" width="18" style="vertical-align:middle"> Gitea, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png" width="18" style="vertical-align:middle"> Nginx Proxy Manager (+ NPMplus), <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/adguard-home.png" width="18" style="vertical-align:middle"> AdGuard DNS, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png" width="18" style="vertical-align:middle"> Healthcheck, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchman.png" width="18" style="vertical-align:middle"> Patchmon, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png" width="18" style="vertical-align:middle"> Jellystat, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/plex.png" width="18" style="vertical-align:middle"> Plex, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png" width="18" style="vertical-align:middle"> Tailscale, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/linkding.png" width="18" style="vertical-align:middle"> Bookmarks.
 - **Multi-instance support** — Add multiple instances of the same service and switch between them seamlessly.
 - **Cyberpunk mode** — Toggle a unique cyberpunk visual theme for your service cards.
 - **Multilingual** — English, Italian, French, Spanish, German — auto-detected from your system language.
@@ -44,43 +31,33 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
 <table align="center">
   <tr>
     <th>Dashboard</th>
-    <th>Portainer</th>
-    <th>Nginx Proxy</th>
-    <th>Beszel</th>
-    <th>Pi-hole</th>
+    <th>Bookmarks</th>
   </tr>
   <tr>
-    <td align="center"><img src="media-docs/foto-ios/Dashboard.png" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9187.PNG" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9190.PNG" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9193.PNG" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9199.PNG" width="150" /></td>
+    <td align="center"><img src="media-docs/foto-ios/Dashboard.png" width="200" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9201.PNG" width="200" /></td>
   </tr>
 </table>
 
 <table align="center">
   <tr>
-    <th>Gitea</th>
-    <th>AdGuard DNS</th>
-    <th>Healthcheck</th>
-    <th>Patchmon</th>
-    <th>Jellystat</th>
-    <th>Plex</th>
-    <th>Bookmarks</th>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9187.PNG" width="120" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9193.PNG" width="120" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9190.PNG" width="120" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9199.PNG" width="120" /></td>
+    <td align="center"><img src="media-docs/foto-ios/plex.PNG" width="120" /></td>
   </tr>
   <tr>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9200.jpg" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9218.PNG" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9238.PNG" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9269.PNG" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9275.PNG" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-ios/plex.PNG" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9201.PNG" width="115" /></td>
+    <td align="center"><sub>Portainer</sub></td>
+    <td align="center"><sub>Beszel</sub></td>
+    <td align="center"><sub>Nginx Proxy</sub></td>
+    <td align="center"><sub>Pi-hole</sub></td>
+    <td align="center"><sub>Plex</sub></td>
   </tr>
 </table>
 
 <details>
-<summary><b>View all iOS screenshots</b></summary>
+<summary><b>📸 View all iOS screenshots (12 services)</b></summary>
 <br>
 
 **Portainer**
@@ -92,7 +69,7 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
   </tr>
 </table>
 
-**Nginx Proxy Manager**
+**Nginx Proxy Manager / NPMplus**
 <table>
   <tr>
     <td align="center"><img src="media-docs/foto-ios/IMG_9190.PNG" width="180" /></td>
@@ -113,40 +90,24 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
   </tr>
 </table>
 
-**AdGuard DNS**
+**Pi-hole** · **AdGuard DNS** · **Healthcheck**
 <table>
   <tr>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9218.PNG" width="180" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9219.PNG" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9199.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9218.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9219.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9238.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9239.PNG" width="145" /></td>
   </tr>
 </table>
 
-**Healthcheck**
+**Gitea** · **Patchmon** · **Jellystat** · **Plex**
 <table>
   <tr>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9238.PNG" width="180" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9239.PNG" width="180" /></td>
-  </tr>
-</table>
-
-**Patchmon**
-<table>
-  <tr>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9269.PNG" width="180" /></td>
-  </tr>
-</table>
-
-**Jellystat**
-<table>
-  <tr>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9275.PNG" width="180" /></td>
-  </tr>
-</table>
-
-**Plex**
-<table>
-  <tr>
-    <td align="center"><img src="media-docs/foto-ios/plex.PNG" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9200.jpg" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9269.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9275.PNG" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-ios/plex.PNG" width="145" /></td>
   </tr>
 </table>
 
@@ -160,43 +121,33 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
 <table align="center">
   <tr>
     <th>Dashboard</th>
-    <th>Portainer</th>
-    <th>Beszel</th>
-    <th>Gitea</th>
-    <th>Nginx Proxy</th>
+    <th>Bookmarks</th>
   </tr>
   <tr>
-    <td align="center"><img src="media-docs/foto-android/Dashboard.jpg" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-16_20-24-21.jpg" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_4_2026-03-16_20-24-21.jpg" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_12_2026-03-16_20-24-21.jpg" width="150" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="150" /></td>
+    <td align="center"><img src="media-docs/foto-android/Dashboard.jpg" width="200" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="200" /></td>
   </tr>
 </table>
 
 <table align="center">
   <tr>
-    <th>Pi-hole</th>
-    <th>AdGuard DNS</th>
-    <th>Healthcheck</th>
-    <th>Patchmon</th>
-    <th>Jellystat</th>
-    <th>Plex</th>
-    <th>Bookmarks</th>
+    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-16_20-24-21.jpg" width="120" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_4_2026-03-16_20-24-21.jpg" width="120" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="120" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="120" /></td>
+    <td align="center"><img src="media-docs/foto-android/plex.jpg" width="120" /></td>
   </tr>
   <tr>
-    <td align="center"><img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-android/adguard1.jpg" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-android/healthcheck1.jpg" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-21_01-00-34.jpg" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_2_2026-03-21_01-00-34.jpg" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-android/plex.jpg" width="115" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="115" /></td>
+    <td align="center"><sub>Portainer</sub></td>
+    <td align="center"><sub>Beszel</sub></td>
+    <td align="center"><sub>Nginx Proxy</sub></td>
+    <td align="center"><sub>Pi-hole</sub></td>
+    <td align="center"><sub>Plex</sub></td>
   </tr>
 </table>
 
 <details>
-<summary><b>View all Android screenshots</b></summary>
+<summary><b>📸 View all Android screenshots (12 services)</b></summary>
 <br>
 
 **Portainer**
@@ -222,56 +173,26 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
   </tr>
 </table>
 
-**Nginx Proxy Manager**
+**Nginx Proxy Manager / NPMplus** · **Pi-hole**
 <table>
   <tr>
-    <td align="center"><img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="180" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_14_2026-03-16_20-24-21.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_14_2026-03-16_20-24-21.jpg" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="145" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_17_2026-03-16_20-24-21.jpg" width="145" /></td>
   </tr>
 </table>
 
-**Pi-hole**
+**AdGuard DNS** · **Healthcheck** · **Patchmon** · **Jellystat** · **Plex**
 <table>
   <tr>
-    <td align="center"><img src="media-docs/foto-android/photo_16_2026-03-16_20-24-21.jpg" width="180" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_17_2026-03-16_20-24-21.jpg" width="180" /></td>
-  </tr>
-</table>
-
-**AdGuard DNS**
-<table>
-  <tr>
-    <td align="center"><img src="media-docs/foto-android/adguard1.jpg" width="180" /></td>
-    <td align="center"><img src="media-docs/foto-android/adguard2.jpg" width="180" /></td>
-  </tr>
-</table>
-
-**Healthcheck**
-<table>
-  <tr>
-    <td align="center"><img src="media-docs/foto-android/healthcheck1.jpg" width="180" /></td>
-    <td align="center"><img src="media-docs/foto-android/healthcheck2.jpg" width="180" /></td>
-  </tr>
-</table>
-
-**Patchmon**
-<table>
-  <tr>
-    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-21_01-00-34.jpg" width="180" /></td>
-  </tr>
-</table>
-
-**Jellystat**
-<table>
-  <tr>
-    <td align="center"><img src="media-docs/foto-android/photo_2_2026-03-21_01-00-34.jpg" width="180" /></td>
-  </tr>
-</table>
-
-**Plex**
-<table>
-  <tr>
-    <td align="center"><img src="media-docs/foto-android/plex.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-android/adguard1.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/adguard2.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/healthcheck1.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/healthcheck2.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_1_2026-03-21_01-00-34.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_2_2026-03-21_01-00-34.jpg" width="110" /></td>
+    <td align="center"><img src="media-docs/foto-android/plex.jpg" width="110" /></td>
   </tr>
 </table>
 
@@ -332,41 +253,35 @@ The app will update automatically when new versions are released.
 
 ## ✨ Integrated Services
 
-### 🐳 Portainer
-Monitor your Docker environments in real-time. Peek into container statuses, CPU/Memory usage, and perform quick actions like Start, Stop, or Restart directly from your mobile device.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png" width="20" style="vertical-align:middle"> **Portainer** — Monitor your Docker environments in real-time. Peek into container statuses, CPU/Memory usage, and perform quick actions like Start, Stop, or Restart directly from your mobile device.
 
-### 🛡️ Pi-hole
-Keep your network clean. View real-time query statistics, see your total blocked domains, and toggle ad-blocking on the fly with customizable timers.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png" width="20" style="vertical-align:middle"> **Pi-hole** — Keep your network clean. View real-time query statistics, see your total blocked domains, and toggle ad-blocking on the fly with customizable timers.
 
-### 📊 Beszel
-A lightweight, efficient system monitor. Track global CPU, Memory, and Disk usage across all your connected nodes with beautiful percentage-based visualizations.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png" width="20" style="vertical-align:middle"> **Beszel** — A lightweight, efficient system monitor. Track global CPU, Memory, and Disk usage across all your connected nodes with beautiful percentage-based visualizations.
 
-### 🦊 Gitea
-Manage your code natively. Browse repositories, view contribution heatmaps, read code files with full syntax highlighting, and keep track of your latest commits.
+<details>
+<summary><b>📋 View all 12 services...</b></summary>
+<br>
 
-### 🔐 Tailscale
-Integrated Tailscale support helps you securely reach your homelab from anywhere, with quick launch actions and connection status surfaced directly inside the app experience.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png" width="20" style="vertical-align:middle"> **Gitea** — Manage your code natively. Browse repositories, view contribution heatmaps, read code files with full syntax highlighting, and keep track of your latest commits.
 
-### 🔀 Nginx Proxy Manager
-Manage your reverse proxy directly from your phone. Browse proxy hosts, redirection hosts, dead hosts, streams, access lists, and SSL certificates — all in one native interface.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png" width="20" style="vertical-align:middle"> **Tailscale** — Integrated Tailscale support helps you securely reach your homelab from anywhere, with quick launch actions and connection status surfaced directly inside the app experience.
 
-### 🛡️ AdGuard DNS
-Monitor and manage your AdGuard Home DNS server. View real-time query statistics, check filtering status, and control DNS protection directly from your phone.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png" width="20" style="vertical-align:middle"> **Nginx Proxy Manager / NPMplus** — Manage your reverse proxy directly from your phone. Fully compatible with both [Nginx Proxy Manager](https://nginxproxymanager.com/) and the [NPMplus](https://github.com/ZoeyVid/NPMplus) fork (with CrowdSec support). Browse proxy hosts, redirection hosts, dead hosts, streams, access lists, and SSL certificates.
 
-### 💓 Healthcheck
-Monitor the uptime and health of your services. View check statuses, response times, and get notified when services go down — all from a clean native interface.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/adguard-home.png" width="20" style="vertical-align:middle"> **AdGuard DNS** — Monitor and manage your AdGuard Home DNS server. View real-time query statistics, check filtering status, and control DNS protection directly from your phone.
 
-### 🩹 Patchmon
-Track software updates and patches across your infrastructure. Monitor version status, pending updates, and keep your homelab systems up to date from one place.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png" width="20" style="vertical-align:middle"> **Healthcheck** — Monitor the uptime and health of your services. View check statuses, response times, and get notified when services go down — all from a clean native interface.
 
-### 🍿 Jellystat
-Monitor your Jellyfin media server usage. Track active streams, playback statistics, and library activity from a clean native interface.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchman.png" width="20" style="vertical-align:middle"> **Patchmon** — Track software updates and patches across your infrastructure. Monitor version status, pending updates, and keep your homelab systems up to date from one place.
 
-### 🎬 Plex
-Monitor your Plex Media Server. View libraries, recently added media, active sessions, and server status from a native mobile interface.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png" width="20" style="vertical-align:middle"> **Jellystat** — Monitor your Jellyfin media server usage. Track active streams, playback statistics, and library activity from a clean native interface.
 
-### 🔖 Bookmarks
-Keep all your most-used homelab links in one place with a native bookmarks feature that supports organization, quick access, and a cleaner daily workflow.
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/plex.png" width="20" style="vertical-align:middle"> **Plex** — Monitor your Plex Media Server. View libraries, recently added media, active sessions, and server status from a native mobile interface.
+
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/linkding.png" width="20" style="vertical-align:middle"> **Bookmarks** — Keep all your most-used homelab links in one place with a native bookmarks feature that supports organization, quick access, and a cleaner daily workflow.
+
+</details>
 
 ---
 
