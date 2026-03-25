@@ -52,6 +52,8 @@ import com.homelab.app.R
 import com.homelab.app.ui.home.HomeScreen
 import com.homelab.app.ui.settings.SettingsScreen
 import com.homelab.app.ui.settings.DebugLogsScreen
+import com.homelab.app.ui.settings.ConfiguredServicesScreen
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.homelab.app.util.ServiceType
 
 sealed class Screen(
@@ -205,12 +207,25 @@ fun AppNavigation() {
                     },
                     onNavigateToDebugLogs = {
                         navController.navigate("settings/debug-logs")
+                    },
+                    onNavigateToConfiguredServices = {
+                        navController.navigate("settings/configured-services")
                     }
                 )
             }
 
             composable("settings/debug-logs") {
                 DebugLogsScreen(onNavigateBack = { navController.popBackStack() })
+            }
+
+            composable("settings/configured-services") {
+                ConfiguredServicesScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToLogin = { type, instanceId ->
+                        navController.navigate(loginRoute(type, instanceId))
+                    },
+                    viewModel = hiltViewModel()
+                )
             }
 
             composable(

@@ -80,7 +80,21 @@ actor NginxProxyManagerAPIClient {
         }
 
         let decoded = try JSONDecoder().decode(NpmTokenResponse.self, from: data)
-        let resolvedToken = decoded.resolvedToken
+        var resolvedToken = decoded.resolvedToken
+        
+        // Per NPMplus: Se il token nel JSON è vuoto, cerca nei cookie.
+        if resolvedToken.isEmpty, let setCookie = http.allHeaderFields["Set-Cookie"] as? String {
+            // Estrae "token=..." oppure potenziale nome di JWT usando le regex o semplice string parsing.
+            let cookies = setCookie.components(separatedBy: .init(charactersIn: ",;"))
+            for cookie in cookies {
+                let trimmed = cookie.trimmingCharacters(in: .whitespaces)
+                if trimmed.hasPrefix("token=") {
+                    resolvedToken = String(trimmed.dropFirst("token=".count))
+                    break
+                }
+            }
+        }
+
         guard !resolvedToken.isEmpty else {
             throw APIError.custom("Authentication failed. Empty token received.")
         }

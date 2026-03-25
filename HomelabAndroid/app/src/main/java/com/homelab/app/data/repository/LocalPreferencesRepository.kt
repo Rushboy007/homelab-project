@@ -65,6 +65,8 @@ class LocalPreferencesRepository @Inject constructor(
     private val UPDATE_LAST_CHECKED_AT_KEY = longPreferencesKey("update_last_checked_at")
     private val UPDATE_AVAILABLE_VERSION_KEY = stringPreferencesKey("update_available_version")
     private val UPDATE_AVAILABLE_URL_KEY = stringPreferencesKey("update_available_url")
+    private val UPDATE_AVAILABLE_CHANGELOG_KEY = stringPreferencesKey("update_available_changelog")
+    private val DISMISSED_POPUP_VERSION_KEY = stringPreferencesKey("dismissed_popup_version")
 
     val themeMode: Flow<ThemeMode> = dataStore.data
         .catch { exception ->
@@ -280,11 +282,32 @@ class LocalPreferencesRepository @Inject constructor(
         }
         .map { preferences -> preferences[UPDATE_AVAILABLE_URL_KEY] }
 
-    suspend fun setAvailableUpdate(version: String?, url: String?) {
+    val updateAvailableChangelog: Flow<String?> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[UPDATE_AVAILABLE_CHANGELOG_KEY] }
+
+    val dismissedPopupVersion: Flow<String?> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[DISMISSED_POPUP_VERSION_KEY] }
+
+    suspend fun setAvailableUpdate(version: String?, url: String?, changelog: String? = null) {
         dataStore.edit { preferences ->
             if (version.isNullOrBlank()) {
                 preferences.remove(UPDATE_AVAILABLE_VERSION_KEY)
                 preferences.remove(UPDATE_AVAILABLE_URL_KEY)
+                preferences.remove(UPDATE_AVAILABLE_CHANGELOG_KEY)
             } else {
                 preferences[UPDATE_AVAILABLE_VERSION_KEY] = version
                 if (url.isNullOrBlank()) {
@@ -292,6 +315,21 @@ class LocalPreferencesRepository @Inject constructor(
                 } else {
                     preferences[UPDATE_AVAILABLE_URL_KEY] = url
                 }
+                if (changelog.isNullOrBlank()) {
+                    preferences.remove(UPDATE_AVAILABLE_CHANGELOG_KEY)
+                } else {
+                    preferences[UPDATE_AVAILABLE_CHANGELOG_KEY] = changelog
+                }
+            }
+        }
+    }
+
+    suspend fun setDismissedPopupVersion(version: String?) {
+        dataStore.edit { preferences ->
+            if (version.isNullOrBlank()) {
+                preferences.remove(DISMISSED_POPUP_VERSION_KEY)
+            } else {
+                preferences[DISMISSED_POPUP_VERSION_KEY] = version
             }
         }
     }

@@ -32,7 +32,29 @@ class NginxProxyManagerRepository @Inject constructor(
                 url = cleanUrl,
                 credentials = mapOf("identity" to email, "secret" to password)
             )
-            val token = response.resolvedToken
+            
+            if (!response.isSuccessful) {
+                if (response.code() == 401 || response.code() == 403) {
+                    throw Exception("Authentication failed. Check your email and password.")
+                }
+                throw Exception("HTTP Error: ${response.code()}")
+            }
+            
+            val body = response.body() ?: throw Exception("Empty response body")
+            var token = body.resolvedToken
+            
+            // Per NPMplus: Se il token nel JSON è vuoto, cerca nei cookie.
+            if (token.isBlank()) {
+                val cookies = response.headers().values("Set-Cookie")
+                for (cookie in cookies) {
+                    if (cookie.contains("token=")) {
+                        // Estrae il valore tra "token=" e il prossimo ";"
+                        token = cookie.substringAfter("token=").substringBefore(";")
+                        break
+                    }
+                }
+            }
+
             if (token.isBlank()) {
                 throw Exception("Authentication failed. Empty token received.")
             }

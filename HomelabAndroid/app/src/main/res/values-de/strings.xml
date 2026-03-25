@@ -136,6 +136,7 @@
     <string name="settings_home_cyberpunk_desc">Wendet Neon-Ränder und Markenverläufe auf die Service-Karten auf der Startseite an.</string>
     <string name="settings_language_label">Sprache</string>
     <string name="settings_services_label">Verbundene Dienste</string>
+    <string name="settings_configured_services_title">Konfigurierte Dienste</string>
     <string name="settings_not_connected">Nicht verbunden</string>
     <string name="settings_disconnect">Trennen</string>
     <string name="settings_fallback_url">Fallback-URL (z.B. Cloudflare)</string>
@@ -145,6 +146,8 @@
     <string name="settings_update_banner_body">Neueste %1$s • Installiert %2$s</string>
     <string name="settings_update_action">Aktualisieren</string>
     <string name="settings_update_dismiss">Ausblenden</string>
+    <string name="update_popup_title">Update verfügbar</string>
+    <string name="update_popup_body">Eine neue Version von Homelab ist verfügbar. Jetzt aktualisieren für die neuesten Funktionen.</string>
     <string name="settings_contact_telegram">Telegram</string>
     <string name="settings_contact_reddit">Reddit</string>
     <string name="settings_contact_github">GitHub</string>

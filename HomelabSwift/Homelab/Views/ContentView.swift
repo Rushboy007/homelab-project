@@ -9,22 +9,44 @@ struct ContentView: View {
     @Environment(ServicesStore.self) private var servicesStore
     @Environment(Localizer.self) private var localizer
     @Environment(\.scenePhase) private var scenePhase
+    @Environment(\.openURL) private var openURL
 
     var body: some View {
-        TabView {
-            Tab(localizer.t.tabHome, systemImage: "house.fill") {
-                HomeView()
-            }
-            
-            Tab(localizer.t.tabBookmarks, systemImage: "bookmark.fill") {
-                BookmarksView()
-            }
+        ZStack {
+            TabView {
+                Tab(localizer.t.tabHome, systemImage: "house.fill") {
+                    HomeView()
+                }
 
-            Tab(localizer.t.tabSettings, systemImage: "gearshape.fill") {
-                SettingsView()
+                Tab(localizer.t.tabBookmarks, systemImage: "bookmark.fill") {
+                    BookmarksView()
+                }
+
+                Tab(localizer.t.tabSettings, systemImage: "gearshape.fill") {
+                    SettingsView()
+                }
+            }
+            .tabBarMinimizeBehavior(.onScrollDown)
+
+            // Update popup overlay
+            if settingsStore.showUpdatePopup, let version = settingsStore.availableUpdateVersion {
+                UpdatePopupView(
+                    version: version,
+                    changelog: settingsStore.availableUpdateChangelog,
+                    onUpdate: {
+                        if let urlString = settingsStore.availableUpdateURL, let url = URL(string: urlString) {
+                            openURL(url)
+                        }
+                        settingsStore.dismissUpdatePopup()
+                    },
+                    onDismiss: {
+                        settingsStore.dismissUpdatePopup()
+                    }
+                )
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
             }
         }
-        .tabBarMinimizeBehavior(.onScrollDown)
+        .animation(.spring(duration: 0.35), value: settingsStore.showUpdatePopup)
         .preferredColorScheme(colorScheme)
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
@@ -46,6 +68,104 @@ struct ContentView: View {
         case .light: return .light
         case .dark: return .dark
         case .system: return nil
+        }
+    }
+}
+
+// MARK: - Update Popup
+
+struct UpdatePopupView: View {
+    let version: String
+    let changelog: String?
+    let onUpdate: () -> Void
+    let onDismiss: () -> Void
+
+    @Environment(Localizer.self) private var localizer
+
+    var body: some View {
+        ZStack {
+            // Dimmed background
+            Color.black.opacity(0.5)
+                .ignoresSafeArea()
+                .onTapGesture { onDismiss() }
+
+            VStack(spacing: 0) {
+                // Close button
+                HStack {
+                    Spacer()
+                    Button(action: onDismiss) {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title2)
+                            .symbolRenderingMode(.hierarchical)
+                            .foregroundStyle(.secondary)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 16)
+                .padding(.trailing, 16)
+
+                // Icon
+                Image(systemName: "arrow.down.app.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(.tint)
+                    .padding(.bottom, 12)
+
+                // Title
+                Text(localizer.t.updatePopupTitle)
+                    .font(.title2.bold())
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 24)
+
+                // Version badge
+                Text("v\(version)")
+                    .font(.subheadline.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 6)
+                    .background(Capsule().fill(.tint))
+                    .padding(.top, 8)
+
+                // Changelog
+                if let changelog, !changelog.isEmpty {
+                    ScrollView {
+                        Text(changelog)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.leading)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .frame(maxHeight: 180)
+                    .padding(.horizontal, 24)
+                    .padding(.top, 16)
+                } else {
+                    Text(localizer.t.updatePopupBody)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 8)
+                }
+
+                // Update button
+                Button(action: onUpdate) {
+                    Text(localizer.t.settingsUpdateAction)
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                }
+                .buttonStyle(.borderedProminent)
+                .controlSize(.large)
+                .padding(.horizontal, 24)
+                .padding(.top, 20)
+                .padding(.bottom, 24)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    .fill(.regularMaterial)
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
+            .shadow(color: .black.opacity(0.25), radius: 30, y: 10)
+            .padding(.horizontal, 32)
         }
     }
 }

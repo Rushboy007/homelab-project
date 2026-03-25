@@ -136,6 +136,7 @@
     <string name="settings_home_cyberpunk_desc">Aplica bordes neón y gradientes de marca a las tarjetas de servicios en Inicio.</string>
     <string name="settings_language_label">Idioma</string>
     <string name="settings_services_label">Servicios conectados</string>
+    <string name="settings_configured_services_title">Servicios Configurados</string>
     <string name="settings_not_connected">No conectado</string>
     <string name="settings_disconnect">Desconectar</string>
     <string name="settings_fallback_url">URL de respaldo (p. ej. Cloudflare)</string>
@@ -145,6 +146,8 @@
     <string name="settings_update_banner_body">Última %1$s • Instalada %2$s</string>
     <string name="settings_update_action">Actualizar</string>
     <string name="settings_update_dismiss">Ocultar</string>
+    <string name="update_popup_title">Actualización Disponible</string>
+    <string name="update_popup_body">Una nueva versión de Homelab está disponible. Actualiza ahora para las últimas mejoras.</string>
     <string name="settings_contact_telegram">Telegram</string>
     <string name="settings_contact_reddit">Reddit</string>
     <string name="settings_contact_github">GitHub</string>

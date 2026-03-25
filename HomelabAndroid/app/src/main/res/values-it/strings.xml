@@ -141,6 +141,7 @@
     <string name="settings_home_cyberpunk_desc">Applica bordi neon e gradienti brand alle card dei servizi nella Home.</string>
     <string name="settings_language_label">Lingua</string>
     <string name="settings_services_label">Servizi connessi</string>
+    <string name="settings_configured_services_title">Servizi Configurati</string>
     <string name="settings_not_connected">Non connesso</string>
     <string name="settings_disconnect">Disconnetti</string>
     <string name="settings_fallback_url">Fallback URL (Es. Cloudflare)</string>
@@ -150,6 +151,8 @@
     <string name="settings_update_banner_body">Ultima %1$s • Installata %2$s</string>
     <string name="settings_update_action">Aggiorna</string>
     <string name="settings_update_dismiss">Nascondi</string>
+    <string name="update_popup_title">Aggiornamento Disponibile</string>
+    <string name="update_popup_body">Una nuova versione di Homelab è disponibile. Aggiorna ora per le ultime novità e miglioramenti.</string>
     <string name="settings_contact_telegram">Telegram</string>
     <string name="settings_contact_reddit">Reddit</string>
     <string name="settings_contact_github">GitHub</string>

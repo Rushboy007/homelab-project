@@ -686,6 +686,7 @@ struct Translations {
     let settingsSpanish: String
     let settingsGerman: String
     let settingsServices: String
+    let settingsConfiguredServices: String
     let settingsDisconnect: String
     let settingsDisconnectConfirm: String
     let settingsDisconnectMessage: String
@@ -695,6 +696,8 @@ struct Translations {
     let settingsUpdateBannerBody: String
     let settingsUpdateAction: String
     let settingsUpdateDismiss: String
+    let updatePopupTitle: String
+    let updatePopupBody: String
     let settingsConnected: String
     let settingsNotConnected: String
     let settingsFallbackUrl: String

@@ -15,6 +15,8 @@ import com.homelab.app.ui.navigation.AppNavigation
 import com.homelab.app.ui.security.LockScreen
 import com.homelab.app.ui.security.PinSetupScreen
 import com.homelab.app.ui.security.SecurityViewModel
+import com.homelab.app.ui.settings.SettingsViewModel
+import com.homelab.app.ui.settings.UpdatePopupDialog
 import com.homelab.app.util.NotificationHelper
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -32,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homelab.app.data.repository.LocalPreferencesRepository
 import com.homelab.app.data.repository.ThemeMode
 import com.homelab.app.data.repository.ServicesRepository
@@ -124,7 +127,24 @@ class MainActivity : AppCompatActivity() {
                         )
                     }
                     else -> {
+                        val settingsVm = ViewModelProvider(this@MainActivity)[SettingsViewModel::class.java]
+                        val popupState by settingsVm.updatePopupState.collectAsStateWithLifecycle()
+
                         AppNavigation()
+
+                        popupState?.let { popup ->
+                            UpdatePopupDialog(
+                                version = popup.latestVersion,
+                                changelog = popup.changelog,
+                                updateUrl = popup.updateUrl,
+                                onUpdate = {
+                                    settingsVm.dismissUpdatePopup()
+                                },
+                                onDismiss = {
+                                    settingsVm.dismissUpdatePopup()
+                                }
+                            )
+                        }
                     }
                 }
             }

@@ -61,11 +61,25 @@ final class SettingsStore {
         }
     }
 
+    private(set) var availableUpdateChangelog: String? = nil {
+        didSet {
+            UserDefaults.standard.set(availableUpdateChangelog, forKey: Keys.availableUpdateChangelog)
+        }
+    }
+
     private var dismissedUpdateVersion: String? {
         didSet {
             UserDefaults.standard.set(dismissedUpdateVersion, forKey: Keys.dismissedUpdateVersion)
         }
     }
+
+    private var dismissedPopupVersion: String? {
+        didSet {
+            UserDefaults.standard.set(dismissedPopupVersion, forKey: Keys.dismissedPopupVersion)
+        }
+    }
+
+    var showUpdatePopup: Bool = false
 
     private var lastUpdateCheckAt: Date? {
         didSet {
@@ -89,6 +103,8 @@ final class SettingsStore {
         static let lastUpdateCheckAt = "homelab_last_update_check_at"
         static let availableUpdateVersion = "homelab_available_update_version"
         static let availableUpdateURL = "homelab_available_update_url"
+        static let availableUpdateChangelog = "homelab_available_update_changelog"
+        static let dismissedPopupVersion = "homelab_dismissed_popup_version"
     }
 
     private static let updateFeedURL = URL(string: "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/app-version.json")
@@ -114,8 +130,10 @@ final class SettingsStore {
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: Keys.hasCompletedOnboarding)
         self.homeCyberpunkCardsEnabled = UserDefaults.standard.object(forKey: Keys.homeCyberpunkCardsEnabled) as? Bool ?? false
         self.dismissedUpdateVersion = UserDefaults.standard.string(forKey: Keys.dismissedUpdateVersion)
+        self.dismissedPopupVersion = UserDefaults.standard.string(forKey: Keys.dismissedPopupVersion)
         self.availableUpdateVersion = UserDefaults.standard.string(forKey: Keys.availableUpdateVersion)
         self.availableUpdateURL = UserDefaults.standard.string(forKey: Keys.availableUpdateURL)
+        self.availableUpdateChangelog = UserDefaults.standard.string(forKey: Keys.availableUpdateChangelog)
 
         if let timestamp = UserDefaults.standard.object(forKey: Keys.lastUpdateCheckAt) as? TimeInterval {
             self.lastUpdateCheckAt = Date(timeIntervalSince1970: timestamp)
@@ -198,11 +216,19 @@ final class SettingsStore {
         self.availableUpdateURL = nil
     }
 
+    func dismissUpdatePopup() {
+        guard let availableUpdateVersion else { return }
+        dismissedPopupVersion = availableUpdateVersion
+        showUpdatePopup = false
+    }
+
     private func apply(feed: AppVersionFeed) {
         let latest = feed.latest.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !latest.isEmpty else {
             availableUpdateVersion = nil
             availableUpdateURL = nil
+            availableUpdateChangelog = nil
+            showUpdatePopup = false
             return
         }
 
@@ -210,34 +236,53 @@ final class SettingsStore {
         guard compareVersions(latest, current) == .orderedDescending else {
             availableUpdateVersion = nil
             availableUpdateURL = nil
-            return
-        }
-
-        if dismissedUpdateVersion == latest {
-            availableUpdateVersion = nil
-            availableUpdateURL = nil
+            availableUpdateChangelog = nil
+            showUpdatePopup = false
             return
         }
 
         availableUpdateVersion = latest
         availableUpdateURL = feed.iosURL ?? Self.defaultUpdatePage
+        availableUpdateChangelog = feed.changelog
+
+        if dismissedUpdateVersion != latest {
+            // Banner stays visible
+        } else {
+            availableUpdateVersion = nil
+            availableUpdateURL = nil
+            availableUpdateChangelog = nil
+        }
+
+        // Popup: show only if not dismissed for this version
+        if dismissedPopupVersion != latest && dismissedUpdateVersion != latest {
+            showUpdatePopup = true
+        }
     }
 
     private func reconcileCachedUpdateState() {
         guard let latest = availableUpdateVersion?.trimmingCharacters(in: .whitespacesAndNewlines), !latest.isEmpty else {
             availableUpdateVersion = nil
             availableUpdateURL = nil
+            availableUpdateChangelog = nil
+            showUpdatePopup = false
             return
         }
 
         if compareVersions(latest, appVersion) != .orderedDescending || dismissedUpdateVersion == latest {
             availableUpdateVersion = nil
             availableUpdateURL = nil
+            availableUpdateChangelog = nil
+            showUpdatePopup = false
             return
         }
 
         if availableUpdateURL?.isEmpty != false {
             availableUpdateURL = Self.defaultUpdatePage
+        }
+
+        // Restore popup state from cache
+        if dismissedPopupVersion != latest {
+            showUpdatePopup = true
         }
     }
 
@@ -270,11 +315,13 @@ final class SettingsStore {
 
 private struct AppVersionFeed: Decodable {
     let latest: String
+    let changelog: String?
     let iosURL: String?
     let androidURL: String?
 
     enum CodingKeys: String, CodingKey {
         case latest
+        case changelog
         case iosURL = "ios_url"
         case androidURL = "android_url"
     }
