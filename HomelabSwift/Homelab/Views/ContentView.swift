@@ -85,14 +85,43 @@ struct UpdatePopupView: View {
     var body: some View {
         ZStack {
             // Dimmed background
-            Color.black.opacity(0.5)
+            Color.black.opacity(0.55)
                 .ignoresSafeArea()
                 .onTapGesture { onDismiss() }
 
             VStack(spacing: 0) {
-                // Close button
-                HStack {
-                    Spacer()
+                // Colored header section
+                ZStack(alignment: .topTrailing) {
+                    VStack(spacing: 12) {
+                        // Icon
+                        ZStack {
+                            Circle()
+                                .fill(.tint.opacity(0.15))
+                                .frame(width: 80, height: 80)
+                            Image(systemName: "arrow.down.app.fill")
+                                .font(.system(size: 38, weight: .semibold))
+                                .foregroundStyle(.tint)
+                        }
+
+                        // Title
+                        Text(localizer.t.updatePopupTitle)
+                            .font(.title2.bold())
+                            .multilineTextAlignment(.center)
+
+                        // Version badge
+                        Text("v\(version)")
+                            .font(.subheadline.weight(.bold))
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 7)
+                            .background(Capsule().fill(.tint))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 36)
+                    .padding(.bottom, 20)
+                    .padding(.horizontal, 24)
+
+                    // Close button top-right
                     Button(action: onDismiss) {
                         Image(systemName: "xmark.circle.fill")
                             .font(.title2)
@@ -100,30 +129,12 @@ struct UpdatePopupView: View {
                             .foregroundStyle(.secondary)
                     }
                     .buttonStyle(.plain)
+                    .padding(.top, 14)
+                    .padding(.trailing, 16)
                 }
-                .padding(.top, 16)
-                .padding(.trailing, 16)
 
-                // Icon
-                Image(systemName: "arrow.down.app.fill")
-                    .font(.system(size: 48))
-                    .foregroundStyle(.tint)
-                    .padding(.bottom, 12)
-
-                // Title
-                Text(localizer.t.updatePopupTitle)
-                    .font(.title2.bold())
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 24)
-
-                // Version badge
-                Text("v\(version)")
-                    .font(.subheadline.weight(.semibold))
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 6)
-                    .background(Capsule().fill(.tint))
-                    .padding(.top, 8)
+                Divider()
+                    .padding(.horizontal, 20)
 
                 // Changelog
                 if let changelog, !changelog.isEmpty {
@@ -133,9 +144,14 @@ struct UpdatePopupView: View {
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.leading)
                             .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(16)
                     }
-                    .frame(maxHeight: 180)
-                    .padding(.horizontal, 24)
+                    .frame(minHeight: 120, maxHeight: 280)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(.quaternary.opacity(0.5))
+                    )
+                    .padding(.horizontal, 20)
                     .padding(.top, 16)
                 } else {
                     Text(localizer.t.updatePopupBody)
@@ -143,7 +159,7 @@ struct UpdatePopupView: View {
                         .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 24)
-                        .padding(.top, 8)
+                        .padding(.top, 16)
                 }
 
                 // Update button
@@ -155,17 +171,17 @@ struct UpdatePopupView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 20)
                 .padding(.top, 20)
-                .padding(.bottom, 24)
+                .padding(.bottom, 28)
             }
             .background(
-                RoundedRectangle(cornerRadius: 28, style: .continuous)
+                RoundedRectangle(cornerRadius: 32, style: .continuous)
                     .fill(.regularMaterial)
             )
-            .clipShape(RoundedRectangle(cornerRadius: 28, style: .continuous))
-            .shadow(color: .black.opacity(0.25), radius: 30, y: 10)
-            .padding(.horizontal, 32)
+            .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
+            .shadow(color: .black.opacity(0.3), radius: 40, y: 12)
+            .padding(.horizontal, 20)
         }
     }
 }
