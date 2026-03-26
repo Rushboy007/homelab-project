@@ -54,6 +54,7 @@ struct ContentView: View {
                 // App returned to foreground — immediately check and resume polling
                 Task { await servicesStore.checkAllReachability() }
                 servicesStore.startPeriodicHealthChecks()
+                Task { await settingsStore.checkForUpdatesIfNeeded() }
             case .background:
                 // App went to background — stop polling to save battery
                 servicesStore.stopPeriodicHealthChecks()
@@ -146,7 +147,7 @@ struct UpdatePopupView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(16)
                     }
-                    .frame(minHeight: 120, maxHeight: 280)
+                    .frame(minHeight: 180, maxHeight: 380)
                     .background(
                         RoundedRectangle(cornerRadius: 16, style: .continuous)
                             .fill(.quaternary.opacity(0.5))

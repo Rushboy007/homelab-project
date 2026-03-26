@@ -135,7 +135,7 @@ fun UpdatePopupDialog(
                             .fillMaxWidth()
                             .padding(horizontal = 20.dp)
                             .padding(top = 16.dp)
-                            .heightIn(min = 100.dp, max = 280.dp)
+                            .heightIn(min = 180.dp, max = 380.dp)
                     ) {
                         Text(
                             text = changelog,
