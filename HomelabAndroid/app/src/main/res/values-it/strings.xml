@@ -855,4 +855,40 @@
     <string name="jellystat_recent_trend">Trend recente</string>
     <string name="jellystat_no_data_for_period">Nessun dato per questo periodo.</string>
     <string name="jellystat_views_suffix">%1$d visualizzazioni</string>
+
+    <!-- Security Biometric -->
+    <string name="security_biometric_reason">Autenticati per accedere a Homelab</string>
+    <string name="security_biometric_prompt_title">Sblocca Homelab</string>
+    <string name="security_biometric_prompt_desc">Usa la biometria per accedere all\'app</string>
+    <string name="security_biometric_prompt_enable">Abilita Biometria</string>
+
+    <!-- Backup &amp; Restore -->
+    <string name="backupTitle">Backup</string>
+    <string name="backupInfoTitle">Backup e Ripristino</string>
+    <string name="backupInfoDesc">Esporta e importa la configurazione dell\'app in modo sicuro. I backup sono cifrati con una password.</string>
+    <string name="backupExportAction">Esporta Backup</string>
+    <string name="backupExportTitle">Esporta Backup</string>
+    <string name="backupExportError">Errore durante l\'esportazione del backup</string>
+    <string name="backupExporting">Esportazione in corso...</string>
+    <string name="backupImportAction">Importa Backup</string>
+    <string name="backupImportTitle">Importa Backup</string>
+    <string name="backupImportDesc">Seleziona un file di backup da importare. Dovrai inserire la password usata durante l\'esportazione.</string>
+    <string name="backupImportApply">Applica Backup</string>
+    <string name="backupImportDecrypt">Decifra Backup</string>
+    <string name="backupImportPreviewTitle">Anteprima Backup</string>
+    <string name="backupImportSuccess">Backup importato con successo</string>
+    <string name="backupImportPasswordDesc">Inserisci la password per decifrare il backup</string>
+    <string name="backupApplyError">Errore durante l\'applicazione del backup</string>
+    <string name="backupApplying">Applicazione in corso...</string>
+    <string name="backupDecryptError">Errore durante la decifratura del backup</string>
+    <string name="backupDecrypting">Decifratura in corso...</string>
+    <string name="backupPasswordDesc">Scegli una password per proteggere il backup</string>
+    <string name="backupPasswordConfirm">Conferma Password</string>
+    <string name="backupPasswordMismatch">Le password non corrispondono</string>
+    <string name="backupPasswordPlaceholder">Password</string>
+    <string name="backupPasswordRequired">La password è obbligatoria</string>
+    <string name="backupPasswordTooShort">La password deve avere almeno 6 caratteri</string>
+    <string name="backupPreviewServices">%d servizi configurati</string>
+    <string name="backupPreviewUnknown">Backup non riconosciuto</string>
+    <string name="backupPreviewWarning">Il ripristino sovrascriverà la configurazione attuale</string>
 </resources>

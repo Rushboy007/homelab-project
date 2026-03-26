@@ -751,4 +751,146 @@
     <string name="jellystat_recent_trend">Tendencia reciente</string>
     <string name="jellystat_no_data_for_period">No hay datos para este periodo.</string>
     <string name="jellystat_views_suffix">%1$d visualizaciones</string>
+
+    <!-- General missing -->
+    <string name="error_server_unreachable">Servidor inaccesible. Comprueba tu red o dirección IP.</string>
+    <string name="error_timeout">La solicitud ha expirado. El servidor tardó demasiado en responder.</string>
+    <string name="error_invalid_credentials">Credenciales inválidas. Comprueba tu clave API o datos de acceso.</string>
+    <string name="error_forbidden">Acceso denegado. No tienes permiso para ver esto.</string>
+    <string name="error_not_found">Recurso no encontrado en el servidor.</string>
+    <string name="error_server">Se ha producido un error en el servidor. Inténtalo de nuevo más tarde.</string>
+    <string name="error_unknown_status">Error: %1$d</string>
+    <string name="confirm">Confirmar</string>
+    <string name="delete">Eliminar</string>
+    <string name="yes">Sí</string>
+    <string name="no">No</string>
+    <string name="tailscale_open">Tailscale VPN</string>
+    <string name="tailscale_connected">Conectado</string>
+    <string name="tailscale_not_connected">No conectado</string>
+    <string name="tailscale_tap_to_open">Toca para abrir Tailscale</string>
+    <string name="error_gitea_user_profile">No se pudo obtener el perfil de usuario.</string>
+    <string name="gitea_tab_files">Archivos</string>
+    <string name="gitea_tab_commits">Commits</string>
+    <string name="gitea_tab_issues">Issues</string>
+    <string name="gitea_tab_branches">Ramas</string>
+    <string name="gitea_branch_label">Rama:</string>
+    <string name="gitea_preview_truncated">(Vista previa truncada…)</string>
+
+    <!-- Beszel missing metrics -->
+    <string name="beszel_gpu_usage_label">Uso (%)</string>
+    <string name="beszel_gpu_power_label">Potencia (W)</string>
+    <string name="beszel_gpu_usage_label_full">Uso de GPU</string>
+    <string name="beszel_gpu_power_label_full">Potencia de GPU</string>
+    <string name="beszel_gpu_vram_label_full">VRAM de GPU</string>
+    <string name="beszel_memory_usage">Uso de memoria</string>
+    <string name="beszel_swap">Swap</string>
+    <string name="beszel_swap_usage">Uso de swap</string>
+    <string name="beszel_docker_metrics_title">Métricas Docker</string>
+    <string name="beszel_docker_cpu_usage">Uso de CPU Docker</string>
+    <string name="beszel_docker_memory_usage">Uso de memoria Docker</string>
+    <string name="beszel_docker_network_io">E/S de red Docker</string>
+    <string name="beszel_download">Descarga</string>
+    <string name="beszel_upload">Subida</string>
+    <string name="beszel_total_download">Descarga total</string>
+    <string name="beszel_total_upload">Subida total</string>
+    <string name="beszel_read">Lectura</string>
+    <string name="beszel_write">Escritura</string>
+    <string name="beszel_per_core_cpu">Uso de CPU por núcleo</string>
+    <string name="beszel_per_core_summary">%1$d hilos • Prom %2$.1f%% • Pico %3$.1f%%</string>
+    <string name="beszel_cpu_breakdown">Desglose de CPU</string>
+    <string name="beszel_cpu_core_label">Núcleo %1$d</string>
+    <string name="beszel_cpu_user">Usuario</string>
+    <string name="beszel_cpu_system">Sistema</string>
+    <string name="beszel_cpu_nice">Nice</string>
+    <string name="beszel_cpu_wait">Espera</string>
+    <string name="beszel_cpu_idle">Inactivo</string>
+    <string name="beszel_temp_sensors">Sensores</string>
+    <string name="beszel_network_interfaces">Interfaces</string>
+
+    <!-- Portainer missing -->
+    <string name="portainer_os_label">SO</string>
+    <string name="portainer_docker_label">Docker</string>
+    <string name="portainer_arch_label">Arquitectura</string>
+    <string name="portainer_cpu_label">CPU</string>
+    <string name="portainer_ram_label">RAM</string>
+
+    <!-- NPM missing -->
+    <string name="npm_add_access_list">Añadir Lista de Acceso</string>
+    <string name="npm_edit_access_list">Editar Lista de Acceso</string>
+    <string name="npm_add_user">Añadir Usuario</string>
+    <string name="npm_edit_user">Editar Usuario</string>
+    <string name="npm_user_email">Correo electrónico</string>
+    <string name="npm_user_name">Nombre</string>
+    <string name="npm_user_nickname">Apodo</string>
+    <string name="npm_user_password">Contraseña</string>
+    <string name="npm_user_password_hint">Déjalo en blanco para conservar la contraseña actual.</string>
+    <string name="npm_user_role">Rol</string>
+    <string name="npm_user_role_admin">Admin</string>
+    <string name="npm_user_role_user">Usuario</string>
+    <string name="npm_access_list_users">Usuarios</string>
+    <string name="npm_access_list_clients">Clientes</string>
+    <string name="npm_access_list_username">Nombre de usuario</string>
+    <string name="npm_access_list_password">Contraseña</string>
+    <string name="npm_access_list_address">Dirección / CIDR</string>
+    <string name="npm_access_list_directive">Directiva</string>
+    <string name="npm_access_list_allow">Permitir</string>
+    <string name="npm_access_list_deny">Denegar</string>
+    <string name="npm_no_users">No hay usuarios.</string>
+    <string name="npm_no_audit_logs">No hay registros de auditoría.</string>
+    <string name="npm_no_settings">No hay ajustes disponibles.</string>
+    <string name="npm_audit_action_created">Creado</string>
+    <string name="npm_audit_action_updated">Actualizado</string>
+    <string name="npm_audit_action_deleted">Eliminado</string>
+
+    <!-- Plex -->
+    <string name="service_plex">Plex</string>
+    <string name="plex_overview_subtitle">Estadísticas del Servidor Multimedia</string>
+    <string name="plex_active_sessions">Sesiones Activas</string>
+    <string name="plex_total_items">Elementos Totales</string>
+    <string name="plex_movies">Películas</string>
+    <string name="plex_shows">Series</string>
+    <string name="plex_episodes">Episodios</string>
+    <string name="plex_music">Música</string>
+    <string name="plex_libraries">Bibliotecas</string>
+    <string name="plex_recently_added">Añadidos Recientemente</string>
+    <string name="plex_no_recent_items">No se encontraron elementos recientes.</string>
+    <string name="plex_watch_history">Historial de Reproducciones</string>
+    <string name="plex_no_data">No hay datos disponibles del servidor Plex.</string>
+    <string name="login_hint_plex">Usa la URL de tu servidor Plex y tu X-Plex-Token.</string>
+
+    <!-- Security Biometric -->
+    <string name="security_biometric_reason">Autentícate para acceder a Homelab</string>
+    <string name="security_biometric_prompt_title">Desbloquear Homelab</string>
+    <string name="security_biometric_prompt_desc">Usa la biometría para acceder a la aplicación</string>
+    <string name="security_biometric_prompt_enable">Activar Biometría</string>
+
+    <!-- Backup &amp; Restore -->
+    <string name="backupTitle">Copia de Seguridad</string>
+    <string name="backupInfoTitle">Copia de Seguridad y Restauración</string>
+    <string name="backupInfoDesc">Exporta e importa la configuración de la aplicación de forma segura. Las copias de seguridad están cifradas con una contraseña.</string>
+    <string name="backupExportAction">Exportar Copia de Seguridad</string>
+    <string name="backupExportTitle">Exportar Copia de Seguridad</string>
+    <string name="backupExportError">Error al exportar la copia de seguridad</string>
+    <string name="backupExporting">Exportando...</string>
+    <string name="backupImportAction">Importar Copia de Seguridad</string>
+    <string name="backupImportTitle">Importar Copia de Seguridad</string>
+    <string name="backupImportDesc">Selecciona un archivo de copia de seguridad para importar. Deberás introducir la contraseña usada durante la exportación.</string>
+    <string name="backupImportApply">Aplicar Copia de Seguridad</string>
+    <string name="backupImportDecrypt">Descifrar Copia de Seguridad</string>
+    <string name="backupImportPreviewTitle">Vista Previa de la Copia de Seguridad</string>
+    <string name="backupImportSuccess">Copia de seguridad importada correctamente</string>
+    <string name="backupImportPasswordDesc">Introduce la contraseña para descifrar la copia de seguridad</string>
+    <string name="backupApplyError">Error al aplicar la copia de seguridad</string>
+    <string name="backupApplying">Aplicando...</string>
+    <string name="backupDecryptError">Error al descifrar la copia de seguridad</string>
+    <string name="backupDecrypting">Descifrando...</string>
+    <string name="backupPasswordDesc">Elige una contraseña para proteger la copia de seguridad</string>
+    <string name="backupPasswordConfirm">Confirmar Contraseña</string>
+    <string name="backupPasswordMismatch">Las contraseñas no coinciden</string>
+    <string name="backupPasswordPlaceholder">Contraseña</string>
+    <string name="backupPasswordRequired">La contraseña es obligatoria</string>
+    <string name="backupPasswordTooShort">La contraseña debe tener al menos 6 caracteres</string>
+    <string name="backupPreviewServices">%d servicios configurados</string>
+    <string name="backupPreviewUnknown">Copia de seguridad no reconocida</string>
+    <string name="backupPreviewWarning">La restauración sobrescribirá la configuración actual</string>
 </resources>
