@@ -1,6 +1,6 @@
 {
   "latest": "1.0.2",
   "ios_url": "https://github.com/JohnnWi/homelab-project/releases/download/v1.0.2/Homelab.ipa",
-  "android_url": "https://github.com/JohnnWi/homelab-project/releases/download/v1.0.2/Homelab.apk",
+  "android_url": "https://github.com/JohnnWi/homelab-project/releases/tag/v1.0.2",
   "changelog": "What's New in v1.0.2\n\n- Bug fixes and stability improvements\n- Update check interval reduced to 15 minutes — new versions now appear much faster in the in-app popup\n\nPlatforms\n- 📱 **iOS** (Swift / SwiftUI) — requires iOS 18.0+\n- 🤖 **Android** (Kotlin / Jetpack Compose) — requires Android 8.0+"
 }
