@@ -17,8 +17,8 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 
 ## Highlights
 
-- **21 integrated services** — <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png" width="18" style="vertical-align:middle"> Portainer, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png" width="18" style="vertical-align:middle"> Pi-hole, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png" width="18" style="vertical-align:middle"> Beszel, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png" width="18" style="vertical-align:middle"> Gitea, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png" width="18" style="vertical-align:middle"> Nginx Proxy Manager (+ NPMplus), <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/adguard-home.png" width="18" style="vertical-align:middle"> AdGuard DNS, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png" width="18" style="vertical-align:middle"> Healthcheck, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchman.png" width="18" style="vertical-align:middle"> Patchmon, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png" width="18" style="vertical-align:middle"> Jellystat, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/plex.png" width="18" style="vertical-align:middle"> Plex, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png" width="18" style="vertical-align:middle"> Tailscale, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/linkding.png" width="18" style="vertical-align:middle"> Bookmarks, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/sonarr.png" width="18" style="vertical-align:middle"> Sonarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/radarr.png" width="18" style="vertical-align:middle"> Radarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/lidarr.png" width="18" style="vertical-align:middle"> Lidarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/prowlarr.png" width="18" style="vertical-align:middle"> Prowlarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/qbittorrent.png" width="18" style="vertical-align:middle"> qBittorrent, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/technitium.png" width="18" style="vertical-align:middle"> Technitium DNS, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pangolin.png" width="18" style="vertical-align:middle"> Pangolin, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/dockhand.png" width="18" style="vertical-align:middle"> Dockhand, Linux Update.
-- **Servarr stack** — Complete media automation dashboard: Sonarr + Radarr + Lidarr + Prowlarr + qBittorrent + Gluetun, unified in a single view.
+- **23 integrated services** — <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png" width="18" style="vertical-align:middle"> Portainer, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png" width="18" style="vertical-align:middle"> Pi-hole, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png" width="18" style="vertical-align:middle"> Beszel, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png" width="18" style="vertical-align:middle"> Gitea, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png" width="18" style="vertical-align:middle"> Nginx Proxy Manager (+ NPMplus), <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/adguard-home.png" width="18" style="vertical-align:middle"> AdGuard DNS, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png" width="18" style="vertical-align:middle"> Healthcheck, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchman.png" width="18" style="vertical-align:middle"> Patchmon, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png" width="18" style="vertical-align:middle"> Jellystat, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/plex.png" width="18" style="vertical-align:middle"> Plex, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png" width="18" style="vertical-align:middle"> Tailscale, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/linkding.png" width="18" style="vertical-align:middle"> Bookmarks, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/sonarr.png" width="18" style="vertical-align:middle"> Sonarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/radarr.png" width="18" style="vertical-align:middle"> Radarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/lidarr.png" width="18" style="vertical-align:middle"> Lidarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/prowlarr.png" width="18" style="vertical-align:middle"> Prowlarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/qbittorrent.png" width="18" style="vertical-align:middle"> qBittorrent, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/bazarr.png" width="18" style="vertical-align:middle"> Bazarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/flaresolverr.png" width="18" style="vertical-align:middle"> FlareSolverr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/technitium.png" width="18" style="vertical-align:middle"> Technitium DNS, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pangolin.png" width="18" style="vertical-align:middle"> Pangolin, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/dockhand.png" width="18" style="vertical-align:middle"> Dockhand, Linux Update.
+- **Servarr stack** — Complete media automation dashboard: Sonarr + Radarr + Lidarr + Prowlarr + Bazarr + FlareSolverr + qBittorrent + Gluetun, unified in a single view.
 - **Multi-instance support** — Add multiple instances of the same service and switch between them seamlessly.
 - **Alternate app icons** — 6 variants to choose from: Default, Dark, Clear Light, Clear Dark, Tinted Light, Tinted Dark.
 - **Cyberpunk mode** — Toggle a unique cyberpunk visual theme for your service cards.
@@ -33,11 +33,13 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
 <table align="center">
   <tr>
     <th>Dashboard</th>
+    <th>Servarr</th>
     <th>Bookmarks</th>
   </tr>
   <tr>
-    <td align="center"><img src="media-docs/foto-ios/Dashboard.png" width="200" /></td>
-    <td align="center"><img src="media-docs/foto-ios/IMG_9201.PNG" width="200" /></td>
+    <td align="center"><img src="media-docs/foto-ios/Dashboard.png" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/Servarr.png" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-ios/IMG_9201.PNG" width="180" /></td>
   </tr>
 </table>
 
@@ -59,7 +61,7 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
 </table>
 
 <details>
-<summary><b>📸 View all iOS screenshots (12 services)</b></summary>
+<summary><b>📸 View all iOS screenshots</b></summary>
 <br>
 
 **Portainer**
@@ -149,7 +151,7 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
 </table>
 
 <details>
-<summary><b>📸 View all Android screenshots (12 services)</b></summary>
+<summary><b>📸 View all Android screenshots</b></summary>
 <br>
 
 **Portainer**
@@ -277,8 +279,12 @@ The full media automation suite, unified in a single dashboard view. Monitor you
 
 <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/qbittorrent.png" width="20" style="vertical-align:middle"> **qBittorrent** — Monitor your torrent client. View active downloads, upload/download speeds, DHT node count, and firewall/NAT status (including Gluetun tunnel detection).
 
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/bazarr.png" width="20" style="vertical-align:middle"> **Bazarr** — Subtitle manager for Sonarr and Radarr. Track missing subtitles, monitor download status, and view subtitle health across your media library.
+
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/flaresolverr.png" width="20" style="vertical-align:middle"> **FlareSolverr** — Proxy server to bypass Cloudflare and DDoS-GUARD protection for Prowlarr indexers. Monitor service status and version directly from the dashboard.
+
 <details>
-<summary><b>📋 View all 21 services...</b></summary>
+<summary><b>📋 View all 23 services...</b></summary>
 <br>
 
 <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png" width="20" style="vertical-align:middle"> **Gitea / Forgejo** — Manage your code natively. Browse repositories, view contribution heatmaps, read code files with full syntax highlighting, and keep track of your latest commits. [Forgejo](https://forgejo.org/) (a community fork of Gitea) is fully supported — just use the Gitea integration with your Forgejo instance URL.
@@ -304,6 +310,10 @@ The full media automation suite, unified in a single dashboard view. Monitor you
 <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/dockhand.png" width="20" style="vertical-align:middle"> **Dockhand** — Manage your containers with Dockhand. View running containers, resource usage, and perform quick actions from a native interface.
 
 🐧 **Linux Update** — Track pending system updates across your Linux hosts. Monitor available packages and keep your infrastructure patched from one unified view.
+
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/bazarr.png" width="20" style="vertical-align:middle"> **Bazarr** — Subtitle manager for Sonarr and Radarr. Track missing subtitles, monitor download status, and view subtitle health across your media library.
+
+<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/flaresolverr.png" width="20" style="vertical-align:middle"> **FlareSolverr** — Proxy server to bypass Cloudflare and DDoS-GUARD protection for Prowlarr indexers. Monitor service status and version directly from the dashboard.
 
 <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/linkding.png" width="20" style="vertical-align:middle"> **Bookmarks** — Keep all your most-used homelab links in one place with a native bookmarks feature that supports organization, quick access, and a cleaner daily workflow.
 
