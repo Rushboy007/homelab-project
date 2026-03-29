@@ -125,11 +125,13 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
 <table align="center">
   <tr>
     <th>Dashboard</th>
+    <th>Servarr</th>
     <th>Bookmarks</th>
   </tr>
   <tr>
-    <td align="center"><img src="media-docs/foto-android/Dashboard.jpg" width="200" /></td>
-    <td align="center"><img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="200" /></td>
+    <td align="center"><img src="media-docs/foto-android/Dashboard.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-android/Servarr.jpg" width="180" /></td>
+    <td align="center"><img src="media-docs/foto-android/photo_18_2026-03-16_20-24-21.jpg" width="180" /></td>
   </tr>
 </table>
 
