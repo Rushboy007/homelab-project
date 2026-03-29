@@ -27,6 +27,14 @@
       ],
       "versions": [
         {
+          "version": "1.0.3",
+          "date": "2026-03-29",
+          "localizedDescription": "## What's New in v1.0.3\n\n- Critical bug fix\n\n### Platforms\n- 📱 **iOS** (Swift / SwiftUI) — requires iOS 18.0+\n- 🤖 **Android** (Kotlin / Jetpack Compose) — requires Android 8.0+",
+          "downloadURL": "https://github.com/JohnnWi/homelab-project/releases/download/v1.0.3/Homelab.ipa",
+          "size": 27562437,
+          "minOSVersion": "18.0"
+        },
+        {
           "version": "1.0.2",
           "date": "2026-03-29",
           "localizedDescription": "## What's New in v1.0.2\n\n- Bug fixes and stability improvements\n- Update check interval reduced to 15 minutes — new versions now appear much faster in the in-app popup\n\n### Platforms\n- 📱 **iOS** (Swift / SwiftUI) — requires iOS 18.0+\n- 🤖 **Android** (Kotlin / Jetpack Compose) — requires Android 8.0+",
@@ -157,6 +165,16 @@
     }
   ],
   "news": [
+    {
+      "title": "v1.0.3 — - Critical bug fix",
+      "identifier": "release-1.0.3",
+      "caption": "- Critical bug fix - 📱 **iOS** (Swift / SwiftUI) — requires iOS 18.0+ - 🤖 **Android** (Kotlin / Jetpack Compose) — requires Android 8.0+",
+      "date": "2026-03-29",
+      "tintColor": "#4A90D9",
+      "notify": true,
+      "url": "https://github.com/JohnnWi/homelab-project/releases/tag/v1.0.3",
+      "appID": "homelab.foreverhomelab"
+    },
     {
       "title": "v1.0.2 — - Bug fixes and stability improvements",
       "identifier": "release-1.0.2",
