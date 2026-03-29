@@ -38,13 +38,26 @@ enum BackupServiceTypeMapper {
         case .portainer:         return "portainer"
         case .pihole:            return "pihole"
         case .adguardHome:       return "adguard_home"
+        case .technitium:        return "technitium"
         case .beszel:            return "beszel"
         case .healthchecks:      return "healthchecks"
+        case .linuxUpdate:            return "linux_update"
+        case .dockhand:               return "dockhand"
         case .gitea:             return "gitea"
         case .nginxProxyManager: return "nginx_proxy_manager"
+        case .pangolin:          return "pangolin"
         case .patchmon:          return "patchmon"
         case .jellystat:         return "jellystat"
         case .plex:              return "plex"
+        case .radarr:            return "radarr"
+        case .sonarr:            return "sonarr"
+        case .lidarr:            return "lidarr"
+        case .qbittorrent:       return "qbittorrent"
+        case .jellyseerr:        return "jellyseerr"
+        case .prowlarr:          return "prowlarr"
+        case .bazarr:            return "bazarr"
+        case .gluetun:           return "gluetun"
+        case .flaresolverr:      return "flaresolverr"
         }
     }
 
@@ -56,14 +69,31 @@ enum BackupServiceTypeMapper {
         case "pihole":               return .pihole
         case "adguard_home",
              "adguardhome":          return .adguardHome
+        case "technitium",
+             "technitium_dns",
+             "technitium-dns":       return .technitium
         case "beszel":               return .beszel
         case "healthchecks":         return .healthchecks
+        case "linux_update",
+             "linuxupdate",
+             "linux-update":          return .linuxUpdate
+        case "dockhand":              return .dockhand
         case "gitea":                return .gitea
         case "nginx_proxy_manager",
              "nginxproxymanager":     return .nginxProxyManager
+        case "pangolin":             return .pangolin
         case "patchmon":             return .patchmon
         case "jellystat":            return .jellystat
         case "plex":                 return .plex
+        case "radarr":               return .radarr
+        case "sonarr":               return .sonarr
+        case "lidarr":               return .lidarr
+        case "qbittorrent":          return .qbittorrent
+        case "jellyseerr":           return .jellyseerr
+        case "prowlarr":             return .prowlarr
+        case "bazarr":               return .bazarr
+        case "gluetun":              return .gluetun
+        case "flaresolverr":         return .flaresolverr
         default:                     return nil
         }
     }

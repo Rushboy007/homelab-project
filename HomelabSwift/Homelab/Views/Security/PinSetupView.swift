@@ -6,6 +6,7 @@ import LocalAuthentication
 struct PinSetupView: View {
     @Environment(SettingsStore.self) private var settingsStore
     @Environment(Localizer.self) private var localizer
+    @Environment(\.colorScheme) private var colorScheme
 
     var onComplete: () -> Void
 
@@ -18,9 +19,11 @@ struct PinSetupView: View {
         case welcome, ask, create, confirm
     }
 
+    private var palette: SecurityPalette { .resolve(for: colorScheme) }
+
     var body: some View {
         ZStack {
-            AppTheme.premiumGradient()
+            SecurityBackgroundView(palette: palette)
 
             VStack(spacing: 0) {
                 Spacer(minLength: 40)
@@ -88,7 +91,7 @@ struct PinSetupView: View {
 
             ZStack {
                 Circle()
-                    .fill(AppTheme.primary.opacity(0.15))
+                    .fill(palette.accent.opacity(colorScheme == .dark ? 0.14 : 0.10))
                     .frame(width: 200, height: 200)
                     .blur(radius: 50)
 
@@ -98,14 +101,18 @@ struct PinSetupView: View {
                         .scaledToFit()
                         .frame(width: 140, height: 140)
                         .clipShape(RoundedRectangle(cornerRadius: 32))
-                        .shadow(color: AppTheme.primary.opacity(0.4), radius: 25, x: 0, y: 15)
+                        .shadow(color: palette.accent.opacity(colorScheme == .dark ? 0.36 : 0.18), radius: 25, x: 0, y: 15)
                 } else {
                     Image(systemName: "house.fill")
                         .font(.system(size: 72))
-                        .foregroundStyle(AppTheme.accent)
+                        .foregroundStyle(palette.accent)
                         .frame(width: 140, height: 140)
-                        .background(AppTheme.primary.opacity(0.12), in: RoundedRectangle(cornerRadius: 32))
-                        .shadow(color: AppTheme.primary.opacity(0.25), radius: 20, x: 0, y: 12)
+                        .background(palette.iconFill, in: RoundedRectangle(cornerRadius: 32))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 32)
+                                .stroke(palette.iconStroke, lineWidth: 1.1)
+                        )
+                        .shadow(color: palette.accent.opacity(colorScheme == .dark ? 0.26 : 0.12), radius: 20, x: 0, y: 12)
                 }
             }
 
@@ -113,11 +120,11 @@ struct PinSetupView: View {
                 VStack(spacing: 16) {
                     Text(localizer.t.onboardingWelcome)
                         .font(.system(size: 48, weight: .bold, design: .rounded))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(palette.primaryText)
 
                     Text(localizer.t.onboardingWelcomeDesc)
                         .font(.title3)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(palette.secondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }
@@ -135,8 +142,8 @@ struct PinSetupView: View {
                         .padding(.vertical, 18)
                         .background(
                             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                .fill(AppTheme.accent)
-                                .shadow(color: AppTheme.accent.opacity(0.3), radius: 10, y: 5)
+                                .fill(palette.accent)
+                                .shadow(color: palette.accent.opacity(colorScheme == .dark ? 0.32 : 0.16), radius: 10, y: 5)
                         )
                 }
             }
@@ -152,19 +159,26 @@ struct PinSetupView: View {
 
             Image(systemName: "lock.shield.fill")
                 .font(.system(size: 80))
-                .foregroundStyle(AppTheme.accent)
+                .foregroundStyle(palette.accent)
                 .frame(width: 140, height: 140)
-                .glassEffect(.regular, in: .circle)
+                .background(
+                    Circle()
+                        .fill(palette.iconFill)
+                        .overlay(
+                            Circle()
+                                .stroke(palette.iconStroke, lineWidth: 1.1)
+                        )
+                )
 
             VStack(spacing: 32) {
                 VStack(spacing: 16) {
                     Text(localizer.t.securityTitle)
                         .font(.system(size: 36, weight: .bold, design: .rounded))
-                        .foregroundStyle(.primary)
+                        .foregroundStyle(palette.primaryText)
 
                     Text(localizer.t.onboardingAskPin)
                         .font(.title3)
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(palette.secondaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal, 40)
                 }
@@ -183,8 +197,8 @@ struct PinSetupView: View {
                             .padding(.vertical, 18)
                             .background(
                                 RoundedRectangle(cornerRadius: 18, style: .continuous)
-                                    .fill(AppTheme.accent)
-                                    .shadow(color: AppTheme.accent.opacity(0.3), radius: 10, y: 5)
+                                    .fill(palette.accent)
+                                    .shadow(color: palette.accent.opacity(colorScheme == .dark ? 0.32 : 0.16), radius: 10, y: 5)
                             )
                     }
 
@@ -194,7 +208,7 @@ struct PinSetupView: View {
                     } label: {
                         Text(localizer.t.onboardingAskPinNo)
                             .font(.subheadline.bold())
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(palette.secondaryText)
                             .padding(.vertical, 8)
                     }
                 }

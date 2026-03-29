@@ -13,6 +13,7 @@ struct ServiceLoginView: View {
     @State private var fallbackUrl = ""
     @State private var username = ""
     @State private var password = ""
+    @State private var mfaCode = ""
     @State private var apiKey = ""
     @State private var showPassword = false
     @State private var isLoading = false
@@ -26,7 +27,39 @@ struct ServiceLoginView: View {
 
     private var isEditing: Bool { existingInstance != nil }
     private var serviceColor: Color { serviceType.colors.primary }
-    private var needsUsername: Bool { serviceType == .beszel || serviceType == .gitea || serviceType == .nginxProxyManager || serviceType == .adguardHome || serviceType == .patchmon }
+    private var needsUsername: Bool {
+        serviceType == .beszel
+            || serviceType == .gitea
+            || serviceType == .nginxProxyManager
+            || serviceType == .adguardHome
+            || serviceType == .technitium
+            || serviceType == .patchmon
+            || serviceType == .qbittorrent
+            || serviceType == .dockhand
+    }
+
+    private var usesApiKeyAuth: Bool {
+        serviceType == .portainer
+            || serviceType == .healthchecks
+            || serviceType == .linuxUpdate
+            || serviceType == .pangolin
+            || serviceType == .jellystat
+            || serviceType == .plex
+            || serviceType == .radarr
+            || serviceType == .sonarr
+            || serviceType == .lidarr
+            || serviceType == .jellyseerr
+            || serviceType == .prowlarr
+            || serviceType == .bazarr
+    }
+
+    private var supportsCredentiallessAuth: Bool {
+        serviceType == .gluetun || serviceType == .flaresolverr
+    }
+
+    private var supportsOptionalApiKey: Bool {
+        serviceType == .gluetun || serviceType == .flaresolverr
+    }
 
     var body: some View {
         NavigationStack {
@@ -167,7 +200,19 @@ struct ServiceLoginView: View {
                 keyboardType: .URL
             )
 
-            if serviceType == .portainer || serviceType == .healthchecks || serviceType == .jellystat || serviceType == .plex {
+            if supportsOptionalApiKey {
+                InputField(
+                    icon: "key.fill",
+                    placeholder: localizer.t.loginApiKey,
+                    text: $apiKey,
+                    isSecure: !showPassword,
+                    showToggle: true,
+                    toggleAction: { showPassword.toggle() },
+                    showPassword: showPassword
+                )
+            }
+
+            if usesApiKeyAuth {
                 InputField(
                     icon: "key.fill",
                     placeholder: localizer.t.loginApiKey,
@@ -178,7 +223,7 @@ struct ServiceLoginView: View {
                     showPassword: showPassword,
                     onSubmit: handleSave
                 )
-            } else {
+            } else if !supportsCredentiallessAuth {
                 if needsUsername {
                     let isEmailField = serviceType == .beszel || serviceType == .nginxProxyManager
                     InputField(
@@ -201,6 +246,16 @@ struct ServiceLoginView: View {
                     showPassword: showPassword,
                     onSubmit: handleSave
                 )
+
+                if serviceType == .dockhand || serviceType == .technitium {
+                    InputField(
+                        icon: "lock.rotation",
+                        placeholder: localizer.t.loginOptional2FA,
+                        text: $mfaCode,
+                        keyboardType: .numberPad,
+                        onSubmit: handleSave
+                    )
+                }
             }
 
             Button(action: handleSave) {
@@ -224,6 +279,7 @@ struct ServiceLoginView: View {
             .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
             .disabled(isLoading)
             .padding(.top, 6)
+
         }
         .offset(x: shakeOffset)
     }
@@ -233,12 +289,22 @@ struct ServiceLoginView: View {
         case .portainer:         return localizer.t.loginHintPortainer
         case .pihole:            return localizer.t.loginHintPihole
         case .adguardHome:       return localizer.t.loginHintAdguard
+        case .technitium:        return localizer.t.loginHintTechnitium
+        case .linuxUpdate:       return localizer.t.loginHintLinuxUpdate
+        case .dockhand:          return localizer.t.loginHintDockhand
         case .gitea:             return localizer.t.loginHintGitea2FA
         case .nginxProxyManager: return localizer.t.loginHintNpm
+        case .pangolin:          return PangolinStrings.forLanguage(localizer.language).loginHint
         case .healthchecks:      return localizer.t.loginHintHealthchecks
         case .patchmon:          return localizer.t.loginHintPatchmon
         case .jellystat:         return localizer.t.loginHintJellystat
         case .plex:              return localizer.t.loginHintPlex
+        case .gluetun:
+                                 return localizer.t.loginHintGluetun
+        case .flaresolverr:
+                                 return localizer.t.loginHintFlaresolverr
+        case .qbittorrent, .radarr, .sonarr, .lidarr, .jellyseerr, .prowlarr, .bazarr:
+                                 return nil
         default: return nil
         }
     }
@@ -281,6 +347,7 @@ struct ServiceLoginView: View {
         username = existing.username ?? ""
         apiKey = existing.apiKey ?? ""
         password = existing.piholePassword ?? existing.password ?? ""
+        mfaCode = ""
         didPrefill = true
     }
 
@@ -320,7 +387,20 @@ struct ServiceLoginView: View {
                 && normalizedOptional(password).map { !$0.isEmpty } != true
 
             if metadataOnly {
-                return existing.updating(label: label, fallbackUrl: fallbackUrl)
+                return ServiceInstance(
+                    id: existing.id,
+                    type: existing.type,
+                    label: label,
+                    url: existing.url,
+                    token: existing.token,
+                    username: existing.username,
+                    apiKey: existing.apiKey,
+                    piholePassword: existing.piholePassword,
+                    piholeAuthMode: existing.piholeAuthMode,
+                    fallbackUrl: fallbackUrl,
+                    allowSelfSigned: existing.allowSelfSigned,
+                    password: existing.password
+                )
             }
         }
 
@@ -359,6 +439,101 @@ struct ServiceLoginView: View {
                 username: existingInstance?.username,
                 apiKey: key,
                 fallbackUrl: fallbackUrl
+            )
+
+        case .linuxUpdate:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let client = LinuxUpdateAPIClient(instanceId: existingInstanceId ?? UUID())
+            try await client.authenticate(url: url, apiToken: key, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .linuxUpdate,
+                label: label,
+                url: url,
+                token: "",
+                username: existingInstance?.username,
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+
+        case .technitium:
+            let identity = normalizedOptional(username) ?? existingInstance?.username
+            let secret = normalizedOptional(password)
+            guard let identity, !identity.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            if existingInstance != nil && url != existingInstance?.url && secret == nil {
+                throw APIError.custom(localizer.t.loginErrorPasswordRequired)
+            }
+
+            let resolvedPassword: String
+            if let secret, !secret.isEmpty {
+                resolvedPassword = secret
+            } else if let existing = existingInstance?.password, !existing.isEmpty {
+                resolvedPassword = existing
+            } else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+
+            let client = TechnitiumAPIClient(instanceId: existingInstanceId ?? UUID())
+            let token = try await client.authenticate(
+                url: url,
+                username: identity,
+                password: resolvedPassword,
+                totp: mfaCode.trimmingCharacters(in: .whitespacesAndNewlines),
+                fallbackUrl: fallbackUrl
+            )
+
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .technitium,
+                label: label,
+                url: url,
+                token: token,
+                username: identity,
+                fallbackUrl: fallbackUrl,
+                password: resolvedPassword
+            )
+
+        case .dockhand:
+            let identity = normalizedOptional(username) ?? existingInstance?.username
+            let secret = normalizedOptional(password)
+            guard let identity, !identity.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            if existingInstance != nil && url != existingInstance?.url && secret == nil {
+                throw APIError.custom(localizer.t.loginErrorPasswordRequired)
+            }
+
+            let resolvedPassword: String
+            if let secret, !secret.isEmpty {
+                resolvedPassword = secret
+            } else if let existing = existingInstance?.password, !existing.isEmpty {
+                resolvedPassword = existing
+            } else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+
+            let client = DockhandAPIClient(instanceId: existingInstanceId ?? UUID())
+            let sessionCookie = try await client.authenticate(
+                url: url,
+                username: identity,
+                password: resolvedPassword,
+                mfaCode: mfaCode.trimmingCharacters(in: .whitespacesAndNewlines),
+                fallbackUrl: fallbackUrl
+            )
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .dockhand,
+                label: label,
+                url: url,
+                token: sessionCookie,
+                username: identity,
+                fallbackUrl: fallbackUrl,
+                password: resolvedPassword
             )
 
         case .jellystat:
@@ -522,6 +697,23 @@ struct ServiceLoginView: View {
                 password: storedPassword
             )
 
+        case .pangolin:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let client = PangolinAPIClient(instanceId: existingInstanceId ?? UUID())
+            try await client.authenticate(url: url, apiKey: key, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .pangolin,
+                label: label,
+                url: url,
+                token: "",
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+
         case .patchmon:
             let tokenKey = normalizedOptional(username) ?? existingInstance?.username
             let tokenSecret = normalizedOptional(password)
@@ -566,6 +758,118 @@ struct ServiceLoginView: View {
                 url: url,
                 token: "",
                 username: existingInstance?.username,
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+        
+        case .qbittorrent:
+            let identity = normalizedOptional(username) ?? existingInstance?.username
+            let secret = normalizedOptional(password) ?? existingInstance?.password
+            guard let identity, !identity.isEmpty, let secret, !secret.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            if existingInstance != nil && url != existingInstance?.url && normalizedOptional(password) == nil {
+                throw APIError.custom(localizer.t.loginErrorPasswordRequired)
+            }
+            let client = QbittorrentAPIClient(instanceId: existingInstanceId ?? UUID())
+            let sid = try await client.authenticate(url: url, username: identity, password: secret, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .qbittorrent,
+                label: label,
+                url: url,
+                token: sid,
+                username: identity,
+                fallbackUrl: fallbackUrl,
+                password: secret
+            )
+            
+        case .radarr:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let client = RadarrAPIClient(instanceId: existingInstanceId ?? UUID())
+            try await client.authenticate(url: url, apiKey: key, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .radarr,
+                label: label,
+                url: url,
+                token: "",
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+            
+        case .sonarr:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let client = SonarrAPIClient(instanceId: existingInstanceId ?? UUID())
+            try await client.authenticate(url: url, apiKey: key, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .sonarr,
+                label: label,
+                url: url,
+                token: "",
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+            
+        case .lidarr:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let client = LidarrAPIClient(instanceId: existingInstanceId ?? UUID())
+            try await client.authenticate(url: url, apiKey: key, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .lidarr,
+                label: label,
+                url: url,
+                token: "",
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+            
+        case .jellyseerr, .prowlarr, .bazarr:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let genericType = serviceType
+            let client = GenericAPIClient(serviceType: genericType, instanceId: existingInstanceId ?? UUID())
+            await client.configure(url: url, fallbackUrl: fallbackUrl, apiKey: key)
+            guard await client.ping() else {
+                throw APIError.custom(localizer.t.loginErrorFailed)
+            }
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: genericType,
+                label: label,
+                url: url,
+                token: "",
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+
+        case .gluetun, .flaresolverr:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            let genericType = serviceType
+            let client = GenericAPIClient(serviceType: genericType, instanceId: existingInstanceId ?? UUID())
+            await client.configure(url: url, fallbackUrl: fallbackUrl, apiKey: key)
+            guard await client.ping() else {
+                throw APIError.custom(localizer.t.loginErrorFailed)
+            }
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: genericType,
+                label: label,
+                url: url,
+                token: "",
                 apiKey: key,
                 fallbackUrl: fallbackUrl
             )

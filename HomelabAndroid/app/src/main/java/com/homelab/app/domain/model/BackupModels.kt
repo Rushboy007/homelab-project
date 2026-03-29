@@ -46,13 +46,26 @@ object BackupServiceTypeMapper {
             ServiceType.PORTAINER -> "portainer"
             ServiceType.PIHOLE -> "pihole"
             ServiceType.ADGUARD_HOME -> "adguard_home"
+            ServiceType.TECHNITIUM -> "technitium"
             ServiceType.BESZEL -> "beszel"
             ServiceType.HEALTHCHECKS -> "healthchecks"
+            ServiceType.LINUX_UPDATE -> "linux_update"
+            ServiceType.DOCKHAND -> "dockhand"
             ServiceType.GITEA -> "gitea"
             ServiceType.NGINX_PROXY_MANAGER -> "nginx_proxy_manager"
+            ServiceType.PANGOLIN -> "pangolin"
             ServiceType.PATCHMON -> "patchmon"
             ServiceType.JELLYSTAT -> "jellystat"
             ServiceType.PLEX -> "plex"
+            ServiceType.RADARR -> "radarr"
+            ServiceType.SONARR -> "sonarr"
+            ServiceType.LIDARR -> "lidarr"
+            ServiceType.QBITTORRENT -> "qbittorrent"
+            ServiceType.JELLYSEERR -> "jellyseerr"
+            ServiceType.PROWLARR -> "prowlarr"
+            ServiceType.BAZARR -> "bazarr"
+            ServiceType.GLUETUN -> "gluetun"
+            ServiceType.FLARESOLVERR -> "flaresolverr"
             ServiceType.UNKNOWN -> "unknown"
         }
     }
@@ -64,13 +77,26 @@ object BackupServiceTypeMapper {
             "portainer" -> ServiceType.PORTAINER
             "pihole" -> ServiceType.PIHOLE
             "adguard_home", "adguardhome" -> ServiceType.ADGUARD_HOME
+            "technitium", "technitium_dns", "technitium-dns" -> ServiceType.TECHNITIUM
             "beszel" -> ServiceType.BESZEL
             "healthchecks" -> ServiceType.HEALTHCHECKS
+            "linux_update", "linuxupdate", "linux-update" -> ServiceType.LINUX_UPDATE
+            "dockhand" -> ServiceType.DOCKHAND
             "gitea" -> ServiceType.GITEA
             "nginx_proxy_manager", "nginxproxymanager" -> ServiceType.NGINX_PROXY_MANAGER
+            "pangolin" -> ServiceType.PANGOLIN
             "patchmon" -> ServiceType.PATCHMON
             "jellystat" -> ServiceType.JELLYSTAT
             "plex" -> ServiceType.PLEX
+            "radarr" -> ServiceType.RADARR
+            "sonarr" -> ServiceType.SONARR
+            "lidarr" -> ServiceType.LIDARR
+            "qbittorrent" -> ServiceType.QBITTORRENT
+            "jellyseerr" -> ServiceType.JELLYSEERR
+            "prowlarr" -> ServiceType.PROWLARR
+            "bazarr" -> ServiceType.BAZARR
+            "gluetun" -> ServiceType.GLUETUN
+            "flaresolverr" -> ServiceType.FLARESOLVERR
             else -> null
         }
     }

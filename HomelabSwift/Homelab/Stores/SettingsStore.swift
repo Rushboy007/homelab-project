@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import UIKit
 
 @Observable
 @MainActor
@@ -46,6 +47,27 @@ final class SettingsStore {
     var homeCyberpunkCardsEnabled: Bool {
         didSet {
             UserDefaults.standard.set(homeCyberpunkCardsEnabled, forKey: Keys.homeCyberpunkCardsEnabled)
+        }
+    }
+
+    private(set) var appIcon: AppIconOption {
+        didSet {
+            UserDefaults.standard.set(appIcon.rawValue, forKey: Keys.appIcon)
+        }
+    }
+
+    var backupRememberSelectionEnabled: Bool {
+        didSet {
+            UserDefaults.standard.set(backupRememberSelectionEnabled, forKey: Keys.backupRememberSelectionEnabled)
+        }
+    }
+
+    var backupSelectedServiceTypes: Set<ServiceType> {
+        didSet {
+            UserDefaults.standard.set(
+                backupSelectedServiceTypes.map(\.rawValue).sorted(),
+                forKey: Keys.backupSelectedServiceTypes
+            )
         }
     }
 
@@ -99,12 +121,15 @@ final class SettingsStore {
         static let biometricEnabled = "homelab_biometric_enabled"
         static let hasCompletedOnboarding = "homelab_has_completed_onboarding"
         static let homeCyberpunkCardsEnabled = "homelab_home_cyberpunk_cards_enabled"
+        static let appIcon = "homelab_app_icon"
         static let dismissedUpdateVersion = "homelab_dismissed_update_version"
         static let lastUpdateCheckAt = "homelab_last_update_check_at"
         static let availableUpdateVersion = "homelab_available_update_version"
         static let availableUpdateURL = "homelab_available_update_url"
         static let availableUpdateChangelog = "homelab_available_update_changelog"
         static let dismissedPopupVersion = "homelab_dismissed_popup_version"
+        static let backupRememberSelectionEnabled = "homelab_backup_remember_selection_enabled"
+        static let backupSelectedServiceTypes = "homelab_backup_selected_service_types"
     }
 
     private static let updateFeedURL = URL(string: "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/app-version.json")
@@ -121,14 +146,19 @@ final class SettingsStore {
         self.theme = savedTheme.flatMap(ThemeMode.init) ?? .system
 
         let savedHidden = UserDefaults.standard.stringArray(forKey: Keys.hiddenServices) ?? []
-        self.hiddenServices = Set(savedHidden)
+        self.hiddenServices = Set(savedHidden.compactMap(Self.canonicalServiceRawValue))
 
         let savedOrder = UserDefaults.standard.stringArray(forKey: Keys.serviceOrder) ?? []
-        self.serviceOrder = Self.normalizedServiceOrder(savedOrder.compactMap(ServiceType.init(rawValue:)))
+        self.serviceOrder = Self.normalizedServiceOrder(savedOrder.compactMap(Self.serviceType(fromStoredRawValue:)))
 
         self.biometricEnabled = UserDefaults.standard.bool(forKey: Keys.biometricEnabled)
         self.hasCompletedOnboarding = UserDefaults.standard.bool(forKey: Keys.hasCompletedOnboarding)
         self.homeCyberpunkCardsEnabled = UserDefaults.standard.object(forKey: Keys.homeCyberpunkCardsEnabled) as? Bool ?? false
+        let savedAppIcon = UserDefaults.standard.string(forKey: Keys.appIcon)
+        self.appIcon = AppIconOption(rawValue: savedAppIcon ?? "") ?? .default
+        self.backupRememberSelectionEnabled = UserDefaults.standard.object(forKey: Keys.backupRememberSelectionEnabled) as? Bool ?? true
+        let savedBackupSelection = UserDefaults.standard.stringArray(forKey: Keys.backupSelectedServiceTypes) ?? []
+        self.backupSelectedServiceTypes = Set(savedBackupSelection.compactMap(Self.serviceType(fromStoredRawValue:)))
         self.dismissedUpdateVersion = UserDefaults.standard.string(forKey: Keys.dismissedUpdateVersion)
         self.dismissedPopupVersion = UserDefaults.standard.string(forKey: Keys.dismissedPopupVersion)
         self.availableUpdateVersion = UserDefaults.standard.string(forKey: Keys.availableUpdateVersion)
@@ -173,6 +203,33 @@ final class SettingsStore {
         serviceOrder = updated
     }
 
+    func canMoveService(_ type: ServiceType, offset: Int, within allowedTypes: [ServiceType]) -> Bool {
+        let allowedSet = Set(allowedTypes)
+        let filtered = serviceOrder.filter { allowedSet.contains($0) }
+        guard let index = filtered.firstIndex(of: type) else { return false }
+        let destination = index + offset
+        return filtered.indices.contains(destination)
+    }
+
+    func moveService(_ type: ServiceType, offset: Int, within allowedTypes: [ServiceType]) {
+        let allowedSet = Set(allowedTypes)
+        let filtered = serviceOrder.filter { allowedSet.contains($0) }
+        guard let filteredIndex = filtered.firstIndex(of: type) else { return }
+        let filteredDestination = filteredIndex + offset
+        guard filtered.indices.contains(filteredDestination) else { return }
+
+        let sourceType = filtered[filteredIndex]
+        let destinationType = filtered[filteredDestination]
+        guard let sourceGlobal = serviceOrder.firstIndex(of: sourceType),
+              let destinationGlobal = serviceOrder.firstIndex(of: destinationType) else {
+            return
+        }
+
+        var updated = serviceOrder
+        updated.swapAt(sourceGlobal, destinationGlobal)
+        serviceOrder = updated
+    }
+
     // MARK: - PIN Security
 
     var isPinSet: Bool {
@@ -190,6 +247,32 @@ final class SettingsStore {
     func clearSecurity() {
         KeychainService.deletePin()
         biometricEnabled = false
+    }
+
+    func setAppIcon(_ icon: AppIconOption) {
+        guard appIcon != icon else { return }
+        let previousIcon = appIcon
+        appIcon = icon
+
+        Task { @MainActor in
+            do {
+                try await applyAppIcon(icon)
+            } catch {
+                appIcon = previousIcon
+            }
+        }
+    }
+
+    func syncAppIconWithSystem() {
+        guard UIApplication.shared.supportsAlternateIcons else {
+            appIcon = .default
+            return
+        }
+
+        let currentSystemIcon = AppIconOption.fromAlternateIconName(UIApplication.shared.alternateIconName)
+        if currentSystemIcon != appIcon {
+            appIcon = currentSystemIcon
+        }
     }
 
     func checkForUpdatesIfNeeded(force: Bool = false) async {
@@ -305,11 +388,37 @@ final class SettingsStore {
         return .orderedSame
     }
 
+    private func applyAppIcon(_ icon: AppIconOption) async throws {
+        guard UIApplication.shared.supportsAlternateIcons else { return }
+        let requestedName = icon.alternateIconName
+        if UIApplication.shared.alternateIconName == requestedName { return }
+
+        try await withCheckedThrowingContinuation { (continuation: CheckedContinuation<Void, Error>) in
+            UIApplication.shared.setAlternateIconName(requestedName) { error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    }
+
     private static func normalizedServiceOrder(_ order: [ServiceType]) -> [ServiceType] {
         var seen = Set<ServiceType>()
         let unique = order.filter { seen.insert($0).inserted }
         let missing = ServiceType.allCases.filter { !unique.contains($0) }
         return unique + missing
+    }
+
+    private static func serviceType(fromStoredRawValue rawValue: String) -> ServiceType? {
+        ServiceType.fromStoredRawValue(rawValue)
+    }
+
+    private static func canonicalServiceRawValue(_ rawValue: String) -> String? {
+        let trimmed = rawValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return nil }
+        return ServiceType.fromStoredRawValue(trimmed)?.rawValue ?? trimmed
     }
 }
 
@@ -324,6 +433,66 @@ private struct AppVersionFeed: Decodable {
         case changelog
         case iosURL = "ios_url"
         case androidURL = "android_url"
+    }
+}
+
+enum AppIconOption: String, CaseIterable {
+    case `default`
+    case dark
+    case clearLight
+    case clearDark
+    case tintedLight
+    case tintedDark
+
+    var alternateIconName: String? {
+        switch self {
+        case .default:
+            return nil
+        case .dark:
+            return "AppIconDark"
+        case .clearLight:
+            return "AppIconClearLight"
+        case .clearDark:
+            return "AppIconClearDark"
+        case .tintedLight:
+            return "AppIconTintedLight"
+        case .tintedDark:
+            return "AppIconTintedDark"
+        }
+    }
+
+    static func fromAlternateIconName(_ name: String?) -> AppIconOption {
+        switch name {
+        case "AppIconDark":
+            return .dark
+        case "AppIconClearLight":
+            return .clearLight
+        case "AppIconClearDark":
+            return .clearDark
+        case "AppIconTintedLight":
+            return .tintedLight
+        case "AppIconTintedDark":
+            return .tintedDark
+        default:
+            return .default
+        }
+    }
+
+    var previewAssetName: String {
+        switch self {
+        case .default:
+            return "AppIconPreviewDefault"
+        case .dark:
+            return "AppIconPreviewDark"
+        case .clearLight:
+            return "AppIconPreviewClearLight"
+        case .clearDark:
+            return "AppIconPreviewClearDark"
+        case .tintedLight:
+            return "AppIconPreviewTintedLight"
+        case .tintedDark:
+            return "AppIconPreviewTintedDark"
+        }
     }
 }
 

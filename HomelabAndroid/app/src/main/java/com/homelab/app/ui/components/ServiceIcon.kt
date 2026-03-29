@@ -33,8 +33,9 @@ fun ServiceIcon(
     modifier: Modifier = Modifier,
     content: @Composable (() -> Unit)? = null
 ) {
-    val iconSources = remember(type) { type.iconCandidates.ifEmpty { listOf(type.iconUrl).filter { it.isNotBlank() } } }
-    var sourceIndex by remember(type) { mutableIntStateOf(0) }
+    val candidatesKey = remember(type) { type.iconCandidates.joinToString(separator = "|") }
+    val iconSources = remember(type, candidatesKey) { type.iconCandidates.ifEmpty { listOf(type.iconUrl).filter { it.isNotBlank() } } }
+    var sourceIndex by remember(type, candidatesKey) { mutableIntStateOf(0) }
     val currentSource = iconSources.getOrNull(sourceIndex)
 
     Surface(
@@ -46,34 +47,36 @@ fun ServiceIcon(
             if (content != null) {
                 content()
             } else {
-                if (currentSource != null) {
-                    SubcomposeAsyncImage(
-                        model = currentSource,
-                        contentDescription = type.displayName,
-                        modifier = Modifier.size(iconSize),
-                        contentScale = ContentScale.Fit,
-                        error = {
-                            if (sourceIndex < iconSources.lastIndex) {
-                                LaunchedEffect(sourceIndex) {
-                                    sourceIndex += 1
-                                }
-                            } else {
-                                Icon(
-                                    imageVector = type.fallbackIcon,
-                                    contentDescription = type.displayName,
-                                    tint = type.primaryColor,
-                                    modifier = Modifier.size(iconSize * 0.72f)
-                                )
-                            }
-                        }
-                    )
-                } else {
+                val fallback: @Composable () -> Unit = {
                     Icon(
                         imageVector = type.fallbackIcon,
                         contentDescription = type.displayName,
                         tint = type.primaryColor,
                         modifier = Modifier.size(iconSize * 0.72f)
                     )
+                }
+
+                // Keep a deterministic icon visible while remote image fetches/retries.
+                fallback()
+
+                if (currentSource != null) {
+                    SubcomposeAsyncImage(
+                        model = currentSource,
+                        contentDescription = type.displayName,
+                        modifier = Modifier.size(iconSize),
+                        contentScale = ContentScale.Fit,
+                        loading = { fallback() },
+                        error = {
+                            if (sourceIndex < iconSources.lastIndex) {
+                                LaunchedEffect(sourceIndex) {
+                                    sourceIndex += 1
+                                }
+                            }
+                            fallback()
+                        }
+                    )
+                } else {
+                    fallback()
                 }
             }
         }

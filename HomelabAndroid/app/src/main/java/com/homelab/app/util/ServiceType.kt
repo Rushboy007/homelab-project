@@ -1,7 +1,6 @@
 package com.homelab.app.util
 
 import androidx.annotation.Keep
-import androidx.compose.ui.graphics.Color
 import kotlinx.serialization.Serializable
 
 @Keep
@@ -10,12 +9,62 @@ enum class ServiceType(val displayName: String) {
     PORTAINER("Portainer"),
     PIHOLE("Pi-hole"),
     ADGUARD_HOME("AdGuard Home"),
+    TECHNITIUM("Technitium DNS"),
     PLEX("Plex"),
     JELLYSTAT("Jellystat"),
     BESZEL("Beszel"),
     GITEA("Gitea"),
     NGINX_PROXY_MANAGER("Nginx Proxy Manager"),
+    PANGOLIN("Pangolin"),
     HEALTHCHECKS("Healthchecks"),
+    LINUX_UPDATE("Linux Update"),
+    DOCKHAND("Dockhand"),
     PATCHMON("PatchMon"),
-    UNKNOWN("Unknown")
+    RADARR("Radarr"),
+    SONARR("Sonarr"),
+    LIDARR("Lidarr"),
+    QBITTORRENT("qBittorrent"),
+    JELLYSEERR("Jellyseerr"),
+    PROWLARR("Prowlarr"),
+    BAZARR("Bazarr"),
+    GLUETUN("Gluetun"),
+    FLARESOLVERR("FlareSolverr"),
+    UNKNOWN("Unknown");
+
+    companion object {
+        val arrStackTypes: List<ServiceType> = listOf(
+            RADARR,
+            SONARR,
+            LIDARR,
+            QBITTORRENT,
+            JELLYSEERR,
+            PROWLARR,
+            BAZARR,
+            GLUETUN,
+            FLARESOLVERR
+        )
+
+        val homeTypes: List<ServiceType> = entries.filter { it != UNKNOWN && it !in arrStackTypes }
+
+        fun fromStoredName(raw: String?): ServiceType {
+            if (raw.isNullOrBlank()) return UNKNOWN
+            val normalized = raw.trim().replace('-', '_').uppercase()
+            return when (normalized) {
+                "LINUXUPDATE",
+                "LINUX_UPDATE" -> LINUX_UPDATE
+                "TECHNITIUM",
+                "TECHNITIUM_DNS",
+                "TECHNITIUMDNS" -> TECHNITIUM
+                "PANGOLIN" -> PANGOLIN
+                "DOCKHAND" -> DOCKHAND
+                else -> entries.firstOrNull { it.name == normalized } ?: UNKNOWN
+            }
+        }
+    }
+
+    val isArrStack: Boolean
+        get() = this in arrStackTypes
+
+    val isHomeService: Boolean
+        get() = this != UNKNOWN && !isArrStack
 }

@@ -65,8 +65,10 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(container.Id, "abc123def456")
         XCTAssertEqual(container.displayName, "my-container")
         XCTAssertEqual(container.State, "running")
-        XCTAssertEqual(container.Ports.first?.PublicPort, 8080)
-        XCTAssertEqual(container.Mounts.count, 1)
+        let ports = try XCTUnwrap(container.Ports)
+        XCTAssertEqual(ports.first?.PublicPort, 8080)
+        let mounts = try XCTUnwrap(container.Mounts)
+        XCTAssertEqual(mounts.count, 1)
     }
 
     func testContainerStatsDecoding() throws {
@@ -94,9 +96,11 @@ final class ModelDecodingTests: XCTestCase {
         """.data(using: .utf8)!
 
         let stats = try JSONDecoder().decode(ContainerStats.self, from: json)
-        XCTAssertEqual(stats.cpu_stats.online_cpus, 4)
-        XCTAssertEqual(stats.memory_stats.usage, 104857600)
-        XCTAssertEqual(stats.memory_stats.limit, 2147483648)
+        let cpuStats = try XCTUnwrap(stats.cpu_stats)
+        XCTAssertEqual(cpuStats.online_cpus, 4)
+        let memoryStats = try XCTUnwrap(stats.memory_stats)
+        XCTAssertEqual(memoryStats.usage, 104857600)
+        XCTAssertEqual(memoryStats.limit, 2147483648)
         XCTAssertEqual(stats.networks?["eth0"]?.rx_bytes, 1024000)
     }
 
@@ -212,6 +216,71 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(decoded.domains.filter { $0.type == .allow }.count, 2)
         XCTAssertEqual(decoded.domains.filter { $0.type == .deny }.count, 2)
         XCTAssertEqual(decoded.domains.filter { $0.kind == "regex" }.count, 2)
+    }
+
+    // MARK: - Sonarr
+
+    func testSonarrSeriesDecodingUsesStatisticsFallbacks() throws {
+        let json = """
+        {
+            "id": 42,
+            "title": "Severance",
+            "statistics": {
+                "episodeFileCount": 8,
+                "episodeCount": 10,
+                "sizeOnDisk": 1234567890
+            },
+            "images": [
+                {"coverType": "poster", "remoteUrl": "/MediaCover/42/poster.jpg"}
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(SonarrSeries.self, from: json)
+        XCTAssertEqual(decoded.id, 42)
+        XCTAssertEqual(decoded.title, "Severance")
+        XCTAssertEqual(decoded.episodeFileCount, 8)
+        XCTAssertEqual(decoded.episodeCount, 10)
+        XCTAssertEqual(decoded.sizeOnDisk, 1234567890)
+        XCTAssertEqual(decoded.posterUrl, "/MediaCover/42/poster.jpg")
+    }
+
+    func testSonarrQueueRecordDecodingHandlesCamelCaseFallbacks() throws {
+        let json = """
+        {
+            "page": 1,
+            "records": [
+                {
+                    "id": 7,
+                    "title": "Episode 1",
+                    "size": 5000,
+                    "sizeLeft": 1250,
+                    "timeLeft": "00:05:00"
+                }
+            ]
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(SonarrQueueResponse.self, from: json)
+        XCTAssertEqual(decoded.page, 1)
+        XCTAssertEqual(decoded.pageSize, 0)
+        XCTAssertEqual(decoded.records.count, 1)
+        XCTAssertEqual(decoded.records[0].sizeleft, 1250)
+        XCTAssertEqual(decoded.records[0].timeleft, "00:05:00")
+        XCTAssertEqual(decoded.records[0].status, "unknown")
+    }
+
+    func testSonarrSystemStatusDecodingSupportsAppVersionFallback() throws {
+        let json = """
+        {
+            "appVersion": "4.0.15.2941",
+            "releaseBranch": "main"
+        }
+        """.data(using: .utf8)!
+
+        let decoded = try JSONDecoder().decode(SonarrSystemStatus.self, from: json)
+        XCTAssertEqual(decoded.version, "4.0.15.2941")
+        XCTAssertEqual(decoded.displayBranch, "Main")
     }
 
     // MARK: - Beszel
@@ -550,5 +619,16 @@ final class ModelDecodingTests: XCTestCase {
         XCTAssertEqual(migrated.url, "https://beszel.local")
         XCTAssertEqual(migrated.token, "token-1")
         XCTAssertEqual(migrated.username, "ops@example.com")
+    }
+
+    func testServiceTypeDecodesLinuxUpdateRawValue() throws {
+        let data = Data("\"linux_update\"".utf8)
+        let decoded = try JSONDecoder().decode(ServiceType.self, from: data)
+        XCTAssertEqual(decoded, .linuxUpdate)
+    }
+
+    func testServiceTypeEncodesLinuxUpdateWithCanonicalRawValue() throws {
+        let data = try JSONEncoder().encode(ServiceType.linuxUpdate)
+        XCTAssertEqual(String(decoding: data, as: UTF8.self), "\"linux_update\"")
     }
 }

@@ -76,7 +76,7 @@ private fun portainerPageBackground(isDarkTheme: Boolean, accent: Color): Brush 
 private fun portainerCardColor(
     isDarkTheme: Boolean,
     accent: Color? = null,
-    tint: Float = if (isDarkTheme) 0.10f else 0.05f
+    tint: Float = if (isDarkTheme) 0.055f else 0.03f
 ): Color {
     val base = if (isDarkTheme) Color(0xFF121C2A) else Color(0xFFF4F4F1)
     return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.22f)) } ?: base
@@ -85,7 +85,7 @@ private fun portainerCardColor(
 private fun portainerRaisedCardColor(
     isDarkTheme: Boolean,
     accent: Color? = null,
-    tint: Float = if (isDarkTheme) 0.08f else 0.04f
+    tint: Float = if (isDarkTheme) 0.05f else 0.025f
 ): Color {
     val base = if (isDarkTheme) Color(0xFF1A2638) else Color(0xFFF9F9F7)
     return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.18f)) } ?: base
@@ -94,7 +94,7 @@ private fun portainerRaisedCardColor(
 private fun portainerBorderTone(
     isDarkTheme: Boolean,
     accent: Color? = null,
-    tint: Float = if (isDarkTheme) 0.26f else 0.14f
+    tint: Float = if (isDarkTheme) 0.14f else 0.08f
 ): Color {
     val base = if (isDarkTheme) Color(0xFF34465F) else Color(0xFFD4D6D1)
     return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.35f)) } ?: base
@@ -146,32 +146,16 @@ fun PortainerDashboardScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                     actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
         },
-        containerColor = Color.Transparent
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(pageBrush)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(pageGlow, Color.Transparent),
-                            center = Offset(160f, 90f),
-                            radius = 560f
-                        )
-                    )
-            )
-
+        Box(modifier = Modifier.fillMaxSize()) {
             when (val state = uiState) {
                 is UiState.Loading, is UiState.Idle -> {
                     Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {

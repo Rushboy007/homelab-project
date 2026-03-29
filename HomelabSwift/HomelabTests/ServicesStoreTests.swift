@@ -114,7 +114,7 @@ final class ServicesStoreTests: XCTestCase {
         XCTAssertEqual(store.preferredInstance(for: .beszel)?.id, first.id)
     }
 
-    func testUnauthorizedNotificationOnlyRemovesAffectedInstance() async {
+    func testUnauthorizedNotificationMarksOnlyAffectedInstanceUnreachable() async {
         let store = ServicesStore()
         let first = ServiceInstance(
             id: UUID(uuidString: "20000000-0000-0000-0000-000000000001")!,
@@ -142,9 +142,11 @@ final class ServicesStoreTests: XCTestCase {
 
         try? await Task.sleep(for: .milliseconds(50))
 
-        XCTAssertNil(store.instance(id: first.id))
+        XCTAssertNotNil(store.instance(id: first.id))
         XCTAssertNotNil(store.instance(id: second.id))
-        XCTAssertEqual(store.instances(for: .gitea).count, 1)
+        XCTAssertEqual(store.instances(for: .gitea).count, 2)
+        XCTAssertEqual(store.reachability(for: first.id), false)
+        XCTAssertNil(store.reachability(for: second.id))
     }
 
     func testServiceConnectionURLCleaning() {

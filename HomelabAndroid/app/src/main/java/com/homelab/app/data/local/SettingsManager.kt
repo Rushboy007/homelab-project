@@ -35,7 +35,7 @@ class SettingsManager @Inject constructor(
     val preferredInstanceIds: Flow<Map<ServiceType, String?>> = dataStore.data.map { prefs ->
         ServiceType.entries
             .filter { it != ServiceType.UNKNOWN }
-            .associateWith { prefs[Keys.preferredInstanceKey(it)] }
+            .associateWith { type -> prefs[Keys.preferredInstanceKey(type)] }
     }
 
     fun preferredInstanceId(type: ServiceType): Flow<String?> = dataStore.data.map { prefs ->
@@ -43,12 +43,14 @@ class SettingsManager @Inject constructor(
     }
 
     fun legacyConnection(type: ServiceType): Flow<ServiceConnection?> = dataStore.data.map { prefs ->
-        prefs[Keys.connectionKey(type)]?.let { decodeLegacyConnection(type, it) }
+        prefs[Keys.connectionKey(type)]
+            ?.let { decodeLegacyConnection(type, it) }
     }
 
     suspend fun getLegacyConnection(type: ServiceType): ServiceConnection? {
         val prefs = dataStore.data.first()
-        return prefs[Keys.connectionKey(type)]?.let { decodeLegacyConnection(type, it) }
+        return prefs[Keys.connectionKey(type)]
+            ?.let { decodeLegacyConnection(type, it) }
     }
 
     suspend fun removeLegacyConnection(type: ServiceType) {

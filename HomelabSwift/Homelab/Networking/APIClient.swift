@@ -18,10 +18,51 @@ final class BaseNetworkEngine: Sendable {
 
     private static let insecureDelegate = InsecureTrustDelegate()
     static let insecureDelegateForPortainerAuth = insecureDelegate
+    private static let requestSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 8
+        config.timeoutIntervalForResource = 8
+        config.httpShouldSetCookies = false
+        config.httpCookieAcceptPolicy = .never
+        return URLSession(configuration: config, delegate: insecureDelegate, delegateQueue: nil)
+    }()
+    private static let pingSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 3
+        config.timeoutIntervalForResource = 3
+        config.httpShouldSetCookies = false
+        config.httpCookieAcceptPolicy = .never
+        return URLSession(configuration: config, delegate: insecureDelegate, delegateQueue: nil)
+    }()
+    private static let imageSession: URLSession = {
+        let config = URLSessionConfiguration.default
+        config.timeoutIntervalForRequest = 8
+        config.timeoutIntervalForResource = 8
+        config.httpShouldSetCookies = false
+        config.httpCookieAcceptPolicy = .never
+        config.requestCachePolicy = .returnCacheDataElseLoad
+        return URLSession(configuration: config, delegate: insecureDelegate, delegateQueue: nil)
+    }()
 
     init(serviceType: ServiceType, instanceId: UUID) {
         self.serviceType = serviceType
         self.instanceId = instanceId
+    }
+
+    static func imageData(from url: URL, headers: [String: String] = [:]) async throws -> Data {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 8
+        headers.forEach { key, value in
+            request.setValue(value, forHTTPHeaderField: key)
+        }
+        let (data, response) = try await imageSession.data(for: request)
+        guard let http = response as? HTTPURLResponse else {
+            throw APIError.custom("Invalid image response")
+        }
+        guard (200...399).contains(http.statusCode) else {
+            throw APIError.httpError(statusCode: http.statusCode, body: "")
+        }
+        return data
     }
 
     // MARK: - Core Request (primary → fallback)
@@ -100,16 +141,17 @@ final class BaseNetworkEngine: Sendable {
         fallbackURL: String,
         path: String,
         method: String = "GET",
-        headers: [String: String] = [:]
+        headers: [String: String] = [:],
+        body: Data? = nil
     ) async throws -> Data {
         guard !baseURL.isEmpty else { throw APIError.notConfigured }
 
         do {
-            return try await performDataRequest(baseURL: baseURL, path: path, method: method, headers: headers)
+            return try await performDataRequest(baseURL: baseURL, path: path, method: method, headers: headers, body: body)
         } catch let primaryError {
             guard !fallbackURL.isEmpty else { throw primaryError }
             do {
-                return try await performDataRequest(baseURL: fallbackURL, path: path, method: method, headers: headers)
+                return try await performDataRequest(baseURL: fallbackURL, path: path, method: method, headers: headers, body: body)
             } catch let fallbackError {
                 throw APIError.bothURLsFailed(primaryError: primaryError, fallbackError: fallbackError)
             }
@@ -120,32 +162,21 @@ final class BaseNetworkEngine: Sendable {
 
     func pingURL(_ urlString: String, extraHeaders: [String: String] = [:]) async -> Bool {
         guard let url = URL(string: urlString) else { return false }
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = pingTimeout
-        let session = URLSession(configuration: config, delegate: BaseNetworkEngine.insecureDelegate, delegateQueue: nil)
         var request = URLRequest(url: url)
+        request.timeoutInterval = pingTimeout
         for (key, value) in extraHeaders {
             request.setValue(value, forHTTPHeaderField: key)
         }
         do {
-            let (_, response) = try await session.data(for: request)
+            let (_, response) = try await BaseNetworkEngine.pingSession.data(for: request)
             guard let http = response as? HTTPURLResponse else { return false }
-            return http.statusCode < 600
+            return (200...399).contains(http.statusCode)
         } catch {
             return false
         }
     }
 
     // MARK: - Private
-
-    private var urlSession: URLSession {
-        let config = URLSessionConfiguration.default
-        config.timeoutIntervalForRequest = timeoutInterval
-        config.timeoutIntervalForResource = timeoutInterval
-        config.httpShouldSetCookies = false
-        config.httpCookieAcceptPolicy = .never
-        return URLSession(configuration: config, delegate: BaseNetworkEngine.insecureDelegate, delegateQueue: nil)
-    }
 
     private func performRequest<T: Decodable>(
         baseURL: String,
@@ -166,7 +197,7 @@ final class BaseNetworkEngine: Sendable {
         req.httpBody = body
 
         logRequest(req)
-        let (data, response) = try await urlSession.data(for: req)
+        let (data, response) = try await BaseNetworkEngine.requestSession.data(for: req)
         logResponse(response, data: data)
         try interceptResponse(response, data: data)
 
@@ -197,7 +228,7 @@ final class BaseNetworkEngine: Sendable {
         req.httpBody = body
 
         logRequest(req)
-        let (data, response) = try await urlSession.data(for: req)
+        let (data, response) = try await BaseNetworkEngine.requestSession.data(for: req)
         logResponse(response, data: data)
         try interceptResponse(response, data: data)
 
@@ -223,7 +254,7 @@ final class BaseNetworkEngine: Sendable {
         req.httpBody = body
 
         logRequest(req)
-        let (data, response) = try await urlSession.data(for: req)
+        let (data, response) = try await BaseNetworkEngine.requestSession.data(for: req)
         logResponse(response, data: data)
         try interceptResponse(response, data: data)
     }
@@ -232,7 +263,8 @@ final class BaseNetworkEngine: Sendable {
         baseURL: String,
         path: String,
         method: String,
-        headers: [String: String]
+        headers: [String: String],
+        body: Data?
     ) async throws -> Data {
         let urlString = baseURL + path
         guard let url = URL(string: urlString) else { throw APIError.invalidURL }
@@ -243,13 +275,12 @@ final class BaseNetworkEngine: Sendable {
         for (key, value) in headers {
             req.setValue(value, forHTTPHeaderField: key)
         }
-
-        req.httpBody = nil
+        req.httpBody = body
 
         logRequest(req)
-        let (data, response) = try await urlSession.data(for: req)
+        let (data, response) = try await BaseNetworkEngine.requestSession.data(for: req)
         logResponse(response, data: data)
-        try interceptResponse(response)
+        try interceptResponse(response, data: data)
         return data
     }
 

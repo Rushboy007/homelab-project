@@ -70,10 +70,17 @@ public final class LogStore {
     public static let shared = LogStore()
     
     public struct LogEntry: Identifiable {
-        public let id = UUID()
-        public let timestamp = Date()
+        public let id: UUID
+        public let timestamp: Date
         public let level: LogLevel
         public let message: String
+
+        public init(level: LogLevel, message: String, timestamp: Date = Date(), id: UUID = UUID()) {
+            self.id = id
+            self.timestamp = timestamp
+            self.level = level
+            self.message = message
+        }
         
         public var formattedTime: String {
             let formatter = DateFormatter()
@@ -100,11 +107,15 @@ public final class LogStore {
     
     public private(set) var entries: [LogEntry] = []
     private let maxEntries = 500
+    private var lastEmissionByKey: [String: Date] = [:]
     
     private init() {}
     
     public func add(_ message: String, level: LogLevel = .info) {
-        let entry = LogEntry(level: level, message: message)
+        let now = Date()
+        guard !shouldDrop(level: level, message: message, now: now) else { return }
+
+        let entry = LogEntry(level: level, message: message, timestamp: now)
         entries.append(entry)
         
         if entries.count > maxEntries {
@@ -119,5 +130,30 @@ public final class LogStore {
     public func export() -> String {
         entries.map { "[\($0.formattedTime)] [\($0.level.rawValue)] \($0.message)" }
             .joined(separator: "\n")
+    }
+
+    private func shouldDrop(level: LogLevel, message: String, now: Date) -> Bool {
+        let minInterval: TimeInterval
+        switch level {
+        case .network:
+            minInterval = 2.0
+        case .debug:
+            minInterval = 0.8
+        case .info, .error:
+            return false
+        }
+
+        let key = "\(level.rawValue)|\(message)"
+        if let last = lastEmissionByKey[key], now.timeIntervalSince(last) < minInterval {
+            return true
+        }
+
+        lastEmissionByKey[key] = now
+
+        if lastEmissionByKey.count > 1200 {
+            let threshold = now.addingTimeInterval(-120)
+            lastEmissionByKey = lastEmissionByKey.filter { $0.value >= threshold }
+        }
+        return false
     }
 }

@@ -38,6 +38,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homelab.app.data.repository.LocalPreferencesRepository
 import com.homelab.app.data.repository.ThemeMode
 import com.homelab.app.data.repository.ServicesRepository
+import com.homelab.app.util.AppIconManager
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -47,6 +48,9 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var servicesRepository: ServicesRepository
+
+    @Inject
+    lateinit var appIconManager: AppIconManager
 
     private var isUnlocked by mutableStateOf(false)
     private var needsSetup by mutableStateOf(true)
@@ -61,6 +65,10 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             val languageMode = preferencesRepository.languageMode.first()
             AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(languageMode.code))
+            val selectedIcon = preferencesRepository.appIcon.first()
+            if (!appIconManager.isApplied(selectedIcon)) {
+                appIconManager.apply(selectedIcon)
+            }
             servicesRepository.initialize()
 
             val hasCompletedOnboarding = preferencesRepository.hasCompletedOnboarding.first()

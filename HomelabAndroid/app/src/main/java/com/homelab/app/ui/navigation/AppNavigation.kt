@@ -23,9 +23,11 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Bookmark
 import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -55,6 +57,7 @@ import com.homelab.app.ui.settings.DebugLogsScreen
 import com.homelab.app.ui.settings.ConfiguredServicesScreen
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.homelab.app.ui.security.LockScreen
@@ -67,6 +70,7 @@ sealed class Screen(
     val inactiveIcon: androidx.compose.ui.graphics.vector.ImageVector
 ) {
     data object Home : Screen("home", R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home)
+    data object Media : Screen("media", R.string.nav_media, Icons.Filled.PlayArrow, Icons.Outlined.PlayArrow)
     data object Bookmarks : Screen("bookmarks", R.string.nav_bookmarks, Icons.Filled.Bookmark, Icons.Outlined.Bookmark)
     data object Settings : Screen("settings", R.string.nav_settings, Icons.Filled.Settings, Icons.Outlined.Settings)
 }
@@ -76,15 +80,32 @@ private fun dashboardRoute(type: ServiceType, instanceId: String): String {
         ServiceType.PORTAINER -> "portainer/$instanceId/dashboard"
         ServiceType.PIHOLE -> "pihole/$instanceId/dashboard"
         ServiceType.ADGUARD_HOME -> "adguard/$instanceId/dashboard"
+        ServiceType.TECHNITIUM -> "technitium/$instanceId/dashboard"
         ServiceType.JELLYSTAT -> "jellystat/$instanceId/dashboard"
         ServiceType.BESZEL -> "beszel/$instanceId/dashboard"
         ServiceType.GITEA -> "gitea/$instanceId/dashboard"
+        ServiceType.LINUX_UPDATE -> "linux-update/$instanceId/dashboard"
+        ServiceType.DOCKHAND -> "dockhand/$instanceId/dashboard"
         ServiceType.NGINX_PROXY_MANAGER -> "nginxpm/$instanceId/dashboard"
+        ServiceType.PANGOLIN -> "pangolin/$instanceId/dashboard"
         ServiceType.HEALTHCHECKS -> "healthchecks/$instanceId/dashboard"
         ServiceType.PATCHMON -> "patchmon/$instanceId/dashboard"
         ServiceType.PLEX -> "plex/$instanceId/dashboard"
+        ServiceType.RADARR,
+        ServiceType.SONARR,
+        ServiceType.LIDARR,
+        ServiceType.QBITTORRENT,
+        ServiceType.JELLYSEERR,
+        ServiceType.PROWLARR,
+        ServiceType.BAZARR,
+        ServiceType.GLUETUN,
+        ServiceType.FLARESOLVERR -> "media/${type.name}/$instanceId/dashboard"
         ServiceType.UNKNOWN -> Screen.Home.route
     }
+}
+
+private fun technitiumDashboardRoute(instanceId: String): String {
+    return "technitium/$instanceId/dashboard"
 }
 
 private fun loginRoute(type: ServiceType, instanceId: String? = null): String {
@@ -99,7 +120,8 @@ private fun loginRoute(type: ServiceType, instanceId: String? = null): String {
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
-    val items = listOf(Screen.Home, Screen.Bookmarks, Screen.Settings)
+    val items = listOf(Screen.Home, Screen.Media, Screen.Bookmarks, Screen.Settings)
+    var configuredServicesUnlocked by rememberSaveable { mutableStateOf(false) }
 
     Scaffold(
         bottomBar = {
@@ -107,6 +129,7 @@ fun AppNavigation() {
             val currentDestination = navBackStackEntry?.destination
             val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
             val isServiceChild = currentDestination?.route?.contains("/") == true
+            val isMediaChild = currentDestination?.route?.startsWith("media/") == true
 
             Surface(
                 color = MaterialTheme.colorScheme.background,
@@ -124,7 +147,8 @@ fun AppNavigation() {
                 ) {
                     items.forEach { screen ->
                         val selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true ||
-                            (screen.route == Screen.Home.route && isServiceChild)
+                            (screen.route == Screen.Home.route && isServiceChild && !isMediaChild) ||
+                            (screen.route == Screen.Media.route && isMediaChild)
                         val color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
                         val label = stringResource(screen.titleResId)
 
@@ -200,6 +224,17 @@ fun AppNavigation() {
                 )
             }
 
+            composable(Screen.Media.route) {
+                com.homelab.app.ui.media.MediaArrScreen(
+                    onNavigateToLogin = { type, instanceId ->
+                        navController.navigate(loginRoute(type, instanceId))
+                    },
+                    onNavigateToService = { type, instanceId ->
+                        navController.navigate(dashboardRoute(type, instanceId))
+                    }
+                )
+            }
+
             composable(Screen.Bookmarks.route) {
                 com.homelab.app.ui.bookmarks.BookmarksScreen()
             }
@@ -229,12 +264,11 @@ fun AppNavigation() {
                 val settingsVm: com.homelab.app.ui.settings.SettingsViewModel = hiltViewModel()
                 val isPinSet by settingsVm.isPinSet.collectAsStateWithLifecycle()
                 val biometricEnabled by settingsVm.biometricEnabled.collectAsStateWithLifecycle()
-                var isUnlocked by remember { mutableStateOf(false) }
 
-                if (isPinSet && !isUnlocked) {
+                if (isPinSet && !configuredServicesUnlocked) {
                     LockScreen(
                         biometricEnabled = biometricEnabled,
-                        onUnlock = { isUnlocked = true },
+                        onUnlock = { configuredServicesUnlocked = true },
                         onVerifyPin = { settingsVm.verifyPin(it) }
                     )
                 } else {
@@ -243,9 +277,31 @@ fun AppNavigation() {
                         onNavigateToLogin = { type, instanceId ->
                             navController.navigate(loginRoute(type, instanceId))
                         },
+                        onNavigateToGroup = { group ->
+                            navController.navigate("settings/configured-services/${group.name}")
+                        },
                         viewModel = settingsVm
                     )
                 }
+            }
+
+            composable(
+                route = "settings/configured-services/{group}",
+                arguments = listOf(androidx.navigation.navArgument("group") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val settingsVm: com.homelab.app.ui.settings.SettingsViewModel = hiltViewModel()
+                val groupArg = backStackEntry.arguments?.getString("group")
+                val group = runCatching {
+                    com.homelab.app.ui.settings.ConfiguredServicesGroup.valueOf(groupArg.orEmpty())
+                }.getOrNull() ?: com.homelab.app.ui.settings.ConfiguredServicesGroup.HOME
+                ConfiguredServicesScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToLogin = { type, instanceId ->
+                        navController.navigate(loginRoute(type, instanceId))
+                    },
+                    group = group,
+                    viewModel = settingsVm
+                )
             }
 
             composable("settings/backup") {
@@ -266,8 +322,10 @@ fun AppNavigation() {
                 )
             ) { backStackEntry ->
                 val typeName = backStackEntry.arguments?.getString("serviceType") ?: return@composable
+                val serviceType = ServiceType.fromStoredName(typeName)
+                if (serviceType == ServiceType.UNKNOWN) return@composable
                 com.homelab.app.ui.login.ServiceLoginScreen(
-                    serviceType = ServiceType.valueOf(typeName),
+                    serviceType = serviceType,
                     onDismiss = { navController.popBackStack() }
                 )
             }
@@ -523,6 +581,59 @@ fun AppNavigation() {
             }
 
             composable(
+                route = "linux-update/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.linux_update.LinuxUpdateDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.LINUX_UPDATE, newInstanceId)) {
+                                popUpTo("linux-update/$instanceId/dashboard") { inclusive = true }
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "technitium/{instanceId}/dashboard",
+                arguments = listOf(
+                    androidx.navigation.navArgument("instanceId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.technitium.TechnitiumDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.TECHNITIUM, newInstanceId)) {
+                                popUpTo("technitium/$instanceId/dashboard") { inclusive = true }
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "dockhand/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.dockhand.DockhandDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.DOCKHAND, newInstanceId)) {
+                                popUpTo("dockhand/$instanceId/dashboard") { inclusive = true }
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(
                 route = "healthchecks/{instanceId}/dashboard",
                 arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
             ) { backStackEntry ->
@@ -550,6 +661,15 @@ fun AppNavigation() {
                     },
                     onNavigateToBadges = { navController.navigate("healthchecks/$instanceId/badges") },
                     onNavigateToChannels = { navController.navigate("healthchecks/$instanceId/channels") }
+                )
+            }
+
+            composable(
+                route = "pangolin/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) {
+                com.homelab.app.ui.pangolin.PangolinDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
 
@@ -728,6 +848,21 @@ fun AppNavigation() {
                             }
                         }
                     }
+                )
+            }
+
+            composable(
+                route = "media/{serviceType}/{instanceId}/dashboard",
+                arguments = listOf(
+                    androidx.navigation.navArgument("serviceType") { type = NavType.StringType },
+                    androidx.navigation.navArgument("instanceId") { type = NavType.StringType }
+                )
+            ) { backStackEntry ->
+                val typeName = backStackEntry.arguments?.getString("serviceType") ?: return@composable
+                val mediaType = ServiceType.fromStoredName(typeName)
+                com.homelab.app.ui.media.MediaServiceDashboardScreen(
+                    serviceType = mediaType,
+                    onNavigateBack = { navController.popBackStack() }
                 )
             }
         }

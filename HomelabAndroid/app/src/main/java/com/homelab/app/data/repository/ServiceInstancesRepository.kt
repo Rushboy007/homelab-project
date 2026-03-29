@@ -57,7 +57,8 @@ class ServiceInstancesRepository @Inject constructor(
     }
 
     suspend fun getInstances(type: ServiceType): List<ServiceInstance> {
-        return dao.getByType(type.name).map { it.toDomain() }
+        val entities = dao.getByType(type.name)
+        return entities.map { it.toDomain() }
     }
 
     suspend fun getPreferredInstance(type: ServiceType): ServiceInstance? {
@@ -87,7 +88,9 @@ class ServiceInstancesRepository @Inject constructor(
 
     suspend fun setPreferredInstance(type: ServiceType, instanceId: String?) {
         val validId = instanceId?.takeIf { candidate ->
-            dao.getById(candidate)?.type == type.name
+            dao.getById(candidate)?.let { entity ->
+                ServiceType.fromStoredName(entity.type) == type
+            } == true
         }
         settingsManager.setPreferredInstanceId(type, validId)
         if (validId == null) {
@@ -103,7 +106,7 @@ class ServiceInstancesRepository @Inject constructor(
         ServiceType.entries
             .filter { it != ServiceType.UNKNOWN }
             .forEach { type ->
-                val existing = dao.getByType(type.name)
+                val existing = getInstances(type)
                 val legacy = settingsManager.getLegacyConnection(type)
 
                 if (legacy != null && existing.isEmpty()) {
@@ -128,12 +131,21 @@ class ServiceInstancesRepository @Inject constructor(
         if (entities.isEmpty()) return
 
         val normalized = entities.map { entity ->
+            val normalizedType = ServiceType.fromStoredName(entity.type).name
             val normalizedUrl = normalizeUrl(entity.url)
             val normalizedFallback = normalizeOptionalUrl(entity.fallbackUrl)
-            if (normalizedUrl == entity.url && normalizedFallback == entity.fallbackUrl) {
+            if (
+                normalizedType == entity.type &&
+                normalizedUrl == entity.url &&
+                normalizedFallback == entity.fallbackUrl
+            ) {
                 entity
             } else {
-                entity.copy(url = normalizedUrl, fallbackUrl = normalizedFallback)
+                entity.copy(
+                    type = normalizedType,
+                    url = normalizedUrl,
+                    fallbackUrl = normalizedFallback
+                )
             }
         }
 
@@ -159,7 +171,7 @@ class ServiceInstancesRepository @Inject constructor(
 private fun ServiceInstanceEntity.toDomain(): ServiceInstance {
     return ServiceInstance(
         id = id,
-        type = ServiceType.valueOf(type),
+        type = ServiceType.fromStoredName(type),
         label = label,
         url = url,
         token = token,

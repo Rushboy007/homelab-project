@@ -2,7 +2,6 @@ package com.homelab.app.ui.home
 
 import android.content.ActivityNotFoundException
 import android.content.Intent
-import android.net.Uri
 import java.text.NumberFormat
 import java.util.Locale
 import androidx.compose.animation.core.Spring
@@ -31,6 +30,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
@@ -90,6 +91,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.core.net.toUri
 import androidx.lifecycle.repeatOnLifecycle
 import com.homelab.app.R
 import com.homelab.app.domain.model.ServiceInstance
@@ -132,7 +134,7 @@ fun HomeScreen(
             while (isActive) {
                 viewModel.checkAllReachability()
                 viewModel.fetchSummaryData()
-                delay(180_000L)
+                delay(300_000L)
             }
         }
     }
@@ -143,7 +145,7 @@ fun HomeScreen(
             // Construct refresh key INSIDE snapshotFlow so Compose tracks all dependencies
             serviceOrder.map { type ->
                 val id = preferredInstanceIds[type]
-                "${type.name}:$id:${reachability[id]}"
+                "${type.name}:$id"
             }.joinToString("|")
         }
         .distinctUntilChanged()
@@ -153,7 +155,7 @@ fun HomeScreen(
         }
     }
 
-    val visibleTypes = serviceOrder.filter { !hiddenServices.contains(it.name) }
+    val visibleTypes = serviceOrder.filter { it.isHomeService && !hiddenServices.contains(it.name) }
     val hasUnreachableInstance = visibleTypes
         .flatMap { instancesByType[it].orEmpty() }
         .any { instance ->
@@ -256,7 +258,7 @@ fun HomeScreen(
                             summary = instanceSummaries[instance.id],
                             isSummaryLoading = instanceSummaries[instance.id] == null && summaryLoading,
                             onOpen = { onNavigateToService(type, instance.id) },
-                            onRefresh = { viewModel.checkReachability(instance.id) }
+                            onRefresh = { viewModel.checkReachability(instance.id, force = true) }
                         )
                     }
                 }
@@ -276,7 +278,7 @@ fun HomeScreen(
 
     if (showReorderDialog) {
         ServiceOrderDialog(
-            serviceOrder = serviceOrder,
+            serviceOrder = serviceOrder.filter { it.isHomeService },
             onMoveUp = { type -> viewModel.moveService(type, -1) },
             onMoveDown = { type -> viewModel.moveService(type, 1) },
             onDismiss = { showReorderDialog = false }
@@ -300,6 +302,7 @@ private fun InstanceCard(
     onRefresh: () -> Unit
 ) {
     val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
+    val useEnhancedBrandCard = useCyberpunkCards && (type == ServiceType.JELLYSTAT || type == ServiceType.PLEX)
     val resolvedReachable = when {
         summary != null -> true
         isReachable == false && (isSummaryLoading || isPinging) -> null
@@ -321,12 +324,12 @@ private fun InstanceCard(
         null -> stringResource(R.string.home_verifying)
     }
     val cardShape = RoundedCornerShape(18.dp)
-    val cardColor = if (useCyberpunkCards) {
+    val cardColor = if (useEnhancedBrandCard) {
         if (isDarkTheme) Color(0xFF10161F) else Color(0xFFFBFCFF)
     } else {
         MaterialTheme.colorScheme.surfaceContainerLow
     }
-    val cardBorder = if (useCyberpunkCards) {
+    val cardBorder = if (useEnhancedBrandCard) {
         BorderStroke(
             1.25.dp,
             type.primaryColor.copy(alpha = if (isDarkTheme) 0.82f else 0.58f)
@@ -335,8 +338,8 @@ private fun InstanceCard(
         null
     }
     val brandColor = type.primaryColor
-    val cardBrush = remember(brandColor, useCyberpunkCards, isDarkTheme) {
-        if (useCyberpunkCards) {
+    val cardBrush = remember(brandColor, useEnhancedBrandCard, isDarkTheme) {
+        if (useEnhancedBrandCard) {
             Brush.linearGradient(
                 colors = listOf(
                     brandColor.copy(alpha = if (isDarkTheme) 0.13f else 0.075f),
@@ -358,7 +361,11 @@ private fun InstanceCard(
             "adguard_total_queries" -> stringResource(R.string.adguard_total_queries)
             "systems_online" -> stringResource(R.string.beszel_systems_online)
             "repos" -> stringResource(R.string.gitea_repos)
+            "linux_update_systems_up_to_date" -> stringResource(R.string.linux_update_systems_up_to_date)
+            "technitium_blocked_queries" -> stringResource(R.string.technitium_blocked_queries)
+            "dockhand_running_containers" -> stringResource(R.string.dockhand_running_containers)
             "proxy_hosts" -> stringResource(R.string.npm_proxy_hosts)
+            "pangolin_sites_clients" -> stringResource(R.string.pangolin_sites_clients)
             "checks" -> stringResource(R.string.healthchecks_checks)
             "jellystat_watch_time" -> stringResource(R.string.jellystat_watch_time)
             "hosts" -> stringResource(R.string.patchmon_hosts)
@@ -544,12 +551,13 @@ private fun ConnectInstanceCard(
     onClick: () -> Unit
 ) {
     val isDarkTheme = MaterialTheme.colorScheme.background.luminance() < 0.45f
-    val cardColor = if (useCyberpunkCards) {
+    val useEnhancedBrandCard = useCyberpunkCards && (type == ServiceType.JELLYSTAT || type == ServiceType.PLEX)
+    val cardColor = if (useEnhancedBrandCard) {
         if (isDarkTheme) Color(0xFF10161F) else Color(0xFFFBFCFF)
     } else {
         MaterialTheme.colorScheme.surfaceContainerLow
     }
-    val cardBorder = if (useCyberpunkCards) {
+    val cardBorder = if (useEnhancedBrandCard) {
         BorderStroke(
             1.25.dp,
             type.primaryColor.copy(alpha = if (isDarkTheme) 0.82f else 0.58f)
@@ -558,8 +566,8 @@ private fun ConnectInstanceCard(
         null
     }
     val brandColor = type.primaryColor
-    val cardBrush = remember(brandColor, useCyberpunkCards, isDarkTheme) {
-        if (useCyberpunkCards) {
+    val cardBrush = remember(brandColor, useEnhancedBrandCard, isDarkTheme) {
+        if (useEnhancedBrandCard) {
             Brush.linearGradient(
                 colors = listOf(
                     brandColor.copy(alpha = if (isDarkTheme) 0.13f else 0.075f),
@@ -684,15 +692,15 @@ fun TailscaleCard(isConnected: Boolean) {
                             context.startActivity(launchIntent.apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) })
                         } else {
                             try {
-                                context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("tailscale://app")))
+                                context.startActivity(Intent(Intent.ACTION_VIEW, "tailscale://app".toUri()))
                             } catch (_: ActivityNotFoundException) {
                                 try {
-                                    context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=com.tailscale.ipn")))
+                                    context.startActivity(Intent(Intent.ACTION_VIEW, "market://details?id=com.tailscale.ipn".toUri()))
                                 } catch (_: ActivityNotFoundException) {
                                     context.startActivity(
                                         Intent(
                                             Intent.ACTION_VIEW,
-                                            Uri.parse("https://play.google.com/store/apps/details?id=com.tailscale.ipn")
+                                            "https://play.google.com/store/apps/details?id=com.tailscale.ipn".toUri()
                                         )
                                     )
                                 }
@@ -743,6 +751,7 @@ fun DashboardSummary(viewModel: HomeViewModel) {
     val adguard by viewModel.adguardSummary.collectAsStateWithLifecycle()
     val beszel by viewModel.beszelSummary.collectAsStateWithLifecycle()
     val gitea by viewModel.giteaSummary.collectAsStateWithLifecycle()
+    val linuxUpdate by viewModel.linuxUpdateSummary.collectAsStateWithLifecycle()
     val healthchecks by viewModel.healthchecksSummary.collectAsStateWithLifecycle()
     val connectionStatus by viewModel.connectionStatus.collectAsStateWithLifecycle()
 
@@ -775,6 +784,15 @@ fun DashboardSummary(viewModel: HomeViewModel) {
             }
             if (connectionStatus[ServiceType.GITEA] == true) {
                 SummaryRow(title = stringResource(R.string.gitea_repos), value = gitea?.totalRepos?.toString() ?: "—", subValue = null, icon = Icons.Default.Source, color = ServiceType.GITEA.primaryColor)
+            }
+            if (connectionStatus[ServiceType.LINUX_UPDATE] == true) {
+                SummaryRow(
+                    title = stringResource(R.string.linux_update_systems_up_to_date),
+                    value = linuxUpdate?.upToDate?.toString() ?: "—",
+                    subValue = linuxUpdate?.let { "/ ${it.total}" },
+                    icon = Icons.Default.CheckCircle,
+                    color = ServiceType.LINUX_UPDATE.primaryColor
+                )
             }
             if (connectionStatus[ServiceType.HEALTHCHECKS] == true) {
                 SummaryRow(title = stringResource(R.string.healthchecks_checks), value = healthchecks?.up?.toString() ?: "—", subValue = healthchecks?.let { "/ ${it.total}" }, icon = Icons.Default.CheckCircle, color = ServiceType.HEALTHCHECKS.primaryColor)
@@ -959,7 +977,13 @@ private fun ServiceOrderDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.home_reorder_services)) },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 420.dp)
+                    .verticalScroll(rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
                 serviceOrder.forEachIndexed { index, type ->
                     Row(
                         modifier = Modifier.fillMaxWidth(),

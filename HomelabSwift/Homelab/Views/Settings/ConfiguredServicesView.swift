@@ -9,27 +9,33 @@ struct AuthGatedConfiguredServicesView: View {
     @Environment(SettingsStore.self) private var settingsStore
 
     @State private var isUnlocked = false
+    @State private var unlockSessionID = UUID()
 
     var body: some View {
-        ZStack {
+        Group {
             if settingsStore.isPinSet && !isUnlocked {
                 LockScreenView {
+                    unlockSessionID = UUID()
                     isUnlocked = true
                 }
                 .toolbar(.hidden, for: .tabBar)
-                .navigationBarBackButtonHidden(true)
             } else {
                 ConfiguredServicesView()
+                    .id(unlockSessionID)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
             if !settingsStore.isPinSet {
+                unlockSessionID = UUID()
                 isUnlocked = true
             }
         }
-        .onDisappear {
-            isUnlocked = false
+        .onChange(of: settingsStore.isPinSet) { _, isPinSet in
+            if !isPinSet {
+                unlockSessionID = UUID()
+                isUnlocked = true
+            }
         }
     }
 }
@@ -45,13 +51,117 @@ struct ServiceEditorContext: Identifiable {
     }
 }
 
+private enum ServiceConfigGroup: String, Identifiable, CaseIterable {
+    case home
+    case media
+
+    var id: String { rawValue }
+
+    var iconName: String {
+        switch self {
+        case .home: return "house.fill"
+        case .media: return "play.tv.fill"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .home: return AppTheme.accent
+        case .media: return ServiceType.radarr.colors.primary
+        }
+    }
+
+    var services: [ServiceType] {
+        switch self {
+        case .home: return ServiceType.homeServices
+        case .media: return ServiceType.mediaServices
+        }
+    }
+}
+
 struct ConfiguredServicesView: View {
+    @Environment(ServicesStore.self) private var servicesStore
+    @Environment(Localizer.self) private var localizer
+
+    var body: some View {
+        ZStack {
+            AppTheme.background.ignoresSafeArea()
+
+            ScrollView {
+                VStack(spacing: 14) {
+                    ForEach(ServiceConfigGroup.allCases) { group in
+                        NavigationLink {
+                            ServiceGroupConfigurationView(group: group)
+                        } label: {
+                            groupCard(group)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(16)
+                .padding(.bottom, 32)
+            }
+        }
+        .navigationTitle(localizer.t.settingsConfiguredServices)
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func groupCard(_ group: ServiceConfigGroup) -> some View {
+        let totalInstances = group.services.reduce(0) { partial, type in
+            partial + servicesStore.instances(for: type).count
+        }
+        let configuredServices = group.services.filter { !servicesStore.instances(for: $0).isEmpty }.count
+
+        return HStack(spacing: 14) {
+            Image(systemName: group.iconName)
+                .font(.title3.weight(.semibold))
+                .foregroundStyle(group.tint)
+                .frame(width: 42, height: 42)
+                .background(group.tint.opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(group == .home ? localizer.t.tabHome : localizer.t.tabMedia)
+                    .font(.headline.weight(.bold))
+                Text("\(configuredServices) / \(group.services.count) \(localizer.t.settingsServices) · \(totalInstances) \(localizer.t.settingsInstancePlural)")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+
+            Spacer(minLength: 0)
+
+            Text("\(configuredServices) / \(group.services.count)")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(group.tint)
+                .padding(.horizontal, 8)
+                .padding(.vertical, 4)
+                .background(group.tint.opacity(0.12), in: Capsule())
+
+            Image(systemName: "chevron.right")
+                .font(.caption.bold())
+                .foregroundStyle(AppTheme.textMuted)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(14)
+        .padding(.vertical, 1)
+        .glassCard(tint: group.tint.opacity(0.08))
+    }
+}
+
+private struct ServiceGroupConfigurationView: View {
+    let group: ServiceConfigGroup
+
     @Environment(ServicesStore.self) private var servicesStore
     @Environment(SettingsStore.self) private var settingsStore
     @Environment(Localizer.self) private var localizer
 
     @State private var showDeleteInstance: ServiceInstance? = nil
     @State private var showInstanceEditor: ServiceEditorContext? = nil
+
+    private var orderedTypes: [ServiceType] {
+        settingsStore.serviceOrder.filter { group.services.contains($0) }
+    }
 
     var body: some View {
         ZStack {
@@ -61,7 +171,7 @@ struct ConfiguredServicesView: View {
                 GlassGroup(spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
                         VStack(spacing: 16) {
-                            ForEach(settingsStore.serviceOrder) { type in
+                            ForEach(orderedTypes) { type in
                                 serviceSection(type)
                             }
                         }
@@ -71,7 +181,7 @@ struct ConfiguredServicesView: View {
                 .padding(.bottom, 32)
             }
         }
-        .navigationTitle(localizer.t.settingsConfiguredServices)
+        .navigationTitle(group == .home ? localizer.t.tabHome : localizer.t.tabMedia)
         .navigationBarTitleDisplayMode(.inline)
         .sheet(item: $showInstanceEditor) { context in
             ServiceLoginView(serviceType: context.serviceType, existingInstanceId: context.instanceId)
@@ -151,34 +261,34 @@ struct ConfiguredServicesView: View {
 
                 HStack(spacing: 6) {
                     Button {
-                        settingsStore.moveService(type, offset: -1)
+                        settingsStore.moveService(type, offset: -1, within: group.services)
                         HapticManager.light()
                     } label: {
                         Image(systemName: "arrow.up")
                             .font(.caption.bold())
-                            .foregroundStyle(settingsStore.canMoveService(type, offset: -1) ? AppTheme.accent : .secondary)
+                            .foregroundStyle(settingsStore.canMoveService(type, offset: -1, within: group.services) ? AppTheme.accent : .secondary)
                             .frame(width: 32, height: 32)
                             .background(Color.secondary.opacity(0.1))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(localizer.t.settingsMoveUp)
-                    .disabled(!settingsStore.canMoveService(type, offset: -1))
+                    .disabled(!settingsStore.canMoveService(type, offset: -1, within: group.services))
 
                     Button {
-                        settingsStore.moveService(type, offset: 1)
+                        settingsStore.moveService(type, offset: 1, within: group.services)
                         HapticManager.light()
                     } label: {
                         Image(systemName: "arrow.down")
                             .font(.caption.bold())
-                            .foregroundStyle(settingsStore.canMoveService(type, offset: 1) ? AppTheme.accent : .secondary)
+                            .foregroundStyle(settingsStore.canMoveService(type, offset: 1, within: group.services) ? AppTheme.accent : .secondary)
                             .frame(width: 32, height: 32)
                             .background(Color.secondary.opacity(0.1))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(localizer.t.settingsMoveDown)
-                    .disabled(!settingsStore.canMoveService(type, offset: 1))
+                    .disabled(!settingsStore.canMoveService(type, offset: 1, within: group.services))
                 }
             }
 

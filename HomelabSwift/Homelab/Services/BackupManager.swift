@@ -14,10 +14,10 @@ final class BackupManager: @unchecked Sendable {
 
     // MARK: - Export
 
-    /// Exports all service instances to an encrypted .homelab file.
+    /// Exports service instances to an encrypted .homelab file.
     /// Returns the URL of the temporary file ready for sharing.
-    func exportBackup(password: String) async throws -> URL {
-        let envelope = await buildEnvelope()
+    func exportBackup(password: String, includedTypes: Set<ServiceType>? = nil) async throws -> URL {
+        let envelope = await buildEnvelope(includedTypes: includedTypes)
         let jsonData = try JSONEncoder().encode(envelope)
         let encrypted = try BackupCrypto.encrypt(data: jsonData, password: password)
 
@@ -68,40 +68,71 @@ final class BackupManager: @unchecked Sendable {
 
     // MARK: - Apply
 
-    /// Applies a backup envelope: replaces all existing service instances.
+    /// Applies selected service types from a backup envelope and leaves other services untouched.
     @MainActor
-    func applyBackup(_ envelope: BackupEnvelope) async {
-        // Delete all existing instances
-        for instance in servicesStore.allInstances {
+    func applyBackup(
+        _ envelope: BackupEnvelope,
+        includedTypes: Set<ServiceType>
+    ) async -> Int {
+        guard !includedTypes.isEmpty else { return 0 }
+
+        let entriesByType = envelope.services
+            .compactMap { entry -> (ServiceType, BackupServiceEntry)? in
+                guard let type = BackupServiceTypeMapper.serviceType(from: entry.type),
+                      includedTypes.contains(type) else {
+                    return nil
+                }
+                return (type, entry)
+            }
+            .reduce(into: [ServiceType: [BackupServiceEntry]]()) { partial, element in
+                partial[element.0, default: []].append(element.1)
+            }
+
+        let typesToReplace = Set(entriesByType.keys)
+        guard !typesToReplace.isEmpty else { return 0 }
+
+        // Replace only selected service types present in the backup.
+        for instance in servicesStore.allInstances where typesToReplace.contains(instance.type) {
             servicesStore.deleteInstance(id: instance.id)
         }
 
-        // Track preferred instances per type
-        var preferredByType: [ServiceType: UUID] = [:]
+        var importedCount = 0
+        for type in typesToReplace {
+            let entries = entriesByType[type] ?? []
+            var preferredId: UUID?
 
-        // Import each service entry
-        for entry in envelope.services {
-            guard let instance = entry.toServiceInstance() else { continue }
-            await servicesStore.saveInstance(instance)
+            for entry in entries {
+                guard let instance = entry.toServiceInstance() else { continue }
+                await servicesStore.saveInstance(instance, triggerReachabilityCheck: false)
+                importedCount += 1
+                if entry.isPreferred {
+                    preferredId = instance.id
+                }
+            }
 
-            if entry.isPreferred {
-                preferredByType[instance.type] = instance.id
+            if let preferredId {
+                servicesStore.setPreferredInstance(id: preferredId, for: type)
             }
         }
 
-        // Set preferred instances
-        for (type, id) in preferredByType {
-            servicesStore.setPreferredInstance(id: id, for: type)
-        }
+        await servicesStore.checkAllReachability(force: true)
+        return importedCount
     }
 
     // MARK: - Private
 
     @MainActor
-    private func buildEnvelope() -> BackupEnvelope {
+    private func buildEnvelope(includedTypes: Set<ServiceType>? = nil) -> BackupEnvelope {
         let preferredIds = servicesStore.preferredInstanceIdByType
+        let included = includedTypes ?? []
+        let instancesToExport: [ServiceInstance]
+        if included.isEmpty {
+            instancesToExport = servicesStore.allInstances
+        } else {
+            instancesToExport = servicesStore.allInstances.filter { included.contains($0.type) }
+        }
 
-        let entries: [BackupServiceEntry] = servicesStore.allInstances.map { instance in
+        let entries: [BackupServiceEntry] = instancesToExport.map { instance in
             let isPreferred = preferredIds[instance.type] == instance.id
             return instance.toBackupEntry(isPreferred: isPreferred)
         }
@@ -130,6 +161,10 @@ struct BackupPreviewResult {
 
     var knownCount: Int { knownServices.count }
     var unknownCount: Int { unknownServiceTypes.count }
+
+    var knownServiceTypes: Set<ServiceType> {
+        Set(knownServices.compactMap { BackupServiceTypeMapper.serviceType(from: $0.type) })
+    }
 
     /// Group known services by type for display.
     var servicesByType: [(type: String, displayName: String, count: Int)] {

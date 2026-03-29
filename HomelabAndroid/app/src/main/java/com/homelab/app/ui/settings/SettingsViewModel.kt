@@ -8,6 +8,8 @@ import com.homelab.app.data.repository.LocalPreferencesRepository
 import com.homelab.app.data.repository.ServicesRepository
 import com.homelab.app.data.repository.ThemeMode
 import com.homelab.app.domain.model.ServiceInstance
+import com.homelab.app.util.AppIconManager
+import com.homelab.app.util.AppIconOption
 import com.homelab.app.util.ServiceType
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.net.HttpURLConnection
@@ -26,7 +28,8 @@ import org.json.JSONObject
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val servicesRepository: ServicesRepository,
-    private val localPreferencesRepository: LocalPreferencesRepository
+    private val localPreferencesRepository: LocalPreferencesRepository,
+    private val appIconManager: AppIconManager
 ) : ViewModel() {
 
     data class UpdateBannerState(
@@ -46,6 +49,9 @@ class SettingsViewModel @Inject constructor(
 
     private val _updatePopupState = MutableStateFlow<UpdatePopupState?>(null)
     val updatePopupState: StateFlow<UpdatePopupState?> = _updatePopupState
+
+    private val _appIconApplying = MutableStateFlow(false)
+    val appIconApplying: StateFlow<Boolean> = _appIconApplying
 
     private val updateManifestUrl = "https://raw.githubusercontent.com/JohnnWi/homelab-project/main/app-version.json"
     private val defaultUpdateUrl = "https://github.com/JohnnWi/homelab-project/releases"
@@ -68,6 +74,9 @@ class SettingsViewModel @Inject constructor(
 
     val homeCyberpunkCardsEnabled: StateFlow<Boolean> = localPreferencesRepository.homeCyberpunkCardsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val appIcon: StateFlow<AppIconOption> = localPreferencesRepository.appIcon
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), AppIconOption.DEFAULT)
 
     val serviceOrder: StateFlow<List<ServiceType>> = localPreferencesRepository.serviceOrder
         .stateIn(
@@ -110,6 +119,19 @@ class SettingsViewModel @Inject constructor(
     fun setHomeCyberpunkCardsEnabled(enabled: Boolean) {
         viewModelScope.launch {
             localPreferencesRepository.setHomeCyberpunkCardsEnabled(enabled)
+        }
+    }
+
+    fun setAppIcon(icon: AppIconOption) {
+        viewModelScope.launch {
+            if (appIcon.value == icon) return@launch
+            _appIconApplying.value = true
+            localPreferencesRepository.setAppIcon(icon)
+            try {
+                appIconManager.apply(icon)
+            } finally {
+                _appIconApplying.value = false
+            }
         }
     }
 

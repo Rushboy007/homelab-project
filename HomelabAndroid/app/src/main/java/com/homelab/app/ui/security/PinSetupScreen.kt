@@ -14,6 +14,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -41,11 +42,14 @@ fun PinSetupScreen(
     val scope = rememberCoroutineScope()
     val canUseBiometric = remember { BiometricHelper.canAuthenticate(context) }
     val mismatchText = stringResource(R.string.security_pin_mismatch)
+    val palette = rememberSecurityScreenPalette()
 
     Scaffold { padding ->
         AnimatedContent(
             targetState = step,
-            modifier = Modifier.padding(padding),
+            modifier = Modifier
+                .padding(padding)
+                .background(palette.backgroundBrush),
             transitionSpec = {
                 slideInHorizontally { it } togetherWith slideOutHorizontally { -it }
             },
@@ -54,12 +58,14 @@ fun PinSetupScreen(
             when (currentStep) {
                 SetupStep.WELCOME -> {
                     WelcomeScreen(
+                        palette = palette,
                         onNext = { step = SetupStep.ASK }
                     )
                 }
                 
                 SetupStep.ASK -> {
                     AskSetupScreen(
+                        palette = palette,
                         onYes = { step = SetupStep.CREATE },
                         onNo = { onComplete() }
                     )
@@ -114,11 +120,14 @@ fun PinSetupScreen(
 }
 
 @Composable
-private fun WelcomeScreen(onNext: () -> Unit) {
+private fun WelcomeScreen(
+    palette: SecurityScreenPalette,
+    onNext: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(palette.backgroundBrush)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -127,14 +136,16 @@ private fun WelcomeScreen(onNext: () -> Unit) {
         Surface(
             modifier = Modifier.size(120.dp),
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer
+            color = palette.iconFill,
+            border = androidx.compose.foundation.BorderStroke(1.dp, palette.iconStroke),
+            shadowElevation = 0.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Default.Home,
                     contentDescription = stringResource(R.string.onboarding_welcome),
                     modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                    tint = palette.accent
                 )
             }
         }
@@ -145,7 +156,7 @@ private fun WelcomeScreen(onNext: () -> Unit) {
             text = stringResource(R.string.onboarding_welcome),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = palette.primaryText,
             textAlign = TextAlign.Center
         )
 
@@ -154,7 +165,7 @@ private fun WelcomeScreen(onNext: () -> Unit) {
         Text(
             text = stringResource(R.string.onboarding_welcome_desc),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+            color = palette.secondaryText,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
@@ -167,6 +178,7 @@ private fun WelcomeScreen(onNext: () -> Unit) {
                 .fillMaxWidth()
                 .heightIn(min = 56.dp),
             shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = palette.accent, contentColor = Color.White),
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
         ) {
             Text(
@@ -181,11 +193,15 @@ private fun WelcomeScreen(onNext: () -> Unit) {
 }
 
 @Composable
-private fun AskSetupScreen(onYes: () -> Unit, onNo: () -> Unit) {
+private fun AskSetupScreen(
+    palette: SecurityScreenPalette,
+    onYes: () -> Unit,
+    onNo: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(palette.backgroundBrush)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -194,14 +210,16 @@ private fun AskSetupScreen(onYes: () -> Unit, onNo: () -> Unit) {
         Surface(
             modifier = Modifier.size(120.dp),
             shape = CircleShape,
-            color = MaterialTheme.colorScheme.secondaryContainer
+            color = palette.iconFill,
+            border = androidx.compose.foundation.BorderStroke(1.dp, palette.iconStroke),
+            shadowElevation = 0.dp
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Icon(
                     imageVector = Icons.Default.Shield,
                     contentDescription = stringResource(R.string.security_title),
                     modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.secondary
+                    tint = palette.accent
                 )
             }
         }
@@ -212,7 +230,7 @@ private fun AskSetupScreen(onYes: () -> Unit, onNo: () -> Unit) {
             text = stringResource(R.string.security_title),
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground,
+            color = palette.primaryText,
             textAlign = TextAlign.Center
         )
 
@@ -221,7 +239,7 @@ private fun AskSetupScreen(onYes: () -> Unit, onNo: () -> Unit) {
         Text(
             text = stringResource(R.string.onboarding_ask_pin),
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+            color = palette.secondaryText,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 24.dp)
         )
@@ -239,6 +257,7 @@ private fun AskSetupScreen(onYes: () -> Unit, onNo: () -> Unit) {
                     .fillMaxWidth()
                     .heightIn(min = 56.dp),
                 shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = palette.accent, contentColor = Color.White),
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 14.dp)
             ) {
                 Text(
@@ -256,7 +275,7 @@ private fun AskSetupScreen(onYes: () -> Unit, onNo: () -> Unit) {
                 Text(
                     text = stringResource(R.string.onboarding_ask_pin_no),
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f)
+                    color = palette.secondaryText
                 )
             }
         }

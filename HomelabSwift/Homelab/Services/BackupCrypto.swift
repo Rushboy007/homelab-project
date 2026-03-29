@@ -90,8 +90,6 @@ enum BackupCrypto {
         let ciphertextAndTag = Data(data[33...])
 
         let key = try deriveKey(password: password, salt: Array(salt))
-        let nonce = try AES.GCM.Nonce(data: nonceData)
-
         // Reconstruct the combined box that CryptoKit expects: nonce + ciphertext + tag
         var combined = Data(nonceData)
         combined.append(ciphertextAndTag)

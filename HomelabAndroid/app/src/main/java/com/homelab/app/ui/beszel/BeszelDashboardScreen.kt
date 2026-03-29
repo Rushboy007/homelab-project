@@ -136,25 +136,9 @@ fun BeszelDashboardScreen(
                 )
             )
         },
-        containerColor = Color.Transparent
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(pageBrush)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(pageGlow, Color.Transparent),
-                            center = Offset(180f, 120f),
-                            radius = 640f
-                        )
-                    )
-            )
-
+        Box(modifier = Modifier.fillMaxSize()) {
             when (val state = systemsState) {
                 is UiState.Loading, is UiState.Idle -> {
                     Box(

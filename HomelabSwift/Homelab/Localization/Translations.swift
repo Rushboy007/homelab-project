@@ -26,6 +26,7 @@ struct Translations {
     let tabHome: String
     let tabBookmarks: String
     let tabSettings: String
+    let tabMedia: String
 
     // Launcher
     let launcherTitle: String
@@ -74,7 +75,25 @@ struct Translations {
     let servicePatchmonDesc: String
     let serviceJellystatDesc: String
     let servicePlex: String
+    let serviceRadarr: String
+    let serviceSonarr: String
+    let serviceLidarr: String
+    let serviceQbittorrent: String
+    let serviceJellyseerr: String
+    let serviceProwlarr: String
+    let serviceBazarr: String
+    let serviceGluetun: String
+    let serviceFlaresolverr: String
     let servicePlexDesc: String
+    let serviceRadarrDesc: String
+    let serviceSonarrDesc: String
+    let serviceLidarrDesc: String
+    let serviceQbittorrentDesc: String
+    let serviceJellyseerrDesc: String
+    let serviceProwlarrDesc: String
+    let serviceBazarrDesc: String
+    let serviceGluetunDesc: String
+    let serviceFlaresolverrDesc: String
 
     // Login
     let loginTitle: String
@@ -95,10 +114,16 @@ struct Translations {
     let loginHintAdguard: String
     let loginHintGitea2FA: String
     let loginHintPortainer: String
+    let loginHintTechnitium: String
+    let loginHintLinuxUpdate: String
+    let loginHintDockhand: String
     let loginHintHealthchecks: String
     let loginHintPatchmon: String
     let loginHintJellystat: String
     let loginHintPlex: String
+    let loginHintGluetun: String
+    let loginHintFlaresolverr: String
+    let loginOptional2FA: String
     let loginApiKey: String
     let done: String
 
@@ -184,6 +209,90 @@ struct Translations {
     let detailComposeSaved: String
     let detailComposeSaveError: String
     let detailComposeLoading: String
+
+    // Dockhand
+    let dockhandEnvironments: String
+    let dockhandIssues: String
+    let dockhandNoContainers: String
+    let dockhandStacks: String
+    let dockhandNoStacks: String
+    let dockhandResources: String
+    let dockhandImages: String
+    let dockhandVolumes: String
+    let dockhandNetworks: String
+    let dockhandActivity: String
+    let dockhandSchedules: String
+    let dockhandDisabled: String
+    let dockhandState: String
+    let dockhandStatus: String
+    let dockhandPorts: String
+    let dockhandHealth: String
+    let dockhandLogs: String
+    let dockhandNoLogs: String
+    let dockhandSettingsTitle: String
+    let dockhandSettingsRefresh: String
+    let dockhandSettingsData: String
+    let dockhandAutoRefresh: String
+    let dockhandRefreshInterval: String
+    let dockhandActivityLimit: String
+    let dockhandShowAdvancedActivity: String
+    let dockhandLiveStats: String
+    let dockhandShowLess: String
+    let dockhandMoreLines: String
+    let dockhandPlatform: String
+    let dockhandRuntime: String
+    let dockhandDriver: String
+    let dockhandEntrypoint: String
+    let dockhandServicesLabel: String
+    let dockhandSource: String
+    let dockhandSourceType: String
+    let dockhandNextRun: String
+    let dockhandLastRun: String
+    let dockhandDescription: String
+    let dockhandEntity: String
+    let dockhandSystemLabel: String
+    let dockhandEnabledLabel: String
+    let dockhandRecentRuns: String
+
+    // Linux Update
+    let linuxUpdateActionCheckAll: String
+    let linuxUpdateActionRefreshCache: String
+    let linuxUpdateActionCheck: String
+    let linuxUpdateActionUpgrade: String
+    let linuxUpdateActionFullUpgrade: String
+    let linuxUpdateActionPackageUpgrade: String
+    let linuxUpdateHiddenUpdates: String
+    let linuxUpdateNoHiddenUpdates: String
+    let linuxUpdateKeptBack: String
+    let linuxUpdateHidden: String
+
+    // Technitium
+    let technitiumUpdateBlockLists: String
+    let technitiumDisableBlocking: String
+    let technitiumBlockDomain: String
+    let technitiumDisableFor5Minutes: String
+    let technitiumDisableFor30Minutes: String
+    let technitiumDisableUntilManual: String
+    let technitiumCustomDisableTimer: String
+    let technitiumCustomDisableDescription: String
+    let technitiumMinutes: String
+    let technitiumBlockDomainDescription: String
+    let technitiumRange: String
+    let technitiumDnsBlocking: String
+    let technitiumEnabled: String
+    let technitiumDisabled: String
+    let technitiumDisabledUntil: String
+    let technitiumBlockedQueries: String
+    let technitiumBlockedZones: String
+    let technitiumNoClients: String
+    let technitiumNoDomains: String
+    let technitiumNoBlockedDomains: String
+    let technitiumZones: String
+    let technitiumCacheEntries: String
+    let technitiumBlocklistZones: String
+    let technitiumVersion: String
+    let technitiumBlocklistSources: String
+    let technitiumRateLimited: String
 
     // Healthchecks
     let healthchecksChecks: String
@@ -705,12 +814,19 @@ struct Translations {
     let settingsSupportDesc: String
     let settingsCopied: String
     let settingsThemeAuto: String
+    let settingsAppIcon: String
+    let settingsAppIconDefault: String
+    let settingsAppIconDark: String
+    let settingsAppIconClearLight: String
+    let settingsAppIconClearDark: String
+    let settingsAppIconTintedLight: String
+    let settingsAppIconTintedDark: String
     let settingsHomeCyberpunkCards: String
     let settingsHomeCyberpunkCardsDesc: String
     let settingsContacts: String
     let settingsContactTelegram: String
     let settingsContactReddit: String
-    let settingsContactGithub: String
+    let settingsContactLinuxUpdate: String
     let settingsHideService: String
     let settingsShowService: String
     let settingsHiddenBadge: String
@@ -904,6 +1020,16 @@ struct Translations {
     let backupPasswordRequired: String
     let backupPasswordTooShort: String
     let backupPasswordMismatch: String
+    let backupSelectionTitle: String
+    let backupSelectionSubtitle: String
+    let backupSelectionAll: String
+    let backupSelectionHome: String
+    let backupSelectionArr: String
+    let backupSelectionEmpty: String
+    let backupSelectionRequired: String
+    let backupSelectionSelectedCount: String
+    let backupRememberSelectionTitle: String
+    let backupRememberSelectionSubtitle: String
 }
 
 // MARK: - Factory
@@ -943,5 +1069,865 @@ final class Localizer {
         case 12..<18: return t.greetingAfternoon
         default:      return t.greetingEvening
         }
+    }
+}
+struct ArrStrings {
+    let arrGroupTitle: String
+
+    let tutorialTitle: String
+    let tutorialBody: String
+    let tutorialStepConnect: String
+    let tutorialStepOpen: String
+    let tutorialStepAutomations: String
+    let tutorialActionConfigure: String
+    let tutorialActionDismiss: String
+    let quickSetupTitle: String
+    let quickSetupSubtitle: String
+    let addService: (String) -> String
+
+    let connection: String
+    let download: String
+    let upload: String
+    let torrents: String
+    let searchTorrents: String
+
+    let filterAll: String
+    let filterActive: String
+    let filterDone: String
+    let filterPaused: String
+
+    let recheck: String
+    let reannounce: String
+    let deleteWithData: String
+
+    let altLimitsToggled: String
+    let allResumed: String
+    let allPaused: String
+    let torrentResumed: String
+    let torrentPaused: String
+    let torrentDeleted: String
+    let torrentAndDataDeleted: String
+    let recheckStarted: String
+    let reannounceQueued: String
+
+    let radarrVersion: String
+    let sonarrVersion: String
+    let lidarrVersion: String
+    let branch: String
+
+    let searchMissing: String
+    let refreshIndex: String
+    let rssSync: String
+    let rescan: String
+    let downloadedScan: String
+    let healthCheck: String
+    let contentSearchTitle: String
+    let contentSearchPlaceholder: (String) -> String
+    let searchNow: String
+    let clearSearch: String
+    let searchNoResults: String
+    let searchStatusInLibrary: String
+    let searchStatusMonitored: String
+    let searchStatusUnmonitored: String
+    let searchStatusEnded: String
+    let searchStatusPending: String
+    let searchStatusApproved: String
+    let searchStatusAvailable: String
+    let searchStatusProcessing: String
+    let openDetails: String
+    let requestContent: String
+    let requestQueued: String
+    let requestConfigurationTitle: (String) -> String
+    let requestConfigurationMessage: String
+    let requestQualityProfile: String
+    let requestRootFolder: String
+    let requestLanguageProfile: String
+    let requestMetadataProfile: String
+
+    let downloadingWithCount: (Int) -> String
+    let latestAdditions: String
+    let tvSeriesLibrary: String
+    let latestAlbums: String
+    let recentHistory: String
+    let health: String
+    let upcoming: String
+    let noUpcoming: String
+
+    let movieSearchQueued: String
+    let movieRefreshQueued: String
+    let seriesSearchQueued: String
+    let seriesRefreshQueued: String
+    let albumSearchQueued: String
+    let artistRefreshQueued: String
+    let rssSyncQueued: String
+    let rescanQueued: String
+    let downloadedScanQueued: String
+    let healthCheckQueued: String
+
+    let requests: String
+    let approveOldestPending: String
+    let declineOldestPending: String
+    let recentMediaScan: String
+    let fullMediaScan: String
+    let indexers: String
+    let apps: String
+    let issues: String
+    let testIndexers: String
+    let syncApps: String
+    let indexerTestStarted: String
+    let applicationSyncStarted: String
+
+    let subtitles: String
+    let vpn: String
+    let restartVpnTunnel: String
+    let provider: String
+    let forwardedPort: String
+    let service: String
+    let newSession: String
+    let sessionIds: String
+    let statusLabel: String
+    let versionLabel: String
+    let messageLabel: String
+    let urlLabel: String
+    let fallbackURLLabel: String
+    let apiKeyLabel: String
+    let publicIPLabel: String
+    let countryLabel: String
+    let serverLabel: String
+    let dhtLabel: String
+    let diskFreeLabel: String
+    let altSpeedLabel: String
+    let etaLabel: String
+    let seedsLeechersLabel: String
+    let ratioLabel: String
+    let eventFallback: String
+    let openService: String
+    let openFallback: String
+    let sessions: String
+
+    let total: String
+    let pending: String
+    let approved: String
+    let available: String
+
+    let sessionCreatedPrefix: String
+    let sessionDeleted: String
+    let oldestPendingApproved: String
+    let oldestPendingDeclined: String
+    let recentScanStarted: String
+    let fullScanStarted: String
+    let vpnRestartQueued: String
+    let requestApproved: String
+    let requestDeclined: String
+
+    let showLess: String
+    let showMore: (Int) -> String
+}
+
+extension ArrStrings {
+    static func forLanguage(_ language: Language) -> ArrStrings {
+        switch language {
+        case .it:
+            return ArrStrings(
+                arrGroupTitle: "Servizi ARR",
+                tutorialTitle: "Media ARR pronto in pochi minuti",
+                tutorialBody: "Configura solo i servizi che usi: la pagina resta dinamica e pulita.",
+                tutorialStepConnect: "Aggiungi URL e credenziali/API key per ogni servizio.",
+                tutorialStepOpen: "Apri ogni card per azioni rapide, stato e controlli.",
+                tutorialStepAutomations: "Backup e impostazioni mantengono tutto allineato.",
+                tutorialActionConfigure: "Configura servizi",
+                tutorialActionDismiss: "Nascondi guida",
+                quickSetupTitle: "Servizi non configurati",
+                quickSetupSubtitle: "Aggiungi solo quelli che usi davvero.",
+                addService: { "Aggiungi \($0)" },
+                connection: "Connessione",
+                download: "Download",
+                upload: "Upload",
+                torrents: "Torrent",
+                searchTorrents: "Cerca torrent",
+                filterAll: "Tutti",
+                filterActive: "Attivi",
+                filterDone: "Completati",
+                filterPaused: "In pausa",
+                recheck: "Ricontrolla",
+                reannounce: "Riannuncia",
+                deleteWithData: "Elimina + Dati",
+                altLimitsToggled: "Limiti alternativi aggiornati",
+                allResumed: "Tutti i torrent ripresi",
+                allPaused: "Tutti i torrent in pausa",
+                torrentResumed: "Torrent ripreso",
+                torrentPaused: "Torrent in pausa",
+                torrentDeleted: "Torrent eliminato",
+                torrentAndDataDeleted: "Torrent e dati eliminati",
+                recheckStarted: "Verifica avviata",
+                reannounceQueued: "Riannuncio accodato",
+                radarrVersion: "Versione Radarr",
+                sonarrVersion: "Versione Sonarr",
+                lidarrVersion: "Versione Lidarr",
+                branch: "Branch",
+                searchMissing: "Cerca Mancanti",
+                refreshIndex: "Aggiorna Indice",
+                rssSync: "Sincronizza RSS",
+                rescan: "Rescan",
+                downloadedScan: "Scansione scaricati",
+                healthCheck: "Controllo salute",
+                contentSearchTitle: "Ricerca contenuti",
+                contentSearchPlaceholder: { "Cerca in \($0)" },
+                searchNow: "Cerca",
+                clearSearch: "Pulisci",
+                searchNoResults: "Nessun risultato",
+                searchStatusInLibrary: "In libreria",
+                searchStatusMonitored: "Monitorato",
+                searchStatusUnmonitored: "Non monitorato",
+                searchStatusEnded: "Concluso",
+                searchStatusPending: "In attesa",
+                searchStatusApproved: "Approvato",
+                searchStatusAvailable: "Disponibile",
+                searchStatusProcessing: "In elaborazione",
+                openDetails: "Apri dettagli",
+                requestContent: "Richiedi contenuto",
+                requestQueued: "Richiesta inviata",
+                requestConfigurationTitle: { "Configura richiesta per \($0)" },
+                requestConfigurationMessage: "Seleziona il profilo e la cartella da usare per questa richiesta.",
+                requestQualityProfile: "Profilo qualità",
+                requestRootFolder: "Cartella root",
+                requestLanguageProfile: "Profilo lingua",
+                requestMetadataProfile: "Profilo metadata",
+                downloadingWithCount: { "Download (\($0))" },
+                latestAdditions: "Ultimi Aggiunti",
+                tvSeriesLibrary: "Libreria Serie TV",
+                latestAlbums: "Ultimi Album",
+                recentHistory: "Cronologia Recente",
+                health: "Salute",
+                upcoming: "In Arrivo",
+                noUpcoming: "Nessuna uscita imminente",
+                movieSearchQueued: "Ricerca film accodata",
+                movieRefreshQueued: "Refresh film accodato",
+                seriesSearchQueued: "Ricerca serie accodata",
+                seriesRefreshQueued: "Refresh serie accodato",
+                albumSearchQueued: "Ricerca album accodata",
+                artistRefreshQueued: "Refresh artisti accodato",
+                rssSyncQueued: "Sync RSS accodata",
+                rescanQueued: "Rescan accodato",
+                downloadedScanQueued: "Scansione scaricati accodata",
+                healthCheckQueued: "Controllo salute accodato",
+                requests: "Richieste",
+                approveOldestPending: "Approva attesa più vecchia",
+                declineOldestPending: "Rifiuta attesa più vecchia",
+                recentMediaScan: "Scan media recenti",
+                fullMediaScan: "Scan media completo",
+                indexers: "Indexer",
+                apps: "App",
+                issues: "Problemi",
+                testIndexers: "Test Indexer",
+                syncApps: "Sync App",
+                indexerTestStarted: "Test indexer avviato",
+                applicationSyncStarted: "Sync applicazioni avviata",
+                subtitles: "Sottotitoli",
+                vpn: "VPN",
+                restartVpnTunnel: "Riavvia tunnel VPN",
+                provider: "Provider",
+                forwardedPort: "Porta Inoltrata",
+                service: "Servizio",
+                newSession: "Nuova Sessione",
+                sessionIds: "ID Sessioni",
+                statusLabel: "Stato",
+                versionLabel: "Versione",
+                messageLabel: "Messaggio",
+                urlLabel: "URL",
+                fallbackURLLabel: "URL fallback",
+                apiKeyLabel: "API Key",
+                publicIPLabel: "IP pubblico",
+                countryLabel: "Paese",
+                serverLabel: "Server",
+                dhtLabel: "Nodi DHT",
+                diskFreeLabel: "Disco libero",
+                altSpeedLabel: "Velocità alternativa",
+                etaLabel: "ETA",
+                seedsLeechersLabel: "Seed/Leech",
+                ratioLabel: "Rapporto",
+                eventFallback: "Evento",
+                openService: "Apri Servizio",
+                openFallback: "Apri Fallback",
+                sessions: "Sessioni",
+                total: "Totale",
+                pending: "In Attesa",
+                approved: "Approvate",
+                available: "Disponibili",
+                sessionCreatedPrefix: "Sessione creata:",
+                sessionDeleted: "Sessione eliminata",
+                oldestPendingApproved: "Richiesta in attesa approvata",
+                oldestPendingDeclined: "Richiesta in attesa rifiutata",
+                recentScanStarted: "Scan recente avviato",
+                fullScanStarted: "Scan completo avviato",
+                vpnRestartQueued: "Riavvio tunnel VPN avviato",
+                requestApproved: "Richiesta approvata",
+                requestDeclined: "Richiesta rifiutata",
+                showLess: "Mostra meno",
+                showMore: { "Mostra altri \($0)" }
+            )
+        case .fr:
+            return ArrStrings(
+                arrGroupTitle: "Services ARR",
+                tutorialTitle: "Media ARR prêt en quelques minutes",
+                tutorialBody: "Configurez uniquement les services que vous utilisez.",
+                tutorialStepConnect: "Ajoutez URL et identifiants/API key pour chaque service.",
+                tutorialStepOpen: "Ouvrez chaque carte pour actions rapides et statut.",
+                tutorialStepAutomations: "Sauvegarde et réglages restent synchronisés.",
+                tutorialActionConfigure: "Configurer les services",
+                tutorialActionDismiss: "Masquer le guide",
+                quickSetupTitle: "Services non configurés",
+                quickSetupSubtitle: "Ajoutez seulement ceux que vous utilisez.",
+                addService: { "Ajouter \($0)" },
+                connection: "Connexion",
+                download: "Téléchargement",
+                upload: "Envoi",
+                torrents: "Torrents",
+                searchTorrents: "Rechercher des torrents",
+                filterAll: "Tous",
+                filterActive: "Actifs",
+                filterDone: "Terminés",
+                filterPaused: "En pause",
+                recheck: "Revérifier",
+                reannounce: "Réannoncer",
+                deleteWithData: "Suppr. + Données",
+                altLimitsToggled: "Limites alternatives basculées",
+                allResumed: "Tous les torrents repris",
+                allPaused: "Tous les torrents en pause",
+                torrentResumed: "Torrent repris",
+                torrentPaused: "Torrent en pause",
+                torrentDeleted: "Torrent supprimé",
+                torrentAndDataDeleted: "Torrent et données supprimés",
+                recheckStarted: "Revérification lancée",
+                reannounceQueued: "Réannonce mise en file",
+                radarrVersion: "Version Radarr",
+                sonarrVersion: "Version Sonarr",
+                lidarrVersion: "Version Lidarr",
+                branch: "Branche",
+                searchMissing: "Rechercher manquants",
+                refreshIndex: "Rafraîchir l'index",
+                rssSync: "Sync RSS",
+                rescan: "Rescan",
+                downloadedScan: "Scan téléchargements",
+                healthCheck: "Contrôle santé",
+                contentSearchTitle: "Recherche de contenu",
+                contentSearchPlaceholder: { "Rechercher dans \($0)" },
+                searchNow: "Rechercher",
+                clearSearch: "Effacer",
+                searchNoResults: "Aucun résultat",
+                searchStatusInLibrary: "En bibliothèque",
+                searchStatusMonitored: "Surveillé",
+                searchStatusUnmonitored: "Non surveillé",
+                searchStatusEnded: "Terminé",
+                searchStatusPending: "En attente",
+                searchStatusApproved: "Approuvé",
+                searchStatusAvailable: "Disponible",
+                searchStatusProcessing: "Traitement",
+                openDetails: "Ouvrir les détails",
+                requestContent: "Demander le contenu",
+                requestQueued: "Demande envoyée",
+                requestConfigurationTitle: { "Configurer la demande pour \($0)" },
+                requestConfigurationMessage: "Sélectionnez le profil et le dossier à utiliser pour cette demande.",
+                requestQualityProfile: "Profil qualité",
+                requestRootFolder: "Dossier racine",
+                requestLanguageProfile: "Profil de langue",
+                requestMetadataProfile: "Profil de métadonnées",
+                downloadingWithCount: { "Téléchargements (\($0))" },
+                latestAdditions: "Derniers ajouts",
+                tvSeriesLibrary: "Bibliothèque Séries TV",
+                latestAlbums: "Derniers albums",
+                recentHistory: "Historique récent",
+                health: "Santé",
+                upcoming: "À venir",
+                noUpcoming: "Aucune sortie imminente",
+                movieSearchQueued: "Recherche films en file",
+                movieRefreshQueued: "Rafraîchissement films en file",
+                seriesSearchQueued: "Recherche séries en file",
+                seriesRefreshQueued: "Rafraîchissement séries en file",
+                albumSearchQueued: "Recherche albums en file",
+                artistRefreshQueued: "Rafraîchissement artistes en file",
+                rssSyncQueued: "Sync RSS en file",
+                rescanQueued: "Rescan en file",
+                downloadedScanQueued: "Scan téléchargements en file",
+                healthCheckQueued: "Contrôle santé en file",
+                requests: "Demandes",
+                approveOldestPending: "Approuver plus ancienne attente",
+                declineOldestPending: "Refuser plus ancienne attente",
+                recentMediaScan: "Scan médias récents",
+                fullMediaScan: "Scan médias complet",
+                indexers: "Indexers",
+                apps: "Apps",
+                issues: "Problèmes",
+                testIndexers: "Tester indexers",
+                syncApps: "Sync apps",
+                indexerTestStarted: "Test indexers lancé",
+                applicationSyncStarted: "Sync applications lancée",
+                subtitles: "Sous-titres",
+                vpn: "VPN",
+                restartVpnTunnel: "Redémarrer tunnel VPN",
+                provider: "Fournisseur",
+                forwardedPort: "Port redirigé",
+                service: "Service",
+                newSession: "Nouvelle session",
+                sessionIds: "ID de session",
+                statusLabel: "Statut",
+                versionLabel: "Version",
+                messageLabel: "Message",
+                urlLabel: "URL",
+                fallbackURLLabel: "URL de secours",
+                apiKeyLabel: "Clé API",
+                publicIPLabel: "IP publique",
+                countryLabel: "Pays",
+                serverLabel: "Serveur",
+                dhtLabel: "Nœuds DHT",
+                diskFreeLabel: "Disque libre",
+                altSpeedLabel: "Vitesse alternative",
+                etaLabel: "ETA",
+                seedsLeechersLabel: "Seed/Leech",
+                ratioLabel: "Ratio",
+                eventFallback: "Événement",
+                openService: "Ouvrir le service",
+                openFallback: "Ouvrir le fallback",
+                sessions: "Sessions",
+                total: "Total",
+                pending: "En attente",
+                approved: "Approuvées",
+                available: "Disponibles",
+                sessionCreatedPrefix: "Session créée :",
+                sessionDeleted: "Session supprimée",
+                oldestPendingApproved: "Demande en attente approuvée",
+                oldestPendingDeclined: "Demande en attente refusée",
+                recentScanStarted: "Scan récent lancé",
+                fullScanStarted: "Scan complet lancé",
+                vpnRestartQueued: "Redémarrage du tunnel VPN lancé",
+                requestApproved: "Demande approuvée",
+                requestDeclined: "Demande refusée",
+                showLess: "Voir moins",
+                showMore: { "Voir \($0) de plus" }
+            )
+        case .es:
+            return ArrStrings(
+                arrGroupTitle: "Servicios ARR",
+                tutorialTitle: "Media ARR listo en minutos",
+                tutorialBody: "Configura solo los servicios que uses.",
+                tutorialStepConnect: "Añade URL y credenciales/API key de cada servicio.",
+                tutorialStepOpen: "Abre cada tarjeta para acciones rápidas y estado.",
+                tutorialStepAutomations: "Backup y ajustes se mantienen alineados.",
+                tutorialActionConfigure: "Configurar servicios",
+                tutorialActionDismiss: "Ocultar guía",
+                quickSetupTitle: "Servicios no configurados",
+                quickSetupSubtitle: "Añade solo los que realmente uses.",
+                addService: { "Añadir \($0)" },
+                connection: "Conexión",
+                download: "Descarga",
+                upload: "Subida",
+                torrents: "Torrents",
+                searchTorrents: "Buscar torrents",
+                filterAll: "Todos",
+                filterActive: "Activos",
+                filterDone: "Completados",
+                filterPaused: "Pausados",
+                recheck: "Revisar",
+                reannounce: "Reanunciar",
+                deleteWithData: "Borrar + Datos",
+                altLimitsToggled: "Límites alternativos cambiados",
+                allResumed: "Todos los torrents reanudados",
+                allPaused: "Todos los torrents pausados",
+                torrentResumed: "Torrent reanudado",
+                torrentPaused: "Torrent pausado",
+                torrentDeleted: "Torrent eliminado",
+                torrentAndDataDeleted: "Torrent y datos eliminados",
+                recheckStarted: "Revisión iniciada",
+                reannounceQueued: "Reanuncio en cola",
+                radarrVersion: "Versión de Radarr",
+                sonarrVersion: "Versión de Sonarr",
+                lidarrVersion: "Versión de Lidarr",
+                branch: "Rama",
+                searchMissing: "Buscar faltantes",
+                refreshIndex: "Actualizar índice",
+                rssSync: "Sincronizar RSS",
+                rescan: "Rescan",
+                downloadedScan: "Escaneo descargados",
+                healthCheck: "Control de salud",
+                contentSearchTitle: "Búsqueda de contenido",
+                contentSearchPlaceholder: { "Buscar en \($0)" },
+                searchNow: "Buscar",
+                clearSearch: "Limpiar",
+                searchNoResults: "Sin resultados",
+                searchStatusInLibrary: "En biblioteca",
+                searchStatusMonitored: "Monitorizado",
+                searchStatusUnmonitored: "No monitorizado",
+                searchStatusEnded: "Finalizado",
+                searchStatusPending: "Pendiente",
+                searchStatusApproved: "Aprobado",
+                searchStatusAvailable: "Disponible",
+                searchStatusProcessing: "Procesando",
+                openDetails: "Abrir detalles",
+                requestContent: "Solicitar contenido",
+                requestQueued: "Solicitud enviada",
+                requestConfigurationTitle: { "Configurar solicitud para \($0)" },
+                requestConfigurationMessage: "Selecciona el perfil y la carpeta que se usarán para esta solicitud.",
+                requestQualityProfile: "Perfil de calidad",
+                requestRootFolder: "Carpeta raíz",
+                requestLanguageProfile: "Perfil de idioma",
+                requestMetadataProfile: "Perfil de metadatos",
+                downloadingWithCount: { "Descargando (\($0))" },
+                latestAdditions: "Últimos agregados",
+                tvSeriesLibrary: "Biblioteca de series",
+                latestAlbums: "Últimos álbumes",
+                recentHistory: "Historial reciente",
+                health: "Salud",
+                upcoming: "Próximamente",
+                noUpcoming: "Sin lanzamientos próximos",
+                movieSearchQueued: "Búsqueda de películas en cola",
+                movieRefreshQueued: "Actualización de películas en cola",
+                seriesSearchQueued: "Búsqueda de series en cola",
+                seriesRefreshQueued: "Actualización de series en cola",
+                albumSearchQueued: "Búsqueda de álbumes en cola",
+                artistRefreshQueued: "Actualización de artistas en cola",
+                rssSyncQueued: "Sync RSS en cola",
+                rescanQueued: "Rescan en cola",
+                downloadedScanQueued: "Escaneo de descargados en cola",
+                healthCheckQueued: "Control de salud en cola",
+                requests: "Solicitudes",
+                approveOldestPending: "Aprobar espera más antigua",
+                declineOldestPending: "Rechazar espera más antigua",
+                recentMediaScan: "Escaneo medios recientes",
+                fullMediaScan: "Escaneo completo",
+                indexers: "Indexadores",
+                apps: "Apps",
+                issues: "Problemas",
+                testIndexers: "Probar indexadores",
+                syncApps: "Sync apps",
+                indexerTestStarted: "Prueba de indexadores iniciada",
+                applicationSyncStarted: "Sincronización de aplicaciones iniciada",
+                subtitles: "Subtítulos",
+                vpn: "VPN",
+                restartVpnTunnel: "Reiniciar túnel VPN",
+                provider: "Proveedor",
+                forwardedPort: "Puerto reenviado",
+                service: "Servicio",
+                newSession: "Nueva sesión",
+                sessionIds: "IDs de sesión",
+                statusLabel: "Estado",
+                versionLabel: "Versión",
+                messageLabel: "Mensaje",
+                urlLabel: "URL",
+                fallbackURLLabel: "URL de respaldo",
+                apiKeyLabel: "API Key",
+                publicIPLabel: "IP pública",
+                countryLabel: "País",
+                serverLabel: "Servidor",
+                dhtLabel: "Nodos DHT",
+                diskFreeLabel: "Disco libre",
+                altSpeedLabel: "Velocidad alternativa",
+                etaLabel: "ETA",
+                seedsLeechersLabel: "Seed/Leech",
+                ratioLabel: "Ratio",
+                eventFallback: "Evento",
+                openService: "Abrir servicio",
+                openFallback: "Abrir fallback",
+                sessions: "Sesiones",
+                total: "Total",
+                pending: "Pendientes",
+                approved: "Aprobadas",
+                available: "Disponibles",
+                sessionCreatedPrefix: "Sesión creada:",
+                sessionDeleted: "Sesión eliminada",
+                oldestPendingApproved: "Solicitud pendiente aprobada",
+                oldestPendingDeclined: "Solicitud pendiente rechazada",
+                recentScanStarted: "Escaneo reciente iniciado",
+                fullScanStarted: "Escaneo completo iniciado",
+                vpnRestartQueued: "Reinicio de túnel VPN iniciado",
+                requestApproved: "Solicitud aprobada",
+                requestDeclined: "Solicitud rechazada",
+                showLess: "Ver menos",
+                showMore: { "Ver \($0) más" }
+            )
+        case .de:
+            return ArrStrings(
+                arrGroupTitle: "ARR-Dienste",
+                tutorialTitle: "Media ARR in wenigen Minuten bereit",
+                tutorialBody: "Konfiguriere nur die Dienste, die du wirklich nutzt.",
+                tutorialStepConnect: "URL und Zugangsdaten/API key je Dienst eintragen.",
+                tutorialStepOpen: "Jede Karte für Schnellaktionen und Status öffnen.",
+                tutorialStepAutomations: "Backup und Einstellungen bleiben synchron.",
+                tutorialActionConfigure: "Dienste konfigurieren",
+                tutorialActionDismiss: "Guide ausblenden",
+                quickSetupTitle: "Nicht konfigurierte Dienste",
+                quickSetupSubtitle: "Füge nur benötigte Dienste hinzu.",
+                addService: { "\($0) hinzufügen" },
+                connection: "Verbindung",
+                download: "Download",
+                upload: "Upload",
+                torrents: "Torrents",
+                searchTorrents: "Torrents suchen",
+                filterAll: "Alle",
+                filterActive: "Aktiv",
+                filterDone: "Fertig",
+                filterPaused: "Pausiert",
+                recheck: "Erneut prüfen",
+                reannounce: "Neu ankündigen",
+                deleteWithData: "Löschen + Daten",
+                altLimitsToggled: "Alternative Limits umgeschaltet",
+                allResumed: "Alle Torrents fortgesetzt",
+                allPaused: "Alle Torrents pausiert",
+                torrentResumed: "Torrent fortgesetzt",
+                torrentPaused: "Torrent pausiert",
+                torrentDeleted: "Torrent gelöscht",
+                torrentAndDataDeleted: "Torrent und Daten gelöscht",
+                recheckStarted: "Prüfung gestartet",
+                reannounceQueued: "Neuankündigung eingereiht",
+                radarrVersion: "Radarr-Version",
+                sonarrVersion: "Sonarr-Version",
+                lidarrVersion: "Lidarr-Version",
+                branch: "Branch",
+                searchMissing: "Fehlende suchen",
+                refreshIndex: "Index aktualisieren",
+                rssSync: "RSS Sync",
+                rescan: "Rescan",
+                downloadedScan: "Downloads scannen",
+                healthCheck: "Health-Check",
+                contentSearchTitle: "Inhaltssuche",
+                contentSearchPlaceholder: { "In \($0) suchen" },
+                searchNow: "Suchen",
+                clearSearch: "Leeren",
+                searchNoResults: "Keine Ergebnisse",
+                searchStatusInLibrary: "In Bibliothek",
+                searchStatusMonitored: "Überwacht",
+                searchStatusUnmonitored: "Nicht überwacht",
+                searchStatusEnded: "Beendet",
+                searchStatusPending: "Ausstehend",
+                searchStatusApproved: "Genehmigt",
+                searchStatusAvailable: "Verfügbar",
+                searchStatusProcessing: "Verarbeitung",
+                openDetails: "Details öffnen",
+                requestContent: "Inhalt anfragen",
+                requestQueued: "Anfrage gesendet",
+                requestConfigurationTitle: { "Anfrage für \($0) konfigurieren" },
+                requestConfigurationMessage: "Wähle das Profil und den Ordner für diese Anfrage aus.",
+                requestQualityProfile: "Qualitätsprofil",
+                requestRootFolder: "Stammordner",
+                requestLanguageProfile: "Sprachprofil",
+                requestMetadataProfile: "Metadatenprofil",
+                downloadingWithCount: { "Herunterladen (\($0))" },
+                latestAdditions: "Neueste hinzugefügt",
+                tvSeriesLibrary: "TV-Serienbibliothek",
+                latestAlbums: "Neueste Alben",
+                recentHistory: "Neueste Historie",
+                health: "Zustand",
+                upcoming: "Demnächst",
+                noUpcoming: "Keine bevorstehenden Veröffentlichungen",
+                movieSearchQueued: "Filmsuche eingereiht",
+                movieRefreshQueued: "Film-Refresh eingereiht",
+                seriesSearchQueued: "Seriensuche eingereiht",
+                seriesRefreshQueued: "Serien-Refresh eingereiht",
+                albumSearchQueued: "Alben-Suche eingereiht",
+                artistRefreshQueued: "Künstler-Refresh eingereiht",
+                rssSyncQueued: "RSS Sync eingereiht",
+                rescanQueued: "Rescan eingereiht",
+                downloadedScanQueued: "Download-Scan eingereiht",
+                healthCheckQueued: "Health-Check eingereiht",
+                requests: "Anfragen",
+                approveOldestPending: "Älteste Wartende genehmigen",
+                declineOldestPending: "Älteste Wartende ablehnen",
+                recentMediaScan: "Aktuelle Medien scannen",
+                fullMediaScan: "Vollständiger Scan",
+                indexers: "Indexer",
+                apps: "Apps",
+                issues: "Probleme",
+                testIndexers: "Indexer testen",
+                syncApps: "Apps syncen",
+                indexerTestStarted: "Indexer-Test gestartet",
+                applicationSyncStarted: "App-Sync gestartet",
+                subtitles: "Untertitel",
+                vpn: "VPN",
+                restartVpnTunnel: "VPN-Tunnel neu starten",
+                provider: "Anbieter",
+                forwardedPort: "Weitergeleiteter Port",
+                service: "Dienst",
+                newSession: "Neue Sitzung",
+                sessionIds: "Sitzungs-IDs",
+                statusLabel: "Status",
+                versionLabel: "Version",
+                messageLabel: "Nachricht",
+                urlLabel: "URL",
+                fallbackURLLabel: "Fallback-URL",
+                apiKeyLabel: "API-Key",
+                publicIPLabel: "Öffentliche IP",
+                countryLabel: "Land",
+                serverLabel: "Server",
+                dhtLabel: "DHT-Knoten",
+                diskFreeLabel: "Freier Speicher",
+                altSpeedLabel: "Alternatives Limit",
+                etaLabel: "ETA",
+                seedsLeechersLabel: "Seed/Leech",
+                ratioLabel: "Verhältnis",
+                eventFallback: "Ereignis",
+                openService: "Dienst öffnen",
+                openFallback: "Fallback öffnen",
+                sessions: "Sitzungen",
+                total: "Gesamt",
+                pending: "Ausstehend",
+                approved: "Genehmigt",
+                available: "Verfügbar",
+                sessionCreatedPrefix: "Sitzung erstellt:",
+                sessionDeleted: "Sitzung gelöscht",
+                oldestPendingApproved: "Ausstehende Anfrage genehmigt",
+                oldestPendingDeclined: "Ausstehende Anfrage abgelehnt",
+                recentScanStarted: "Aktueller Scan gestartet",
+                fullScanStarted: "Vollständiger Scan gestartet",
+                vpnRestartQueued: "VPN-Tunnel-Neustart gestartet",
+                requestApproved: "Anfrage genehmigt",
+                requestDeclined: "Anfrage abgelehnt",
+                showLess: "Weniger anzeigen",
+                showMore: { "\($0) weitere anzeigen" }
+            )
+        case .en:
+            return ArrStrings(
+                arrGroupTitle: "ARR Services",
+                tutorialTitle: "Media ARR ready in minutes",
+                tutorialBody: "Configure only the services you actually use.",
+                tutorialStepConnect: "Add URL and credentials/API key for each service.",
+                tutorialStepOpen: "Open each card for quick actions and status.",
+                tutorialStepAutomations: "Backup and settings stay in sync.",
+                tutorialActionConfigure: "Configure services",
+                tutorialActionDismiss: "Hide guide",
+                quickSetupTitle: "Unconfigured services",
+                quickSetupSubtitle: "Add only what you really use.",
+                addService: { "Add \($0)" },
+                connection: "Connection",
+                download: "Download",
+                upload: "Upload",
+                torrents: "Torrents",
+                searchTorrents: "Search torrents",
+                filterAll: "All",
+                filterActive: "Active",
+                filterDone: "Done",
+                filterPaused: "Paused",
+                recheck: "Recheck",
+                reannounce: "Reannounce",
+                deleteWithData: "Delete + Data",
+                altLimitsToggled: "Alternative limits toggled",
+                allResumed: "All torrents resumed",
+                allPaused: "All torrents paused",
+                torrentResumed: "Torrent resumed",
+                torrentPaused: "Torrent paused",
+                torrentDeleted: "Torrent deleted",
+                torrentAndDataDeleted: "Torrent and data deleted",
+                recheckStarted: "Recheck started",
+                reannounceQueued: "Reannounce queued",
+                radarrVersion: "Radarr Version",
+                sonarrVersion: "Sonarr Version",
+                lidarrVersion: "Lidarr Version",
+                branch: "Branch",
+                searchMissing: "Search Missing",
+                refreshIndex: "Refresh Index",
+                rssSync: "RSS Sync",
+                rescan: "Rescan",
+                downloadedScan: "Downloaded Scan",
+                healthCheck: "Health Check",
+                contentSearchTitle: "Content Search",
+                contentSearchPlaceholder: { "Search in \($0)" },
+                searchNow: "Search",
+                clearSearch: "Clear",
+                searchNoResults: "No results",
+                searchStatusInLibrary: "In library",
+                searchStatusMonitored: "Monitored",
+                searchStatusUnmonitored: "Unmonitored",
+                searchStatusEnded: "Ended",
+                searchStatusPending: "Pending",
+                searchStatusApproved: "Approved",
+                searchStatusAvailable: "Available",
+                searchStatusProcessing: "Processing",
+                openDetails: "Open details",
+                requestContent: "Request content",
+                requestQueued: "Request sent",
+                requestConfigurationTitle: { "Configure request for \($0)" },
+                requestConfigurationMessage: "Choose the profile and folder to use for this request.",
+                requestQualityProfile: "Quality profile",
+                requestRootFolder: "Root folder",
+                requestLanguageProfile: "Language profile",
+                requestMetadataProfile: "Metadata profile",
+                downloadingWithCount: { "Downloading (\($0))" },
+                latestAdditions: "Latest Additions",
+                tvSeriesLibrary: "TV Series Library",
+                latestAlbums: "Latest Albums",
+                recentHistory: "Recent History",
+                health: "Health",
+                upcoming: "Upcoming",
+                noUpcoming: "No upcoming releases",
+                movieSearchQueued: "Movie search queued",
+                movieRefreshQueued: "Movie refresh queued",
+                seriesSearchQueued: "Series search queued",
+                seriesRefreshQueued: "Series refresh queued",
+                albumSearchQueued: "Album search queued",
+                artistRefreshQueued: "Artist refresh queued",
+                rssSyncQueued: "RSS sync queued",
+                rescanQueued: "Rescan queued",
+                downloadedScanQueued: "Downloaded scan queued",
+                healthCheckQueued: "Health check queued",
+                requests: "Requests",
+                approveOldestPending: "Approve oldest pending",
+                declineOldestPending: "Decline oldest pending",
+                recentMediaScan: "Recent media scan",
+                fullMediaScan: "Full media scan",
+                indexers: "Indexers",
+                apps: "Apps",
+                issues: "Issues",
+                testIndexers: "Test Indexers",
+                syncApps: "Sync Apps",
+                indexerTestStarted: "Indexer test started",
+                applicationSyncStarted: "Application sync started",
+                subtitles: "Subtitles",
+                vpn: "VPN",
+                restartVpnTunnel: "Restart VPN tunnel",
+                provider: "Provider",
+                forwardedPort: "Forwarded Port",
+                service: "Service",
+                newSession: "New Session",
+                sessionIds: "Session IDs",
+                statusLabel: "Status",
+                versionLabel: "Version",
+                messageLabel: "Message",
+                urlLabel: "URL",
+                fallbackURLLabel: "Fallback URL",
+                apiKeyLabel: "API Key",
+                publicIPLabel: "Public IP",
+                countryLabel: "Country",
+                serverLabel: "Server",
+                dhtLabel: "DHT Nodes",
+                diskFreeLabel: "Disk Free",
+                altSpeedLabel: "Alt Speed",
+                etaLabel: "ETA",
+                seedsLeechersLabel: "Seeds/Leechers",
+                ratioLabel: "Ratio",
+                eventFallback: "Event",
+                openService: "Open Service",
+                openFallback: "Open Fallback",
+                sessions: "Sessions",
+                total: "Total",
+                pending: "Pending",
+                approved: "Approved",
+                available: "Available",
+                sessionCreatedPrefix: "Session created:",
+                sessionDeleted: "Session deleted",
+                oldestPendingApproved: "Oldest pending request approved",
+                oldestPendingDeclined: "Oldest pending request declined",
+                recentScanStarted: "Recent scan started",
+                fullScanStarted: "Full scan started",
+                vpnRestartQueued: "VPN tunnel restart started",
+                requestApproved: "Request approved",
+                requestDeclined: "Request declined",
+                showLess: "Show less",
+                showMore: { "Show \($0) more" }
+            )
+        }
+    }
+}
+
+extension Localizer {
+    var arr: ArrStrings {
+        ArrStrings.forLanguage(language)
     }
 }

@@ -4,6 +4,7 @@ import LocalAuthentication
 struct LockScreenView: View {
     @Environment(SettingsStore.self) private var settingsStore
     @Environment(Localizer.self) private var localizer
+    @Environment(\.colorScheme) private var colorScheme
 
     var onUnlock: () -> Void
 
@@ -11,10 +12,11 @@ struct LockScreenView: View {
     @State private var errorMessage: String? = nil
     @State private var attempts = 0
     @State private var hasTriggedBiometric = false
+    private var palette: SecurityPalette { .resolve(for: colorScheme) }
 
     var body: some View {
         ZStack {
-            AppTheme.premiumGradient()
+            SecurityBackgroundView(palette: palette)
 
             VStack(spacing: 0) {
                 Spacer(minLength: 40)

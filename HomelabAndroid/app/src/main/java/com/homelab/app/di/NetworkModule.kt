@@ -201,8 +201,32 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideLinuxUpdateApi(retrofit: Retrofit): com.homelab.app.data.remote.api.LinuxUpdateApi {
+        return retrofit.create(com.homelab.app.data.remote.api.LinuxUpdateApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideDockhandApi(retrofit: Retrofit): com.homelab.app.data.remote.api.DockhandApi {
+        return retrofit.create(com.homelab.app.data.remote.api.DockhandApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideTechnitiumApi(retrofit: Retrofit): com.homelab.app.data.remote.api.TechnitiumApi {
+        return retrofit.create(com.homelab.app.data.remote.api.TechnitiumApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun providePatchmonApi(retrofit: Retrofit): com.homelab.app.data.remote.api.PatchmonApi {
         return retrofit.create(com.homelab.app.data.remote.api.PatchmonApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun providePangolinApi(retrofit: Retrofit): com.homelab.app.data.remote.api.PangolinApi {
+        return retrofit.create(com.homelab.app.data.remote.api.PangolinApi::class.java)
     }
 
     @Provides

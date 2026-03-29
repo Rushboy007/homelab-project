@@ -6,7 +6,6 @@ import SwiftUI
 
 struct ContentView: View {
     @Environment(SettingsStore.self) private var settingsStore
-    @Environment(ServicesStore.self) private var servicesStore
     @Environment(Localizer.self) private var localizer
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.openURL) private var openURL
@@ -16,6 +15,10 @@ struct ContentView: View {
             TabView {
                 Tab(localizer.t.tabHome, systemImage: "house.fill") {
                     HomeView()
+                }
+
+                Tab(localizer.t.tabMedia, systemImage: "play.tv.fill") {
+                    MediaDashboardView()
                 }
 
                 Tab(localizer.t.tabBookmarks, systemImage: "bookmark.fill") {
@@ -51,13 +54,8 @@ struct ContentView: View {
         .onChange(of: scenePhase) { _, newPhase in
             switch newPhase {
             case .active:
-                // App returned to foreground — immediately check and resume polling
-                Task { await servicesStore.checkAllReachability() }
-                servicesStore.startPeriodicHealthChecks()
+                // Network lifecycle is managed at App level.
                 Task { await settingsStore.checkForUpdatesIfNeeded() }
-            case .background:
-                // App went to background — stop polling to save battery
-                servicesStore.stopPeriodicHealthChecks()
             default:
                 break
             }

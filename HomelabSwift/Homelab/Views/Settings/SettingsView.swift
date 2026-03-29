@@ -40,6 +40,7 @@ struct SettingsView: View {
                             donationSection
                             servicesSection
                             themeSection
+                            appIconSection
                             homeStyleSection
                             languageSection
                             securitySection
@@ -242,6 +243,71 @@ struct SettingsView: View {
         .glassCard(cornerRadius: 14)
     }
 
+    @ViewBuilder
+    private var appIconSection: some View {
+        if UIApplication.shared.supportsAlternateIcons {
+            let columns = [
+                GridItem(.flexible(), spacing: 10),
+                GridItem(.flexible(), spacing: 10),
+                GridItem(.flexible(), spacing: 10)
+            ]
+            VStack(alignment: .leading, spacing: 8) {
+                Text(localizer.t.settingsAppIcon.sentenceCased())
+                    .font(.caption2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(AppTheme.accent)
+                    .padding(.leading, 8)
+
+                LazyVGrid(columns: columns, spacing: 10) {
+                    ForEach(AppIconOption.allCases, id: \.self) { iconOption in
+                        let selected = settingsStore.appIcon == iconOption
+                        Button {
+                            settingsStore.setAppIcon(iconOption)
+                            HapticManager.light()
+                        } label: {
+                            VStack(spacing: 8) {
+                                ZStack(alignment: .topTrailing) {
+                                    appIconPreview(for: iconOption)
+                                        .frame(width: 56, height: 56)
+
+                                    if selected {
+                                        Image(systemName: "checkmark.circle.fill")
+                                            .font(.caption.weight(.bold))
+                                            .foregroundStyle(AppTheme.accent)
+                                            .offset(x: 4, y: -4)
+                                    }
+                                }
+
+                                Text(label(for: iconOption))
+                                    .font(.caption2.weight(selected ? .bold : .semibold))
+                                    .foregroundStyle(selected ? AppTheme.accent : .primary)
+                                    .multilineTextAlignment(.center)
+                                    .lineLimit(2)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.horizontal, 6)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(selected ? AppTheme.accent.opacity(0.12) : Color.clear)
+                            )
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .stroke(
+                                        selected ? AppTheme.accent.opacity(0.45) : Color.primary.opacity(0.08),
+                                        lineWidth: 1
+                                    )
+                            )
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(10)
+                .glassCard(cornerRadius: 14)
+            }
+        }
+    }
+
     private var languageSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(localizer.t.settingsLanguage.sentenceCased())
@@ -280,6 +346,23 @@ struct SettingsView: View {
         }
     }
 
+    private func label(for icon: AppIconOption) -> String {
+        switch icon {
+        case .default:
+            return localizer.t.settingsAppIconDefault
+        case .dark:
+            return localizer.t.settingsAppIconDark
+        case .clearLight:
+            return localizer.t.settingsAppIconClearLight
+        case .clearDark:
+            return localizer.t.settingsAppIconClearDark
+        case .tintedLight:
+            return localizer.t.settingsAppIconTintedLight
+        case .tintedDark:
+            return localizer.t.settingsAppIconTintedDark
+        }
+    }
+
     private var contactsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(localizer.t.settingsContacts.sentenceCased())
@@ -307,14 +390,28 @@ struct SettingsView: View {
                 )
                 Divider().padding(.horizontal, 16)
                 ContactRow(
-                    title: localizer.t.settingsContactGithub,
+                    title: localizer.t.settingsContactLinuxUpdate,
                     iconUrl: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/github.png",
-                    fallbackSystemName: "terminal.fill",
+                    fallbackSystemName: "chevron.left.slash.chevron.right",
                     url: "https://github.com/JohnnWi/homelab-project",
-                    color: .primary
+                    color: Color(hex: "#24292F")
                 )
             }
             .glassCard()
+        }
+    }
+
+    @ViewBuilder
+    private func appIconPreview(for icon: AppIconOption) -> some View {
+        if let image = UIImage(named: icon.previewAssetName) {
+            Image(uiImage: image)
+                .resizable()
+                .interpolation(.high)
+                .scaledToFit()
+        } else {
+            Image(systemName: settingsStore.appIcon == icon ? "app.badge.fill" : "app")
+                .font(.system(size: 30, weight: .semibold))
+                .foregroundStyle(settingsStore.appIcon == icon ? AppTheme.accent : AppTheme.textMuted)
         }
     }
 

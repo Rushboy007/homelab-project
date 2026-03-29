@@ -1,6 +1,11 @@
 # macOS
 .DS_Store
+Thumbs.db
 *.pem
+*.orig
+*.rej
+*.tmp
+*.trace
 
 # Secrets / credentials
 *.env
@@ -8,6 +13,10 @@
 !.env.example
 credentials.json
 secrets.json
+*.jks
+*.keystore
+*.p12
+*.mobileprovision
 **/GoogleService-Info.plist
 
 # App Bundles

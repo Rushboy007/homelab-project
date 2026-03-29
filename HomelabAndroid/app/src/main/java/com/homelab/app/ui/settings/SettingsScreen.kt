@@ -2,6 +2,7 @@ package com.homelab.app.ui.settings
 
 import android.content.ClipData
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.animation.*
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -48,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homelab.app.ui.components.ServiceIcon
 import com.homelab.app.domain.model.ServiceInstance
+import com.homelab.app.util.AppIconOption
 import com.homelab.app.util.ServiceType
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.delay
@@ -67,9 +70,20 @@ fun SettingsScreen(
     val preferredInstanceIdByType by viewModel.preferredInstanceIdByType.collectAsStateWithLifecycle()
     val hiddenServices by viewModel.hiddenServices.collectAsStateWithLifecycle()
     val serviceOrder by viewModel.serviceOrder.collectAsStateWithLifecycle()
+    val isPinSet by viewModel.isPinSet.collectAsStateWithLifecycle()
     val homeCyberpunkCardsEnabled by viewModel.homeCyberpunkCardsEnabled.collectAsStateWithLifecycle()
+    val appIcon by viewModel.appIcon.collectAsStateWithLifecycle()
+    val appIconApplying by viewModel.appIconApplying.collectAsStateWithLifecycle()
     val updateBannerState by viewModel.updateBannerState.collectAsStateWithLifecycle()
     val uriHandler = LocalUriHandler.current
+    val homeConfiguredCount = remember(serviceOrder, instancesByType) {
+        serviceOrder.count { it.isHomeService && instancesByType[it].orEmpty().isNotEmpty() }
+    }
+    val homeTotalCount = remember(serviceOrder) { serviceOrder.count { it.isHomeService } }
+    val arrConfiguredCount = remember(serviceOrder, instancesByType) {
+        serviceOrder.count { it.isArrStack && instancesByType[it].orEmpty().isNotEmpty() }
+    }
+    val arrTotalCount = remember(serviceOrder) { serviceOrder.count { it.isArrStack } }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background
@@ -256,9 +270,40 @@ fun SettingsScreen(
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium
                             )
+                            Spacer(modifier = Modifier.height(6.dp))
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(999.dp),
+                                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.65f)
+                                ) {
+                                    Text(
+                                        text = "${stringResource(R.string.settings_group_home_title)} $homeConfiguredCount/$homeTotalCount",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Surface(
+                                    shape = RoundedCornerShape(999.dp),
+                                    color = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.65f)
+                                ) {
+                                    Text(
+                                        text = "ARR $arrConfiguredCount/$arrTotalCount",
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onTertiaryContainer,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
                         }
-                        val isPinSetForLock by viewModel.isPinSet.collectAsState()
-                        if (isPinSetForLock) {
+                        if (isPinSet) {
                             Icon(
                                 imageVector = Icons.Default.Lock,
                                 contentDescription = null,
@@ -354,6 +399,57 @@ fun SettingsScreen(
                 }
             }
 
+            item {
+                val iconRows = remember { AppIconOption.entries.chunked(3) }
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        text = stringResource(R.string.settings_app_icon_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
+
+                    Surface(
+                        shape = RoundedCornerShape(16.dp),
+                        color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                        tonalElevation = 1.dp,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(14.dp),
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            if (appIconApplying) {
+                                LinearProgressIndicator(
+                                    modifier = Modifier.fillMaxWidth()
+                                )
+                            }
+
+                            iconRows.forEach { row ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    row.forEach { option ->
+                                        AppIconOptionCard(
+                                            option = option,
+                                            isSelected = appIcon == option,
+                                            enabled = !appIconApplying,
+                                            onClick = { viewModel.setAppIcon(option) },
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                    repeat(3 - row.size) {
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // --- LANGUAGE SELECTOR ---
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -392,7 +488,6 @@ fun SettingsScreen(
 
             // --- SECURITY ---
             item {
-                val isPinSet by viewModel.isPinSet.collectAsState()
                 val biometricEnabled by viewModel.biometricEnabled.collectAsState()
                 val context = LocalContext.current
                 val canUseBiometric = remember { com.homelab.app.util.BiometricHelper.canAuthenticate(context) }
@@ -783,7 +878,7 @@ fun SettingsScreen(
                         modifier = Modifier.weight(1f)
                     )
                     ContactChip(
-                        label = stringResource(R.string.settings_contact_github),
+                        label = stringResource(R.string.settings_contact_repository),
                         iconUrl = "https://cdn.jsdelivr.net/gh/selfhst/icons/png/github.png",
                         onClick = { uriHandler.openUri("https://github.com/JohnnWi/homelab-project") },
                         modifier = Modifier.weight(1f)
@@ -883,6 +978,75 @@ fun SettingsScreen(
 }
 
 @Composable
+private fun AppIconOptionCard(
+    option: AppIconOption,
+    isSelected: Boolean,
+    enabled: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val cardBorder = if (isSelected) {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
+    } else {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
+    }
+    val cardColor = if (isSelected) {
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+    } else {
+        MaterialTheme.colorScheme.surfaceContainer
+    }
+
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = RoundedCornerShape(14.dp),
+        border = cardBorder,
+        color = cardColor,
+                                modifier = modifier
+            .aspectRatio(1f)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
+            ) {
+                Image(
+                    painter = painterResource(option.previewDrawableRes),
+                    contentDescription = stringResource(option.labelRes),
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(74.dp)
+                        .clip(RoundedCornerShape(18.dp))
+                )
+            }
+
+            if (isSelected) {
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(8.dp)
+                        .size(20.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onPrimary,
+                            modifier = Modifier.size(12.dp)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
 private fun ContactChip(
     label: String,
     iconUrl: String,
@@ -923,5 +1087,3 @@ private fun ContactChip(
         }
     }
 }
-
-

@@ -10,6 +10,42 @@
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleIcons</key>
+	<dict>
+		<key>CFBundleAlternateIcons</key>
+		<dict>
+			<key>AppIconClearDark</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>AppIconClearDark</string>
+			</dict>
+			<key>AppIconClearLight</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>AppIconClearLight</string>
+			</dict>
+			<key>AppIconDark</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>AppIconDark</string>
+			</dict>
+			<key>AppIconTintedDark</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>AppIconTintedDark</string>
+			</dict>
+			<key>AppIconTintedLight</key>
+			<dict>
+				<key>CFBundleIconName</key>
+				<string>AppIconTintedLight</string>
+			</dict>
+		</dict>
+		<key>CFBundlePrimaryIcon</key>
+		<dict>
+			<key>CFBundleIconName</key>
+			<string>AppIcon</string>
+		</dict>
+	</dict>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -17,9 +53,9 @@
 	<key>CFBundlePackageType</key>
 	<string>$(PRODUCT_BUNDLE_TYPE)</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.9.2</string>
+	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>15</string>
+	<string>16</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>tailscale</string>

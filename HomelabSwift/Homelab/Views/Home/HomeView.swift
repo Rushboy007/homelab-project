@@ -13,16 +13,23 @@ struct HomeView: View {
     @State private var summaryData: [UUID: ServiceSummaryInfo] = [:]
     @State private var summaryLoading = false
     @State private var summaryRefreshID = UUID()
+    @State private var isViewVisible = false
 
     private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
     private let tailscaleIconURL = URL(string: "https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png")
 
     private var visibleTypes: [ServiceType] {
-        settingsStore.serviceOrder.filter { !settingsStore.isServiceHidden($0) }
+        settingsStore.serviceOrder.filter { ServiceType.homeServices.contains($0) && !settingsStore.isServiceHidden($0) }
     }
 
     private var hasServices: Bool {
         visibleTypes.contains { servicesStore.hasInstances(for: $0) }
+    }
+
+    private var connectedHomeCount: Int {
+        visibleTypes.reduce(into: 0) { total, type in
+            total += servicesStore.instances(for: type).count
+        }
     }
 
     private var gridEntries: [ServiceGridEntry] {
@@ -44,14 +51,14 @@ struct HomeView: View {
     }
 
     private var reachabilityHash: String {
-        ServiceType.allCases.map { type in
+        ServiceType.homeServices.map { type in
             let r = servicesStore.isReachable(type)
             return "\(type.rawValue):\(r.map { $0 ? "1" : "0" } ?? "?")"
         }.joined(separator: ",")
     }
 
     private var preferredSelectionHash: String {
-        ServiceType.allCases.map { type in
+        ServiceType.homeServices.map { type in
             let instanceId = servicesStore.preferredInstance(for: type)?.id.uuidString ?? "none"
             return "\(type.rawValue):\(instanceId)"
         }.joined(separator: ",")
@@ -81,10 +88,20 @@ struct HomeView: View {
             .navigationDestination(for: HomeServiceRoute.self) { route in
                 serviceDestination(for: route)
             }
-            .task(id: summaryRefreshID) { await fetchAllSummaryData() }
-            .onChange(of: reachabilityHash) { _, _ in
+            .onAppear {
+                isViewVisible = true
                 summaryRefreshID = UUID()
-                for type in ServiceType.allCases {
+            }
+            .onDisappear { isViewVisible = false }
+            .task(id: summaryRefreshID) {
+                guard isViewVisible else { return }
+                await fetchAllSummaryData()
+            }
+            .onChange(of: reachabilityHash) { _, _ in
+                if isViewVisible {
+                    summaryRefreshID = UUID()
+                }
+                for type in ServiceType.homeServices {
                     for instance in servicesStore.instances(for: type) {
                         if servicesStore.reachability(for: instance.id) == false {
                             summaryData.removeValue(forKey: instance.id)
@@ -94,7 +111,9 @@ struct HomeView: View {
             }
             .onChange(of: preferredSelectionHash) { _, _ in
                 summaryData = [:]
-                summaryRefreshID = UUID()
+                if isViewVisible {
+                    summaryRefreshID = UUID()
+                }
             }
         }
     }
@@ -113,7 +132,7 @@ struct HomeView: View {
                     Image(systemName: "bolt.fill")
                         .font(.caption2)
                         .accessibilityHidden(true)
-                    Text("\(servicesStore.connectedCount)")
+                    Text("\(connectedHomeCount)")
                         .font(.subheadline.bold())
                 }
                 .foregroundStyle(AppTheme.accent)
@@ -267,7 +286,7 @@ struct HomeView: View {
     }
 
     private var footerSection: some View {
-        Text("\(localizer.t.launcherServices) • \(servicesStore.connectedCount) \(localizer.t.launcherConnected.sentenceCased())")
+        Text("\(localizer.t.launcherServices) • \(connectedHomeCount) \(localizer.t.launcherConnected.sentenceCased())")
             .font(.caption)
             .foregroundStyle(AppTheme.textMuted)
             .frame(maxWidth: .infinity)
@@ -281,13 +300,23 @@ struct HomeView: View {
         case .portainer:         PortainerDashboard(instanceId: route.instanceId)
         case .pihole:            PiHoleDashboard(instanceId: route.instanceId)
         case .adguardHome:       AdGuardHomeDashboard(instanceId: route.instanceId)
+        case .technitium:        TechnitiumDashboard(instanceId: route.instanceId)
         case .beszel:            BeszelDashboard(instanceId: route.instanceId)
         case .healthchecks:      HealthchecksDashboard(instanceId: route.instanceId)
+        case .linuxUpdate:            LinuxUpdateDashboard(instanceId: route.instanceId)
+        case .dockhand:               DockhandDashboard(instanceId: route.instanceId)
         case .gitea:             GiteaDashboard(instanceId: route.instanceId)
         case .nginxProxyManager: NpmDashboard(instanceId: route.instanceId)
+        case .pangolin:          PangolinDashboard(instanceId: route.instanceId)
         case .patchmon:          PatchmonDashboard(instanceId: route.instanceId)
         case .jellystat:         JellystatDashboard(instanceId: route.instanceId)
         case .plex:              PlexDashboard(instanceId: route.instanceId)
+        case .qbittorrent:       QbittorrentDashboard(instanceId: route.instanceId)
+        case .radarr:            RadarrDashboard(instanceId: route.instanceId)
+        case .sonarr:            SonarrDashboard(instanceId: route.instanceId)
+        case .lidarr:            LidarrDashboard(instanceId: route.instanceId)
+        case .jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr:
+                                 GenericMediaDashboard(serviceType: route.type, instanceId: route.instanceId)
         }
     }
 
@@ -298,7 +327,7 @@ struct HomeView: View {
         defer { summaryLoading = false }
 
         await withTaskGroup(of: (UUID, ServiceSummaryInfo?).self) { group in
-            for type in ServiceType.allCases {
+            for type in ServiceType.homeServices {
                 for instance in servicesStore.instances(for: type) {
                     guard servicesStore.reachability(for: instance.id) != false else { continue }
                     group.addTask { await (instance.id, self.fetchSummary(instanceId: instance.id, type: type)) }
@@ -329,6 +358,14 @@ struct HomeView: View {
                 guard let client = await servicesStore.adguardClient(instanceId: instanceId) else { return nil }
                 let stats = try await client.getStats()
                 return ServiceSummaryInfo(value: Formatters.formatNumber(stats.totalQueries), label: localizer.t.summaryQueryTotal)
+            case .technitium:
+                guard let client = await servicesStore.technitiumClient(instanceId: instanceId) else { return nil }
+                let overview = try await client.getOverview()
+                return ServiceSummaryInfo(
+                    value: Formatters.formatNumber(overview.totalBlocked),
+                    subValue: "/ \(Formatters.formatNumber(overview.totalQueries))",
+                    label: "Blocked queries"
+                )
             case .beszel:
                 guard let client = await servicesStore.beszelClient(instanceId: instanceId) else { return nil }
                 let response = try await client.getSystems()
@@ -339,6 +376,22 @@ struct HomeView: View {
                 let checks = try await client.listChecks()
                 let healthy = checks.filter { $0.status == "up" || $0.status == "grace" }.count
                 return ServiceSummaryInfo(value: "\(healthy)", subValue: "/ \(checks.count)", label: localizer.t.healthchecksChecks)
+            case .linuxUpdate:
+                guard let client = await servicesStore.linuxUpdateClient(instanceId: instanceId) else { return nil }
+                let stats = try await client.getDashboardStats()
+                return ServiceSummaryInfo(
+                    value: Formatters.formatNumber(stats.totalUpdates),
+                    subValue: "/ \(stats.total)",
+                    label: localizer.t.patchmonUpdates
+                )
+            case .dockhand:
+                guard let client = await servicesStore.dockhandClient(instanceId: instanceId) else { return nil }
+                let overview = try await client.getQuickOverview(environmentId: nil)
+                return ServiceSummaryInfo(
+                    value: "\(overview.runningContainers)",
+                    subValue: "/ \(overview.totalContainers)",
+                    label: "Running containers"
+                )
             case .gitea:
                 guard let client = await servicesStore.giteaClient(instanceId: instanceId) else { return nil }
                 let repos = try await client.getUserRepos(page: 1, limit: 100)
@@ -347,6 +400,14 @@ struct HomeView: View {
                 guard let client = await servicesStore.npmClient(instanceId: instanceId) else { return nil }
                 let report = try await client.getHostReport()
                 return ServiceSummaryInfo(value: "\(report.proxy)", subValue: "/ \(report.total)", label: localizer.t.npmProxyHosts)
+            case .pangolin:
+                guard let client = await servicesStore.pangolinClient(instanceId: instanceId) else { return nil }
+                let summary = try await client.aggregateSummary()
+                return ServiceSummaryInfo(
+                    value: "\(summary.sites)",
+                    subValue: "/ \(summary.clients)",
+                    label: PangolinStrings.forLanguage(localizer.language).sitesClientsLabel
+                )
             case .patchmon:
                 guard let client = await servicesStore.patchmonClient(instanceId: instanceId) else { return nil }
                 let response = try await client.getHosts()
@@ -362,6 +423,8 @@ struct HomeView: View {
                 let libs = try await client.getLibraries()
                 let totalItems = libs.reduce(0) { $0 + $1.itemCount + $1.episodeCount }
                 return ServiceSummaryInfo(value: Formatters.formatNumber(totalItems), label: localizer.t.plexTotalItems)
+            default:
+                return nil
             }
         } catch {
             return nil
@@ -422,28 +485,28 @@ private struct ServiceOrderSheet: View {
     var body: some View {
         NavigationStack {
             List {
-                ForEach(settingsStore.serviceOrder) { type in
+                ForEach(settingsStore.serviceOrder.filter { ServiceType.homeServices.contains($0) }) { type in
                     HStack {
                         Text(type.displayName)
                             .font(.body.weight(.semibold))
                         Spacer()
                         HStack(spacing: 12) {
                             Button {
-                                settingsStore.moveService(type, offset: -1)
+                                settingsStore.moveService(type, offset: -1, within: ServiceType.homeServices)
                             } label: {
                                 Image(systemName: "chevron.up")
                             }
                             .buttonStyle(.borderless)
-                            .disabled(!settingsStore.canMoveService(type, offset: -1))
+                            .disabled(!settingsStore.canMoveService(type, offset: -1, within: ServiceType.homeServices))
                             .accessibilityLabel(localizer.t.settingsMoveUp)
 
                             Button {
-                                settingsStore.moveService(type, offset: 1)
+                                settingsStore.moveService(type, offset: 1, within: ServiceType.homeServices)
                             } label: {
                                 Image(systemName: "chevron.down")
                             }
                             .buttonStyle(.borderless)
-                            .disabled(!settingsStore.canMoveService(type, offset: 1))
+                            .disabled(!settingsStore.canMoveService(type, offset: 1, within: ServiceType.homeServices))
                             .accessibilityLabel(localizer.t.settingsMoveDown)
                         }
                     }
@@ -690,33 +753,40 @@ struct ServiceIconView: View {
 
     var body: some View {
         ZStack {
+            // Always render a local fallback symbol so icons never appear blank.
+            fallbackView
+
             if let local = UIImage(named: localAssetName) {
                 Image(uiImage: local)
                     .resizable()
                     .renderingMode(.original)
                     .scaledToFit()
             } else if let primary = candidates.first {
-                AsyncImage(url: primary) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .renderingMode(.original)
-                            .scaledToFit()
-                    case .failure:
-                        secondaryIconView
-                    default:
-                        ProgressView()
-                            .scaleEffect(0.7)
-                            .tint(type.colors.primary)
-                    }
-                }
-            } else {
-                fallbackView
+                primaryIconView(primary)
             }
         }
         .frame(width: size, height: size)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    @ViewBuilder
+    private func primaryIconView(_ url: URL) -> some View {
+        AsyncImage(url: url) { phase in
+            switch phase {
+            case .success(let image):
+                image
+                    .resizable()
+                    .renderingMode(.original)
+                    .scaledToFit()
+            case .failure:
+                secondaryIconView
+            case .empty:
+                EmptyView()
+            @unknown default:
+                EmptyView()
+            }
+        }
+        .id(url.absoluteString)
     }
 
     @ViewBuilder
@@ -730,15 +800,14 @@ struct ServiceIconView: View {
                         .renderingMode(.original)
                         .scaledToFit()
                 case .failure:
-                    fallbackView
-                default:
-                    ProgressView()
-                        .scaleEffect(0.7)
-                        .tint(type.colors.primary)
+                    EmptyView()
+                case .empty:
+                    EmptyView()
+                @unknown default:
+                    EmptyView()
                 }
             }
-        } else {
-            fallbackView
+            .id(candidates[1].absoluteString)
         }
     }
 

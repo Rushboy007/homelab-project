@@ -44,6 +44,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -59,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -67,6 +69,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -87,12 +90,14 @@ fun ServiceLoginScreen(
     val error by viewModel.error.collectAsStateWithLifecycle()
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
     val keyboardController = LocalSoftwareKeyboardController.current
+    val density = LocalDensity.current
 
     var label by remember { mutableStateOf(serviceType.displayName) }
     var url by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var apiKey by remember { mutableStateOf("") }
+    var mfaCode by remember { mutableStateOf("") }
     var fallbackUrl by remember { mutableStateOf("") }
     var showSecret by remember { mutableStateOf(false) }
     var hasSubmitted by remember { mutableStateOf(false) }
@@ -108,6 +113,7 @@ fun ServiceLoginScreen(
         apiKey = instance.apiKey.orEmpty()
         fallbackUrl = instance.fallbackUrl.orEmpty()
         password = ""
+        mfaCode = ""
     }
 
     LaunchedEffect(isLoading, error, existingInstance?.id) {
@@ -151,7 +157,7 @@ fun ServiceLoginScreen(
                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal))
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
-                .offset(x = shakeOffset.value.dp),
+                .offset { IntOffset(x = with(density) { shakeOffset.value.dp.roundToPx() }, y = 0) },
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             ServiceIcon(
@@ -180,12 +186,25 @@ fun ServiceLoginScreen(
                 ServiceType.PORTAINER -> stringResource(R.string.login_hint_portainer_multi)
                 ServiceType.PIHOLE -> stringResource(R.string.login_hint_pihole_multi)
                 ServiceType.ADGUARD_HOME -> stringResource(R.string.login_hint_adguard)
+                ServiceType.TECHNITIUM -> stringResource(R.string.login_hint_technitium)
                 ServiceType.GITEA -> stringResource(R.string.login_hint_gitea_multi)
                 ServiceType.NGINX_PROXY_MANAGER -> stringResource(R.string.login_hint_npm)
                 ServiceType.HEALTHCHECKS -> stringResource(R.string.login_hint_healthchecks)
+                ServiceType.PANGOLIN -> stringResource(R.string.login_hint_pangolin)
+                ServiceType.LINUX_UPDATE -> stringResource(R.string.login_hint_linux_update)
+                ServiceType.DOCKHAND -> stringResource(R.string.login_hint_dockhand)
                 ServiceType.JELLYSTAT -> stringResource(R.string.login_hint_jellystat)
                 ServiceType.PATCHMON -> stringResource(R.string.login_hint_patchmon)
                 ServiceType.PLEX -> stringResource(R.string.login_hint_plex)
+                ServiceType.RADARR -> stringResource(R.string.login_hint_radarr)
+                ServiceType.SONARR -> stringResource(R.string.login_hint_sonarr)
+                ServiceType.LIDARR -> stringResource(R.string.login_hint_lidarr)
+                ServiceType.QBITTORRENT -> stringResource(R.string.login_hint_qbittorrent)
+                ServiceType.JELLYSEERR -> stringResource(R.string.login_hint_jellyseerr)
+                ServiceType.PROWLARR -> stringResource(R.string.login_hint_prowlarr)
+                ServiceType.BAZARR -> stringResource(R.string.login_hint_bazarr)
+                ServiceType.GLUETUN -> stringResource(R.string.login_hint_gluetun)
+                ServiceType.FLARESOLVERR -> stringResource(R.string.login_hint_flaresolverr)
                 else -> null
             }
 
@@ -343,7 +362,8 @@ fun ServiceLoginScreen(
                     username = username,
                     password = password,
                     apiKey = apiKey,
-                    fallbackUrl = fallbackUrl
+                    fallbackUrl = fallbackUrl,
+                    mfaCode = mfaCode
                 )
             }
 
@@ -390,13 +410,32 @@ fun ServiceLoginScreen(
             if (
                 serviceType == ServiceType.PORTAINER ||
                 serviceType == ServiceType.HEALTHCHECKS ||
+                serviceType == ServiceType.PANGOLIN ||
+                serviceType == ServiceType.LINUX_UPDATE ||
                 serviceType == ServiceType.JELLYSTAT ||
-                serviceType == ServiceType.PLEX
+                serviceType == ServiceType.PLEX ||
+                serviceType == ServiceType.RADARR ||
+                serviceType == ServiceType.SONARR ||
+                serviceType == ServiceType.LIDARR ||
+                serviceType == ServiceType.JELLYSEERR ||
+                serviceType == ServiceType.PROWLARR ||
+                serviceType == ServiceType.BAZARR
             ) {
                 SecretField(
                     value = apiKey,
                     onValueChange = { apiKey = it },
                     label = stringResource(R.string.login_api_key_label),
+                    showSecret = showSecret,
+                    onToggleSecret = { showSecret = !showSecret }
+                )
+            } else if (
+                serviceType == ServiceType.GLUETUN ||
+                serviceType == ServiceType.FLARESOLVERR
+            ) {
+                SecretField(
+                    value = apiKey,
+                    onValueChange = { apiKey = it },
+                    label = stringResource(R.string.login_api_key_optional_label),
                     showSecret = showSecret,
                     onToggleSecret = { showSecret = !showSecret }
                 )
@@ -437,6 +476,41 @@ fun ServiceLoginScreen(
                     onToggleSecret = { showSecret = !showSecret },
                     placeholder = if (isEditing) stringResource(R.string.login_keep_secret_placeholder) else null
                 )
+
+                if (serviceType == ServiceType.DOCKHAND || serviceType == ServiceType.TECHNITIUM) {
+                    OutlinedTextField(
+                        value = mfaCode,
+                        onValueChange = { mfaCode = it },
+                        label = {
+                            Text(
+                                if (serviceType == ServiceType.TECHNITIUM) {
+                                    stringResource(R.string.login_technitium_totp_optional)
+                                } else {
+                                    stringResource(R.string.login_dockhand_2fa_optional)
+                                }
+                            )
+                        },
+                        leadingIcon = {
+                            Icon(
+                                Icons.Default.Key,
+                                contentDescription = if (serviceType == ServiceType.TECHNITIUM) {
+                                    stringResource(R.string.login_technitium_totp_optional)
+                                } else {
+                                    stringResource(R.string.login_dockhand_2fa_optional)
+                                }
+                            )
+                        },
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(
+                            keyboardType = KeyboardType.NumberPassword,
+                            imeAction = ImeAction.Done
+                        ),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 14.dp),
+                        shape = RoundedCornerShape(14.dp)
+                    )
+                }
             }
 
             androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))

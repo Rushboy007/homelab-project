@@ -10,6 +10,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.homelab.app.util.ServiceType
+import com.homelab.app.util.AppIconOption
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -60,13 +61,21 @@ class LocalPreferencesRepository @Inject constructor(
     private val BESZEL_SHOW_CPU_KEY = booleanPreferencesKey("beszel_show_cpu")
     private val BESZEL_SHOW_MEMORY_KEY = booleanPreferencesKey("beszel_show_memory")
     private val BESZEL_SHOW_NETWORK_KEY = booleanPreferencesKey("beszel_show_network")
+    private val DOCKHAND_AUTO_REFRESH_KEY = booleanPreferencesKey("dockhand_auto_refresh")
+    private val DOCKHAND_REFRESH_INTERVAL_KEY = longPreferencesKey("dockhand_refresh_interval")
+    private val DOCKHAND_ACTIVITY_LIMIT_KEY = longPreferencesKey("dockhand_activity_limit")
+    private val DOCKHAND_SHOW_RAW_ACTIVITY_KEY = booleanPreferencesKey("dockhand_show_raw_activity")
     private val HOME_CYBERPUNK_CARDS_KEY = booleanPreferencesKey("home_cyberpunk_cards")
+    private val APP_ICON_KEY = stringPreferencesKey("app_icon")
     private val DISMISSED_UPDATE_VERSION_KEY = stringPreferencesKey("dismissed_update_version")
     private val UPDATE_LAST_CHECKED_AT_KEY = longPreferencesKey("update_last_checked_at")
     private val UPDATE_AVAILABLE_VERSION_KEY = stringPreferencesKey("update_available_version")
     private val UPDATE_AVAILABLE_URL_KEY = stringPreferencesKey("update_available_url")
     private val UPDATE_AVAILABLE_CHANGELOG_KEY = stringPreferencesKey("update_available_changelog")
     private val DISMISSED_POPUP_VERSION_KEY = stringPreferencesKey("dismissed_popup_version")
+    private val MEDIA_ARR_TUTORIAL_DISMISSED_KEY = booleanPreferencesKey("media_arr_tutorial_dismissed")
+    private val BACKUP_SELECTED_TYPES_KEY = stringPreferencesKey("backup_selected_service_types")
+    private val BACKUP_REMEMBER_SELECTION_KEY = booleanPreferencesKey("backup_remember_selection")
 
     val themeMode: Flow<ThemeMode> = dataStore.data
         .catch { exception ->
@@ -146,6 +155,72 @@ class LocalPreferencesRepository @Inject constructor(
         dataStore.edit { preferences -> preferences[BESZEL_SHOW_NETWORK_KEY] = value }
     }
 
+    val dockhandAutoRefreshEnabled: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[DOCKHAND_AUTO_REFRESH_KEY] ?: true }
+
+    val dockhandRefreshIntervalSeconds: Flow<Int> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            val value = (preferences[DOCKHAND_REFRESH_INTERVAL_KEY] ?: 45L).toInt()
+            value.coerceIn(15, 300)
+        }
+
+    val dockhandActivityLimit: Flow<Int> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            val value = (preferences[DOCKHAND_ACTIVITY_LIMIT_KEY] ?: 25L).toInt()
+            value.coerceIn(5, 100)
+        }
+
+    val dockhandShowRawActivity: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[DOCKHAND_SHOW_RAW_ACTIVITY_KEY] ?: false }
+
+    suspend fun setDockhandAutoRefreshEnabled(value: Boolean) {
+        dataStore.edit { preferences -> preferences[DOCKHAND_AUTO_REFRESH_KEY] = value }
+    }
+
+    suspend fun setDockhandRefreshIntervalSeconds(value: Int) {
+        dataStore.edit { preferences ->
+            preferences[DOCKHAND_REFRESH_INTERVAL_KEY] = value.coerceIn(15, 300).toLong()
+        }
+    }
+
+    suspend fun setDockhandActivityLimit(value: Int) {
+        dataStore.edit { preferences ->
+            preferences[DOCKHAND_ACTIVITY_LIMIT_KEY] = value.coerceIn(5, 100).toLong()
+        }
+    }
+
+    suspend fun setDockhandShowRawActivity(value: Boolean) {
+        dataStore.edit { preferences -> preferences[DOCKHAND_SHOW_RAW_ACTIVITY_KEY] = value }
+    }
+
     val hiddenServices: Flow<Set<String>> = dataStore.data
         .catch { exception ->
             if (exception is IOException) {
@@ -156,7 +231,13 @@ class LocalPreferencesRepository @Inject constructor(
         }
         .map { preferences ->
             val raw = preferences[HIDDEN_SERVICES_KEY] ?: ""
-            if (raw.isBlank()) emptySet() else raw.split(",").toSet()
+            if (raw.isBlank()) {
+                emptySet()
+            } else {
+                raw.split(",")
+                    .mapNotNull(::canonicalServiceKey)
+                    .toSet()
+            }
         }
 
     val homeCyberpunkCardsEnabled: Flow<Boolean> = dataStore.data
@@ -169,6 +250,58 @@ class LocalPreferencesRepository @Inject constructor(
         }
         .map { preferences -> preferences[HOME_CYBERPUNK_CARDS_KEY] ?: false }
 
+    val appIcon: Flow<AppIconOption> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            AppIconOption.fromPersistedValue(preferences[APP_ICON_KEY])
+        }
+
+    val mediaArrTutorialDismissed: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[MEDIA_ARR_TUTORIAL_DISMISSED_KEY] ?: false }
+
+    val backupSelectedServiceTypes: Flow<Set<ServiceType>> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences ->
+            val raw = preferences[BACKUP_SELECTED_TYPES_KEY].orEmpty()
+            if (raw.isBlank()) {
+                emptySet()
+            } else {
+                raw.split(',')
+                    .mapNotNull(::parseStoredServiceType)
+                    .filter { it != ServiceType.UNKNOWN }
+                    .toSet()
+            }
+        }
+
+    val backupRememberSelectionEnabled: Flow<Boolean> = dataStore.data
+        .catch { exception ->
+            if (exception is IOException) {
+                emit(emptyPreferences())
+            } else {
+                throw exception
+            }
+        }
+        .map { preferences -> preferences[BACKUP_REMEMBER_SELECTION_KEY] ?: true }
+
     val serviceOrder: Flow<List<ServiceType>> = dataStore.data
         .catch { exception ->
             if (exception is IOException) {
@@ -180,7 +313,7 @@ class LocalPreferencesRepository @Inject constructor(
         .map { preferences ->
             val raw = preferences[SERVICE_ORDER_KEY]
                 ?.split(",")
-                ?.mapNotNull { ServiceType.entries.firstOrNull { type -> type.name == it } }
+                ?.mapNotNull(::parseStoredServiceType)
                 .orEmpty()
             normalizeServiceOrder(raw)
         }
@@ -188,11 +321,18 @@ class LocalPreferencesRepository @Inject constructor(
     suspend fun toggleServiceVisibility(serviceKey: String) {
         dataStore.edit { preferences ->
             val raw = preferences[HIDDEN_SERVICES_KEY] ?: ""
-            val current = if (raw.isBlank()) mutableSetOf() else raw.split(",").toMutableSet()
-            if (current.contains(serviceKey)) {
-                current.remove(serviceKey)
+            val normalizedKey = canonicalServiceKey(serviceKey) ?: return@edit
+            val current = if (raw.isBlank()) {
+                mutableSetOf()
             } else {
-                current.add(serviceKey)
+                raw.split(",")
+                    .mapNotNull(::canonicalServiceKey)
+                    .toMutableSet()
+            }
+            if (current.contains(normalizedKey)) {
+                current.remove(normalizedKey)
+            } else {
+                current.add(normalizedKey)
             }
             preferences[HIDDEN_SERVICES_KEY] = current.joinToString(",")
         }
@@ -203,7 +343,7 @@ class LocalPreferencesRepository @Inject constructor(
             val current = normalizeServiceOrder(
                 preferences[SERVICE_ORDER_KEY]
                     ?.split(",")
-                    ?.mapNotNull { key -> ServiceType.entries.firstOrNull { it.name == key } }
+                    ?.mapNotNull(::parseStoredServiceType)
                     .orEmpty()
             ).toMutableList()
             val index = current.indexOf(serviceType)
@@ -216,9 +356,74 @@ class LocalPreferencesRepository @Inject constructor(
         }
     }
 
+    suspend fun moveServiceWithin(
+        serviceType: ServiceType,
+        offset: Int,
+        within: Set<ServiceType>
+    ) {
+        dataStore.edit { preferences ->
+            val current = normalizeServiceOrder(
+                preferences[SERVICE_ORDER_KEY]
+                    ?.split(",")
+                    ?.mapNotNull(::parseStoredServiceType)
+                    .orEmpty()
+            ).toMutableList()
+
+            if (serviceType !in within) return@edit
+            val scopedOrder = current.filter { it in within }
+            val scopedIndex = scopedOrder.indexOf(serviceType)
+            if (scopedIndex == -1) return@edit
+            val scopedDestination = scopedIndex + offset
+            if (scopedDestination !in scopedOrder.indices) return@edit
+
+            val targetType = scopedOrder[scopedDestination]
+            val fromIndex = current.indexOf(serviceType)
+            val toIndex = current.indexOf(targetType)
+            if (fromIndex == -1 || toIndex == -1 || fromIndex == toIndex) return@edit
+
+            val moved = current.removeAt(fromIndex)
+            current.add(toIndex, moved)
+            preferences[SERVICE_ORDER_KEY] = current.joinToString(",") { it.name }
+        }
+    }
+
     suspend fun setHomeCyberpunkCardsEnabled(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[HOME_CYBERPUNK_CARDS_KEY] = enabled
+        }
+    }
+
+    suspend fun setAppIcon(icon: AppIconOption) {
+        dataStore.edit { preferences ->
+            preferences[APP_ICON_KEY] = icon.persistedValue
+        }
+    }
+
+    suspend fun setMediaArrTutorialDismissed(dismissed: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[MEDIA_ARR_TUTORIAL_DISMISSED_KEY] = dismissed
+        }
+    }
+
+    suspend fun setBackupSelectedServiceTypes(types: Set<ServiceType>) {
+        dataStore.edit { preferences ->
+            val normalized = types
+                .asSequence()
+                .filter { it != ServiceType.UNKNOWN }
+                .map { it.name }
+                .sorted()
+                .toList()
+            if (normalized.isEmpty()) {
+                preferences.remove(BACKUP_SELECTED_TYPES_KEY)
+            } else {
+                preferences[BACKUP_SELECTED_TYPES_KEY] = normalized.joinToString(",")
+            }
+        }
+    }
+
+    suspend fun setBackupRememberSelectionEnabled(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[BACKUP_REMEMBER_SELECTION_KEY] = enabled
         }
     }
 
@@ -399,5 +604,16 @@ class LocalPreferencesRepository @Inject constructor(
             }
         }
         return unique + visibleTypes.filterNot(unique::contains)
+    }
+
+    private fun parseStoredServiceType(raw: String): ServiceType? {
+        val parsed = ServiceType.fromStoredName(raw)
+        return parsed.takeUnless { it == ServiceType.UNKNOWN }
+    }
+
+    private fun canonicalServiceKey(raw: String): String? {
+        val trimmed = raw.trim()
+        if (trimmed.isEmpty()) return null
+        return parseStoredServiceType(trimmed)?.name ?: trimmed
     }
 }

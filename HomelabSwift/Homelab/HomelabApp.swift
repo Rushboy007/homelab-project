@@ -9,6 +9,14 @@ struct HomelabApp: App {
     @State private var needsSetup = false
     @Environment(\.scenePhase) private var scenePhase
 
+    private var colorScheme: ColorScheme? {
+        switch settingsStore.theme {
+        case .light: return .light
+        case .dark: return .dark
+        case .system: return nil
+        }
+    }
+
     var body: some Scene {
         WindowGroup {
             Group {
@@ -34,7 +42,9 @@ struct HomelabApp: App {
             .environment(servicesStore)
             .environment(settingsStore)
             .environment(localizer)
+            .preferredColorScheme(colorScheme)
             .task {
+                settingsStore.syncAppIconWithSystem()
                 localizer.language = settingsStore.language
                 needsSetup = !settingsStore.hasCompletedOnboarding
                 if needsSetup {
@@ -43,11 +53,12 @@ struct HomelabApp: App {
                 await servicesStore.initialize()
             }
             .onChange(of: scenePhase) { _, newPhase in
-                guard settingsStore.isPinSet else { return }
                 switch newPhase {
                 case .background:
-                    settingsStore.lastBackgroundDate = Date()
                     servicesStore.stopPeriodicHealthChecks()
+                    if settingsStore.isPinSet {
+                        settingsStore.lastBackgroundDate = Date()
+                    }
                 case .active:
                     servicesStore.startPeriodicHealthChecks()
                     Task { await servicesStore.checkAllReachability() }
@@ -61,8 +72,8 @@ struct HomelabApp: App {
                             // First launch or killed: stay locked
                             isUnlocked = false
                         }
+                        settingsStore.lastBackgroundDate = nil
                     }
-                    settingsStore.lastBackgroundDate = nil
                 default:
                     break
                 }

@@ -86,7 +86,7 @@ private fun npmPageBackground(isDarkTheme: Boolean, accent: Color): Brush = if (
 private fun npmCardColor(
     isDarkTheme: Boolean,
     accent: Color? = null,
-    tint: Float = if (isDarkTheme) 0.10f else 0.07f
+    tint: Float = if (isDarkTheme) 0.055f else 0.035f
 ): Color {
     val base = if (isDarkTheme) Color(0xFF271C16) else Color(0xFFFFF0E8)
     return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.22f)) } ?: base
@@ -95,7 +95,7 @@ private fun npmCardColor(
 private fun npmRaisedCardColor(
     isDarkTheme: Boolean,
     accent: Color? = null,
-    tint: Float = if (isDarkTheme) 0.08f else 0.05f
+    tint: Float = if (isDarkTheme) 0.05f else 0.03f
 ): Color {
     val base = if (isDarkTheme) Color(0xFF33251E) else Color(0xFFFFF6F1)
     return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.18f)) } ?: base
@@ -104,7 +104,7 @@ private fun npmRaisedCardColor(
 private fun npmBorderTone(
     isDarkTheme: Boolean,
     accent: Color? = null,
-    tint: Float = if (isDarkTheme) 0.28f else 0.20f
+    tint: Float = if (isDarkTheme) 0.15f else 0.10f
 ): Color {
     val base = if (isDarkTheme) Color(0xFF5A4336) else Color(0xFFE2BFA8)
     return accent?.let { lerp(base, it, tint.coerceIn(0f, 0.35f)) } ?: base
@@ -113,7 +113,7 @@ private fun npmBorderTone(
 private fun npmBorderColor(
     isDarkTheme: Boolean,
     accent: Color? = null
-): Color = npmBorderTone(isDarkTheme, accent = accent).copy(alpha = if (isDarkTheme) 0.72f else 0.58f)
+): Color = npmBorderTone(isDarkTheme, accent = accent).copy(alpha = if (isDarkTheme) 0.58f else 0.42f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -223,7 +223,7 @@ fun NpmDashboardScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                     actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -252,25 +252,9 @@ fun NpmDashboardScreen(
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        containerColor = Color.Transparent
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(pageBrush)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(pageGlow, Color.Transparent),
-                            center = Offset(160f, 90f),
-                            radius = 560f
-                        )
-                    )
-            )
-
+        Box(modifier = Modifier.fillMaxSize()) {
             Column(modifier = Modifier.padding(paddingValues)) {
                 if (isPerformingAction) {
                     LinearProgressIndicator(

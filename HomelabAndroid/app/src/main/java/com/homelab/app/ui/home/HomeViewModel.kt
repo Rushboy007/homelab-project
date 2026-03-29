@@ -4,17 +4,21 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.homelab.app.data.repository.BeszelRepository
+import com.homelab.app.data.repository.DockhandRepository
 import com.homelab.app.data.repository.GiteaRepository
+import com.homelab.app.data.repository.LinuxUpdateRepository
 import com.homelab.app.data.repository.JellystatRepository
 import com.homelab.app.data.repository.LocalPreferencesRepository
 import com.homelab.app.data.repository.NginxProxyManagerRepository
 import com.homelab.app.data.repository.HealthchecksRepository
 import com.homelab.app.data.repository.PatchmonRepository
+import com.homelab.app.data.repository.PangolinRepository
 import com.homelab.app.data.repository.PlexRepository
 import com.homelab.app.data.repository.AdGuardHomeRepository
 import com.homelab.app.data.repository.PiholeRepository
 import com.homelab.app.data.repository.PortainerRepository
 import com.homelab.app.data.repository.ServicesRepository
+import com.homelab.app.data.repository.TechnitiumRepository
 import com.homelab.app.domain.model.ServiceInstance
 import com.homelab.app.util.ServiceType
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,10 +42,14 @@ class HomeViewModel @Inject constructor(
     private val jellystatRepository: JellystatRepository,
     private val beszelRepository: BeszelRepository,
     private val giteaRepository: GiteaRepository,
+    private val linuxUpdateRepository: LinuxUpdateRepository,
+    private val technitiumRepository: TechnitiumRepository,
+    private val dockhandRepository: DockhandRepository,
     private val nginxProxyManagerRepository: NginxProxyManagerRepository,
     private val healthchecksRepository: HealthchecksRepository,
     private val patchmonRepository: PatchmonRepository,
     private val plexRepository: PlexRepository,
+    private val pangolinRepository: PangolinRepository,
     private val localPreferencesRepository: LocalPreferencesRepository
 ) : ViewModel() {
 
@@ -51,7 +59,11 @@ class HomeViewModel @Inject constructor(
     data class JellystatSummary(val watchedHours: Double, val totalViews: Int)
     data class BeszelSummary(val online: Int, val total: Int)
     data class GiteaSummary(val totalRepos: Int)
+    data class LinuxUpdateSummary(val upToDate: Int, val total: Int)
+    data class TechnitiumSummary(val blocked: Int, val total: Int)
+    data class DockhandSummary(val running: Int, val total: Int)
     data class NpmSummary(val proxyHosts: Int, val total: Int)
+    data class PangolinSummary(val sites: Int, val resources: Int, val clients: Int)
     data class HealthchecksSummary(val up: Int, val total: Int)
     data class PatchmonSummary(val active: Int, val total: Int)
     data class PlexSummary(val sessions: Int, val totalItems: Int)
@@ -78,8 +90,8 @@ class HomeViewModel @Inject constructor(
         .map { grouped -> grouped.mapValues { it.value.isNotEmpty() } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
 
-    val connectedCount: StateFlow<Int> = servicesRepository.allInstances
-        .map { it.size }
+    val connectedCount: StateFlow<Int> = instancesByType
+        .map { grouped -> ServiceType.homeTypes.sumOf { grouped[it].orEmpty().size } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     val isTailscaleConnected: StateFlow<Boolean> = servicesRepository.isTailscaleConnected
@@ -117,8 +129,20 @@ class HomeViewModel @Inject constructor(
     private val _giteaSummary = MutableStateFlow<GiteaSummary?>(null)
     val giteaSummary: StateFlow<GiteaSummary?> = _giteaSummary
 
+    private val _linuxUpdateSummary = MutableStateFlow<LinuxUpdateSummary?>(null)
+    val linuxUpdateSummary: StateFlow<LinuxUpdateSummary?> = _linuxUpdateSummary
+
+    private val _technitiumSummary = MutableStateFlow<TechnitiumSummary?>(null)
+    val technitiumSummary: StateFlow<TechnitiumSummary?> = _technitiumSummary
+
+    private val _dockhandSummary = MutableStateFlow<DockhandSummary?>(null)
+    val dockhandSummary: StateFlow<DockhandSummary?> = _dockhandSummary
+
     private val _npmSummary = MutableStateFlow<NpmSummary?>(null)
     val npmSummary: StateFlow<NpmSummary?> = _npmSummary
+
+    private val _pangolinSummary = MutableStateFlow<PangolinSummary?>(null)
+    val pangolinSummary: StateFlow<PangolinSummary?> = _pangolinSummary
 
     private val _healthchecksSummary = MutableStateFlow<HealthchecksSummary?>(null)
     val healthchecksSummary: StateFlow<HealthchecksSummary?> = _healthchecksSummary
@@ -138,9 +162,9 @@ class HomeViewModel @Inject constructor(
 
     private var summaryJob: Job? = null
 
-    fun checkReachability(instanceId: String) {
+    fun checkReachability(instanceId: String, force: Boolean = false) {
         viewModelScope.launch {
-            servicesRepository.checkReachability(instanceId)
+            servicesRepository.checkReachability(instanceId, force = force)
         }
     }
 
@@ -159,8 +183,7 @@ class HomeViewModel @Inject constructor(
             try {
                 val newSummaries = mutableMapOf<String, InstanceSummary>()
 
-                for (type in ServiceType.entries) {
-                    if (type == ServiceType.UNKNOWN) continue
+                for (type in ServiceType.homeTypes) {
                     val instances = instancesMap[type].orEmpty()
                     for (instance in instances) {
                         try {
@@ -178,8 +201,7 @@ class HomeViewModel @Inject constructor(
 
                 // Also update legacy per-type summaries from preferred instances
                 val preferredIds = preferredInstanceIdByType.value
-                for (type in ServiceType.entries) {
-                    if (type == ServiceType.UNKNOWN) continue
+                for (type in ServiceType.homeTypes) {
                     val prefId = preferredIds[type] ?: instancesMap[type]?.firstOrNull()?.id ?: continue
                     val summary = newSummaries[prefId]
                     updateLegacySummary(type, prefId, instancesMap)
@@ -229,10 +251,41 @@ class HomeViewModel @Inject constructor(
                 _giteaSummary.value = GiteaSummary(repos.size)
                 InstanceSummary("${repos.size}", null, "repos")
             }
+            ServiceType.LINUX_UPDATE -> {
+                val stats = linuxUpdateRepository.getDashboardStats(instanceId)
+                _linuxUpdateSummary.value = LinuxUpdateSummary(
+                    upToDate = stats.upToDate,
+                    total = stats.total
+                )
+                InstanceSummary("${stats.upToDate}", "/ ${stats.total}", "linux_update_systems_up_to_date")
+            }
+            ServiceType.TECHNITIUM -> {
+                val overview = technitiumRepository.getOverview(instanceId)
+                _technitiumSummary.value = TechnitiumSummary(
+                    blocked = overview.totalBlocked,
+                    total = overview.totalQueries
+                )
+                val formattedBlocked = java.text.NumberFormat.getInstance().format(overview.totalBlocked)
+                val formattedTotal = java.text.NumberFormat.getInstance().format(overview.totalQueries)
+                InstanceSummary(formattedBlocked, "/ $formattedTotal", "technitium_blocked_queries")
+            }
+            ServiceType.DOCKHAND -> {
+                val data = dockhandRepository.getDashboard(instanceId = instanceId, env = null)
+                _dockhandSummary.value = DockhandSummary(
+                    running = data.stats.runningContainers,
+                    total = data.stats.totalContainers
+                )
+                InstanceSummary("${data.stats.runningContainers}", "/ ${data.stats.totalContainers}", "dockhand_running_containers")
+            }
             ServiceType.NGINX_PROXY_MANAGER -> {
                 val report = nginxProxyManagerRepository.getHostReport(instanceId)
                 _npmSummary.value = NpmSummary(report.proxy, report.total)
                 InstanceSummary("${report.proxy}", "/ ${report.total}", "proxy_hosts")
+            }
+            ServiceType.PANGOLIN -> {
+                val (sites, resources, clients) = pangolinRepository.getAggregateSummary(instanceId)
+                _pangolinSummary.value = PangolinSummary(sites, resources, clients)
+                InstanceSummary("$sites", "/ $clients", "pangolin_sites_clients")
             }
             ServiceType.HEALTHCHECKS -> {
                 val checks = healthchecksRepository.listChecks(instanceId)

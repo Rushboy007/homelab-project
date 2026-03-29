@@ -25,6 +25,8 @@ class ServicesRepository @Inject constructor(
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var initialized = false
+    private val lastReachabilityCheckMs = mutableMapOf<String, Long>()
+    private val minReachabilityIntervalMs = 20_000L
 
     private val _reachability = MutableStateFlow<Map<String, Boolean?>>(emptyMap())
     private val _pinging = MutableStateFlow<Map<String, Boolean>>(emptyMap())
@@ -46,7 +48,7 @@ class ServicesRepository @Inject constructor(
 
         scope.launch {
             globalEventBus.authErrors.collect { instanceId ->
-                disconnectInstance(instanceId)
+                markInstanceUnauthorized(instanceId)
             }
         }
     }
@@ -61,14 +63,27 @@ class ServicesRepository @Inject constructor(
         serviceInstancesRepository.deleteInstance(instanceId)
         updateReachabilityMap(instanceId, null, remove = true)
         updatePingingMap(instanceId, false, remove = true)
+        lastReachabilityCheckMs.remove(instanceId)
+    }
+
+    suspend fun markInstanceUnauthorized(instanceId: String) {
+        if (serviceInstancesRepository.getInstance(instanceId) == null) return
+        updateReachabilityMap(instanceId, false)
+        updatePingingMap(instanceId, false)
+        lastReachabilityCheckMs.remove(instanceId)
     }
 
     suspend fun setPreferredInstance(type: ServiceType, instanceId: String?) {
         serviceInstancesRepository.setPreferredInstance(type, instanceId)
     }
 
-    suspend fun checkReachability(instanceId: String) {
+    suspend fun checkReachability(instanceId: String, force: Boolean = false) {
         if (_pinging.value[instanceId] == true) return
+        val now = System.currentTimeMillis()
+        if (!force) {
+            val last = lastReachabilityCheckMs[instanceId]
+            if (last != null && (now - last) < minReachabilityIntervalMs) return
+        }
 
         val instance = serviceInstancesRepository.getInstance(instanceId) ?: return
 
@@ -80,6 +95,18 @@ class ServicesRepository @Inject constructor(
             val pathsToTry = when (instance.type) {
                 ServiceType.PIHOLE -> listOf("/api/info/version", "/admin/index.php", "", "/admin/api.php")
                 ServiceType.ADGUARD_HOME -> listOf("/control/status", "/control/", "")
+                ServiceType.RADARR, ServiceType.SONARR -> listOf("/api/v3/system/status", "/api/v3/health", "")
+                ServiceType.LIDARR -> listOf("/api/v1/system/status", "/api/v1/health", "")
+                ServiceType.QBITTORRENT -> listOf("/api/v2/app/version", "/api/v2/app/buildInfo", "")
+                ServiceType.JELLYSEERR -> listOf("/api/v1/status", "/api/v1/settings/public", "")
+                ServiceType.PROWLARR -> listOf("/api/v1/system/status", "/api/v1/health", "")
+                ServiceType.BAZARR -> listOf("/api/system/status", "/api/badges", "")
+                ServiceType.GLUETUN -> listOf("/v1/openvpn/status", "/v1/publicip/ip", "")
+                ServiceType.FLARESOLVERR -> listOf("/health", "/v1", "")
+                ServiceType.LINUX_UPDATE -> listOf("/api/dashboard/stats", "")
+                ServiceType.TECHNITIUM -> listOf("/api/user/login", "/api/dashboard/stats/get", "")
+                ServiceType.DOCKHAND -> listOf("/api/dashboard/stats", "/api/containers", "")
+                ServiceType.PANGOLIN -> listOf("/v1/orgs", "/v1/openapi.json", "/v1/")
                 else -> listOf("")
             }
 
@@ -96,11 +123,12 @@ class ServicesRepository @Inject constructor(
 
         updatePingingMap(instanceId, false)
         updateReachabilityMap(instanceId, reachable)
+        lastReachabilityCheckMs[instanceId] = System.currentTimeMillis()
     }
 
-    suspend fun checkAllReachability() {
+    suspend fun checkAllReachability(force: Boolean = false) {
         val instances = allInstances.firstOrNull().orEmpty()
-        instances.forEach { checkReachability(it.id) }
+        instances.forEach { checkReachability(it.id, force = force) }
     }
 
     fun checkTailscale() {

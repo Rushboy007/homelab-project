@@ -122,7 +122,7 @@ fun PiholeQueryLogScreen(
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             while (isActive) {
                 viewModel.fetchRecentQueries()
-                delay(10_000L)
+                delay(15_000L)
             }
         }
     }

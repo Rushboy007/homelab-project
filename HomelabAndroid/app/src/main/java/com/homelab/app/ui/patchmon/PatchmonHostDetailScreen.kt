@@ -126,7 +126,7 @@ private fun patchmonDetailBorderTone(isDarkTheme: Boolean): Color =
     if (isDarkTheme) Color(0xFF334052) else Color(0xFFD9DED7)
 
 private fun patchmonDetailBorderColor(isDarkTheme: Boolean): Color =
-    patchmonDetailBorderTone(isDarkTheme).copy(alpha = if (isDarkTheme) 0.72f else 0.58f)
+    patchmonDetailBorderTone(isDarkTheme).copy(alpha = if (isDarkTheme) 0.56f else 0.40f)
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -223,32 +223,19 @@ fun PatchmonHostDetailScreen(
                     }
                 },
                 colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                     actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
         },
-        containerColor = Color.Transparent
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(pageBrush)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(pageGlow, Color.Transparent),
-                            center = Offset(160f, 90f),
-                            radius = 560f
-                        )
-                    )
-            )
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()

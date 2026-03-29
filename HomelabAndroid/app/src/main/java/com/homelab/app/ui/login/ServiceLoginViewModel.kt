@@ -6,17 +6,22 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.homelab.app.R
 import com.homelab.app.data.repository.BeszelRepository
+import com.homelab.app.data.repository.DockhandRepository
 import com.homelab.app.data.repository.GiteaRepository
+import com.homelab.app.data.repository.LinuxUpdateRepository
 import com.homelab.app.data.repository.HealthchecksRepository
 import com.homelab.app.data.repository.JellystatRepository
+import com.homelab.app.data.repository.MediaArrRepository
 import com.homelab.app.data.repository.AdGuardHomeRepository
 import com.homelab.app.data.repository.NginxProxyManagerRepository
 import com.homelab.app.data.repository.PatchmonRepository
+import com.homelab.app.data.repository.PangolinRepository
 import com.homelab.app.data.repository.PiholeRepository
 import com.homelab.app.data.repository.PlexRepository
 import com.homelab.app.data.repository.PortainerRepository
 import com.homelab.app.data.repository.ServiceInstancesRepository
 import com.homelab.app.data.repository.ServicesRepository
+import com.homelab.app.data.repository.TechnitiumRepository
 import com.homelab.app.domain.model.PiHoleAuthMode
 import com.homelab.app.domain.model.ServiceInstance
 import com.homelab.app.util.ErrorHandler
@@ -40,11 +45,16 @@ class ServiceLoginViewModel @Inject constructor(
     private val adGuardHomeRepository: AdGuardHomeRepository,
     private val beszelRepository: BeszelRepository,
     private val giteaRepository: GiteaRepository,
+    private val linuxUpdateRepository: LinuxUpdateRepository,
+    private val technitiumRepository: TechnitiumRepository,
+    private val dockhandRepository: DockhandRepository,
     private val nginxProxyManagerRepository: NginxProxyManagerRepository,
     private val healthchecksRepository: HealthchecksRepository,
     private val jellystatRepository: JellystatRepository,
     private val patchmonRepository: PatchmonRepository,
-    private val plexRepository: PlexRepository
+    private val pangolinRepository: PangolinRepository,
+    private val plexRepository: PlexRepository,
+    private val mediaArrRepository: MediaArrRepository
 ) : ViewModel() {
 
     private val existingInstanceId: String? = savedStateHandle["instanceId"]
@@ -73,7 +83,8 @@ class ServiceLoginViewModel @Inject constructor(
         username: String = "",
         password: String = "",
         apiKey: String = "",
-        fallbackUrl: String = ""
+        fallbackUrl: String = "",
+        mfaCode: String = ""
     ) {
         viewModelScope.launch {
             _isLoading.value = true
@@ -87,6 +98,7 @@ class ServiceLoginViewModel @Inject constructor(
             val trimmedUsername = username.trim()
             val trimmedPassword = password.trim()
             val trimmedApiKey = apiKey.trim()
+            val trimmedMfaCode = mfaCode.trim()
 
             try {
                 val metadataOnly = existing != null &&
@@ -226,6 +238,88 @@ class ServiceLoginViewModel @Inject constructor(
                                 fallbackUrl = cleanFallbackUrl
                             )
                         }
+                        ServiceType.PANGOLIN -> {
+                            require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
+                            pangolinRepository.authenticate(cleanUrl, trimmedApiKey)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                apiKey = trimmedApiKey,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.LINUX_UPDATE -> {
+                            require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
+                            linuxUpdateRepository.authenticate(cleanUrl, trimmedApiKey)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                apiKey = trimmedApiKey,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.TECHNITIUM -> {
+                            require(trimmedUsername.isNotBlank()) { context.getString(R.string.login_error_username_required) }
+                            val authPassword = trimmedPassword.ifBlank {
+                                if (existing != null && existing.url == cleanUrl && existing.username == trimmedUsername) {
+                                    return@ifBlank existing.password.orEmpty()
+                                }
+                                throw IllegalArgumentException(context.getString(R.string.login_error_password_required))
+                            }
+                            require(authPassword.isNotBlank()) { context.getString(R.string.login_error_password_required) }
+
+                            val sessionToken = technitiumRepository.authenticate(
+                                url = cleanUrl,
+                                username = trimmedUsername,
+                                password = authPassword,
+                                totp = trimmedMfaCode,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                token = sessionToken,
+                                username = trimmedUsername,
+                                password = authPassword,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.DOCKHAND -> {
+                            val authPassword = trimmedPassword.ifBlank {
+                                if (existing != null && existing.url == cleanUrl && existing.username == trimmedUsername) {
+                                    return@ifBlank existing.password.orEmpty()
+                                }
+                                throw IllegalArgumentException(context.getString(R.string.login_error_password_required))
+                            }
+                            require(trimmedUsername.isNotBlank()) { context.getString(R.string.login_error_username_required) }
+                            require(authPassword.isNotBlank()) { context.getString(R.string.login_error_password_required) }
+
+                            val cookieHeader = dockhandRepository.authenticate(
+                                url = cleanUrl,
+                                username = trimmedUsername,
+                                password = authPassword,
+                                mfaCode = trimmedMfaCode,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                token = cookieHeader,
+                                username = trimmedUsername,
+                                password = authPassword,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
                         ServiceType.JELLYSTAT -> {
                             require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
                             jellystatRepository.authenticate(cleanUrl, trimmedApiKey)
@@ -267,6 +361,56 @@ class ServiceLoginViewModel @Inject constructor(
                                 label = normalizedLabel,
                                 url = cleanUrl,
                                 apiKey = trimmedApiKey,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.QBITTORRENT -> {
+                            require(trimmedUsername.isNotBlank()) { context.getString(R.string.login_error_username_required) }
+                            val resolvedPassword = trimmedPassword.ifBlank {
+                                if (existing != null && existing.url == cleanUrl && existing.username == trimmedUsername) {
+                                    return@ifBlank existing.password.orEmpty()
+                                }
+                                throw IllegalArgumentException(context.getString(R.string.login_error_password_required))
+                            }
+                            require(resolvedPassword.isNotBlank()) { context.getString(R.string.login_error_password_required) }
+                            val sid = mediaArrRepository.authenticateQbittorrent(cleanUrl, trimmedUsername, resolvedPassword)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                token = sid,
+                                username = trimmedUsername,
+                                fallbackUrl = cleanFallbackUrl,
+                                password = resolvedPassword
+                            )
+                        }
+                        ServiceType.RADARR,
+                        ServiceType.SONARR,
+                        ServiceType.LIDARR,
+                        ServiceType.JELLYSEERR,
+                        ServiceType.PROWLARR,
+                        ServiceType.BAZARR -> {
+                            require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
+                            mediaArrRepository.authenticateWithApiKey(cleanUrl, serviceType, trimmedApiKey)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                apiKey = trimmedApiKey,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.GLUETUN,
+                        ServiceType.FLARESOLVERR -> {
+                            mediaArrRepository.authenticateWithApiKey(cleanUrl, serviceType, trimmedApiKey)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                apiKey = trimmedApiKey.ifBlank { null },
                                 fallbackUrl = cleanFallbackUrl
                             )
                         }

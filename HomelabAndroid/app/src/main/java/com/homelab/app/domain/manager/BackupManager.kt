@@ -7,6 +7,7 @@ import com.homelab.app.domain.model.BackupServiceTypeMapper
 import com.homelab.app.domain.model.toBackupEntry
 import com.homelab.app.domain.model.toServiceInstance
 import com.homelab.app.util.BackupCrypto
+import com.homelab.app.util.ServiceType
 import kotlinx.coroutines.flow.first
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -29,11 +30,16 @@ class BackupManager @Inject constructor(
         val envelope: BackupEnvelope
     )
 
-    suspend fun exportBackup(password: String): ByteArray {
+    suspend fun exportBackup(password: String, includedTypes: Set<ServiceType>? = null): ByteArray {
         val instances = repository.getAllInstances()
+        val filteredInstances = if (includedTypes.isNullOrEmpty()) {
+            instances
+        } else {
+            instances.filter { includedTypes.contains(it.type) }
+        }
         val preferredIdsByType = repository.preferredInstanceIdByType.first()
 
-        val entries = instances.map { instance ->
+        val entries = filteredInstances.map { instance ->
             val isPref = preferredIdsByType[instance.type] == instance.id
             instance.toBackupEntry(isPreferred = isPref ?: false)
         }
@@ -71,22 +77,51 @@ class BackupManager @Inject constructor(
         )
     }
 
-    suspend fun applyBackup(envelope: BackupEnvelope) {
-        // Delete all existing instances
+    suspend fun applyBackup(
+        envelope: BackupEnvelope,
+        selectedTypes: Set<ServiceType>
+    ): Int {
+        if (selectedTypes.isEmpty()) return 0
+
+        val entriesByType = envelope.services
+            .mapNotNull { entry ->
+                val instance = entry.toServiceInstance() ?: return@mapNotNull null
+                if (!selectedTypes.contains(instance.type)) return@mapNotNull null
+                instance to entry.isPreferred
+            }
+            .groupBy(keySelector = { it.first.type }, valueTransform = { it })
+
+        val typesToReplace = entriesByType.keys
+        if (typesToReplace.isEmpty()) return 0
+
+        // Only replace the selected service types that are present in this backup.
         val existing = repository.getAllInstances()
         for (instance in existing) {
-            repository.deleteInstance(instance.id)
-        }
-
-        // Add new ones
-        for (entry in envelope.services) {
-            val validInstance = entry.toServiceInstance()
-            if (validInstance != null) {
-                repository.saveInstance(validInstance)
-                if (entry.isPreferred) {
-                    repository.setPreferredInstance(validInstance.type, validInstance.id)
-                }
+            if (typesToReplace.contains(instance.type)) {
+                repository.deleteInstance(instance.id)
             }
         }
+
+        var importedCount = 0
+        for (type in typesToReplace) {
+            val entriesForType = entriesByType[type].orEmpty()
+            var preferredId: String? = null
+
+            for ((instance, isPreferred) in entriesForType) {
+                repository.saveInstance(instance)
+                importedCount += 1
+                if (isPreferred) {
+                    preferredId = instance.id
+                }
+            }
+
+            when {
+                preferredId != null -> repository.setPreferredInstance(type, preferredId)
+                entriesForType.isNotEmpty() -> repository.setPreferredInstance(type, entriesForType.first().first.id)
+                else -> repository.setPreferredInstance(type, null)
+            }
+        }
+
+        return importedCount
     }
 }

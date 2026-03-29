@@ -48,7 +48,11 @@ object ErrorHandler {
                 }
             }
             is IllegalStateException -> {
-                if (error.message == "Healthchecks authentication failed") {
+                if (
+                    error.message == "Healthchecks authentication failed" ||
+                    error.message == "Linux Update authentication failed" ||
+                    error.message == "Pangolin authentication failed"
+                ) {
                     context.getString(R.string.error_invalid_credentials)
                 } else {
                     error.localizedMessage ?: context.getString(R.string.error_unknown)

@@ -29,7 +29,71 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import com.homelab.app.R
+
+internal data class SecurityScreenPalette(
+    val backgroundBrush: Brush,
+    val accent: Color,
+    val primaryText: Color,
+    val secondaryText: Color,
+    val iconFill: Color,
+    val iconStroke: Color,
+    val dotEmpty: Color,
+    val keypadFill: Color,
+    val keypadAltFill: Color,
+    val keypadStroke: Color,
+    val keypadText: Color
+)
+
+@Composable
+internal fun rememberSecurityScreenPalette(): SecurityScreenPalette {
+    val scheme = MaterialTheme.colorScheme
+    val darkTheme = scheme.background.luminance() < 0.45f
+    return if (darkTheme) {
+        SecurityScreenPalette(
+            backgroundBrush = Brush.verticalGradient(
+                listOf(
+                    Color(0xFF040814),
+                    Color(0xFF0B1120),
+                    Color(0xFF18253E)
+                )
+            ),
+            accent = Color(0xFF12D6B3),
+            primaryText = Color.White,
+            secondaryText = Color.White.copy(alpha = 0.64f),
+            iconFill = Color.White.copy(alpha = 0.08f),
+            iconStroke = Color.White.copy(alpha = 0.12f),
+            dotEmpty = Color.White.copy(alpha = 0.12f),
+            keypadFill = Color.White.copy(alpha = 0.075f),
+            keypadAltFill = Color.White.copy(alpha = 0.06f),
+            keypadStroke = Color(0xFF35507B).copy(alpha = 0.72f),
+            keypadText = Color(0xFF12D6B3)
+        )
+    } else {
+        SecurityScreenPalette(
+            backgroundBrush = Brush.verticalGradient(
+                listOf(
+                    Color(0xFFF3FAFF),
+                    Color(0xFFEAF4FF),
+                    Color(0xFFDCEEFE)
+                )
+            ),
+            accent = Color(0xFF0F9F8C),
+            primaryText = Color(0xFF0F172A),
+            secondaryText = Color(0xFF475569),
+            iconFill = Color.White.copy(alpha = 0.74f),
+            iconStroke = Color(0xFFB7CFDF).copy(alpha = 0.9f),
+            dotEmpty = Color(0xFFB9CBD9),
+            keypadFill = Color.White.copy(alpha = 0.92f),
+            keypadAltFill = Color.White.copy(alpha = 0.84f),
+            keypadStroke = Color(0xFFB7CFDF),
+            keypadText = Color(0xFF0F9F8C)
+        )
+    }
+}
 
 // MARK: - Reusable PIN Entry
 
@@ -46,6 +110,7 @@ fun PinEntryScreen(
     val haptic = LocalHapticFeedback.current
     val scope = rememberCoroutineScope()
     val shakeOffset = remember { Animatable(0f) }
+    val palette = rememberSecurityScreenPalette()
 
     LaunchedEffect(errorMessage) {
         if (errorMessage != null) {
@@ -61,7 +126,7 @@ fun PinEntryScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .background(palette.backgroundBrush)
     ) {
         Column(
             modifier = Modifier
@@ -75,15 +140,17 @@ fun PinEntryScreen(
             Surface(
                 modifier = Modifier.size(80.dp),
                 shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f),
-                tonalElevation = 4.dp
+                color = palette.iconFill,
+                border = androidx.compose.foundation.BorderStroke(1.dp, palette.iconStroke),
+                tonalElevation = 0.dp,
+                shadowElevation = 0.dp
             ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = title,
                         modifier = Modifier.size(40.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = palette.primaryText
                     )
                 }
             }
@@ -95,7 +162,7 @@ fun PinEntryScreen(
                 text = title,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = palette.primaryText
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -104,7 +171,7 @@ fun PinEntryScreen(
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+                color = palette.secondaryText,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 32.dp)
             )
@@ -129,8 +196,7 @@ fun PinEntryScreen(
                             .scale(dotScale)
                             .clip(CircleShape)
                             .background(
-                                if (isFilled) MaterialTheme.colorScheme.primary
-                                else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
+                                if (isFilled) palette.accent else palette.dotEmpty
                             )
                     )
                 }
@@ -195,7 +261,7 @@ fun PinEntryScreen(
                             Icon(
                                 imageVector = Icons.Default.Fingerprint,
                                 contentDescription = stringResource(R.string.security_enable_biometric),
-                                tint = MaterialTheme.colorScheme.primary,
+                                tint = palette.keypadText,
                                 modifier = Modifier.size(28.dp)
                             )
                         }
@@ -228,7 +294,7 @@ fun PinEntryScreen(
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.Backspace,
                             contentDescription = stringResource(R.string.delete),
-                            tint = MaterialTheme.colorScheme.onSurface
+                            tint = palette.keypadText
                         )
                     }
                 }
@@ -242,6 +308,7 @@ fun PinEntryScreen(
 private fun NumberButton(digit: String, onClick: () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val palette = rememberSecurityScreenPalette()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.92f else 1f,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
@@ -254,8 +321,9 @@ private fun NumberButton(digit: String, onClick: () -> Unit) {
             .size(76.dp)
             .scale(scale),
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        shadowElevation = 2.dp,
+        color = palette.keypadFill,
+        border = androidx.compose.foundation.BorderStroke(1.dp, palette.keypadStroke),
+        shadowElevation = 0.dp,
         interactionSource = interactionSource
     ) {
         Box(contentAlignment = Alignment.Center) {
@@ -263,7 +331,7 @@ private fun NumberButton(digit: String, onClick: () -> Unit) {
                 text = digit,
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
+                color = palette.keypadText
             )
         }
     }
@@ -273,6 +341,7 @@ private fun NumberButton(digit: String, onClick: () -> Unit) {
 private fun PadButton(onClick: () -> Unit, content: @Composable () -> Unit) {
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val palette = rememberSecurityScreenPalette()
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.92f else 1f,
         animationSpec = spring(dampingRatio = 0.6f, stiffness = 500f),
@@ -285,8 +354,10 @@ private fun PadButton(onClick: () -> Unit, content: @Composable () -> Unit) {
             .size(76.dp)
             .scale(scale),
         shape = CircleShape,
-        color = MaterialTheme.colorScheme.surfaceContainer,
-        tonalElevation = 1.dp,
+        color = palette.keypadAltFill,
+        border = androidx.compose.foundation.BorderStroke(1.dp, palette.keypadStroke),
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
         interactionSource = interactionSource
     ) {
         Box(contentAlignment = Alignment.Center) {

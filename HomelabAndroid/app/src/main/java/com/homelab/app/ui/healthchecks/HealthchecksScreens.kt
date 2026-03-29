@@ -95,19 +95,19 @@ private fun healthchecksPageBackground(isDarkTheme: Boolean, accent: Color): Bru
 
 private fun healthchecksCardColor(isDarkTheme: Boolean, accent: Color): Color {
     val neutral = if (isDarkTheme) Color(0xFF121A16) else Color(0xFFF3F8F4)
-    val tintAmount = if (isDarkTheme) 0.17f else 0.10f
+    val tintAmount = if (isDarkTheme) 0.10f else 0.055f
     return lerp(neutral, accent, tintAmount)
 }
 
 private fun healthchecksRaisedCardColor(isDarkTheme: Boolean, accent: Color): Color {
     val neutral = if (isDarkTheme) Color(0xFF18211D) else Color(0xFFF9FCFA)
-    val tintAmount = if (isDarkTheme) 0.13f else 0.08f
+    val tintAmount = if (isDarkTheme) 0.075f else 0.04f
     return lerp(neutral, accent, tintAmount)
 }
 
 private fun healthchecksBorderTone(isDarkTheme: Boolean, accent: Color): Color {
     val neutral = if (isDarkTheme) Color(0xFF2E3C35) else Color(0xFFBED4C8)
-    val tintAmount = if (isDarkTheme) 0.34f else 0.22f
+    val tintAmount = if (isDarkTheme) 0.18f else 0.10f
     return lerp(neutral, accent, tintAmount)
 }
 
@@ -211,32 +211,19 @@ fun HealthchecksDashboardScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                     actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
         },
-        containerColor = Color.Transparent
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(pageBrush)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(pageGlow, Color.Transparent),
-                            center = Offset(160f, 90f),
-                            radius = 560f
-                        )
-                    )
-            )
-
             when (val state = uiState) {
                 is UiState.Loading, is UiState.Idle -> {
                     Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {

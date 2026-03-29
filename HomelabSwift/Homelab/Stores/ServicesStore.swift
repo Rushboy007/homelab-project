@@ -6,13 +6,22 @@ private final class ServiceClientManager {
     private var portainerClients: [UUID: PortainerAPIClient] = [:]
     private var piholeClients: [UUID: PiHoleAPIClient] = [:]
     private var adguardClients: [UUID: AdGuardHomeAPIClient] = [:]
+    private var technitiumClients: [UUID: TechnitiumAPIClient] = [:]
     private var beszelClients: [UUID: BeszelAPIClient] = [:]
     private var healthchecksClients: [UUID: HealthchecksAPIClient] = [:]
+    private var linuxUpdateClients: [UUID: LinuxUpdateAPIClient] = [:]
+    private var dockhandClients: [UUID: DockhandAPIClient] = [:]
     private var giteaClients: [UUID: GiteaAPIClient] = [:]
     private var npmClients: [UUID: NginxProxyManagerAPIClient] = [:]
+    private var pangolinClients: [UUID: PangolinAPIClient] = [:]
     private var patchmonClients: [UUID: PatchmonAPIClient] = [:]
     private var jellystatClients: [UUID: JellystatAPIClient] = [:]
     private var plexClients: [UUID: PlexAPIClient] = [:]
+    private var qbittorrentClients: [UUID: QbittorrentAPIClient] = [:]
+    private var radarrClients: [UUID: RadarrAPIClient] = [:]
+    private var sonarrClients: [UUID: SonarrAPIClient] = [:]
+    private var lidarrClients: [UUID: LidarrAPIClient] = [:]
+    private var genericClients: [UUID: GenericAPIClient] = [:]
 
     func portainerClient(id: UUID) -> PortainerAPIClient {
         if let client = portainerClients[id] {
@@ -41,6 +50,15 @@ private final class ServiceClientManager {
         return client
     }
 
+    func technitiumClient(id: UUID) -> TechnitiumAPIClient {
+        if let client = technitiumClients[id] {
+            return client
+        }
+        let client = TechnitiumAPIClient(instanceId: id)
+        technitiumClients[id] = client
+        return client
+    }
+
     func beszelClient(id: UUID) -> BeszelAPIClient {
         if let client = beszelClients[id] {
             return client
@@ -59,6 +77,24 @@ private final class ServiceClientManager {
         return client
     }
 
+    func linuxUpdateClient(id: UUID) -> LinuxUpdateAPIClient {
+        if let client = linuxUpdateClients[id] {
+            return client
+        }
+        let client = LinuxUpdateAPIClient(instanceId: id)
+        linuxUpdateClients[id] = client
+        return client
+    }
+
+    func dockhandClient(id: UUID) -> DockhandAPIClient {
+        if let client = dockhandClients[id] {
+            return client
+        }
+        let client = DockhandAPIClient(instanceId: id)
+        dockhandClients[id] = client
+        return client
+    }
+
     func giteaClient(id: UUID) -> GiteaAPIClient {
         if let client = giteaClients[id] {
             return client
@@ -74,6 +110,15 @@ private final class ServiceClientManager {
         }
         let client = NginxProxyManagerAPIClient(instanceId: id)
         npmClients[id] = client
+        return client
+    }
+
+    func pangolinClient(id: UUID) -> PangolinAPIClient {
+        if let client = pangolinClients[id] {
+            return client
+        }
+        let client = PangolinAPIClient(instanceId: id)
+        pangolinClients[id] = client
         return client
     }
 
@@ -104,6 +149,51 @@ private final class ServiceClientManager {
         return client
     }
 
+    func qbittorrentClient(id: UUID) -> QbittorrentAPIClient {
+        if let client = qbittorrentClients[id] {
+            return client
+        }
+        let client = QbittorrentAPIClient(instanceId: id)
+        qbittorrentClients[id] = client
+        return client
+    }
+
+    func radarrClient(id: UUID) -> RadarrAPIClient {
+        if let client = radarrClients[id] {
+            return client
+        }
+        let client = RadarrAPIClient(instanceId: id)
+        radarrClients[id] = client
+        return client
+    }
+
+    func sonarrClient(id: UUID) -> SonarrAPIClient {
+        if let client = sonarrClients[id] {
+            return client
+        }
+        let client = SonarrAPIClient(instanceId: id)
+        sonarrClients[id] = client
+        return client
+    }
+    
+    func lidarrClient(id: UUID) -> LidarrAPIClient {
+        if let client = lidarrClients[id] {
+            return client
+        }
+        let client = LidarrAPIClient(instanceId: id)
+        lidarrClients[id] = client
+        return client
+    }
+    
+    func genericClient(id: UUID, type: ServiceType) -> GenericAPIClient {
+        if let client = genericClients[id] {
+            return client
+        }
+        let client = GenericAPIClient(serviceType: type, instanceId: id)
+        genericClients[id] = client
+        return client
+    }
+
     func removeClient(id: UUID, type: ServiceType) {
         switch type {
         case .portainer:
@@ -112,20 +202,38 @@ private final class ServiceClientManager {
             piholeClients.removeValue(forKey: id)
         case .adguardHome:
             adguardClients.removeValue(forKey: id)
+        case .technitium:
+            technitiumClients.removeValue(forKey: id)
         case .beszel:
             beszelClients.removeValue(forKey: id)
         case .healthchecks:
             healthchecksClients.removeValue(forKey: id)
+        case .linuxUpdate:
+            linuxUpdateClients.removeValue(forKey: id)
+        case .dockhand:
+            dockhandClients.removeValue(forKey: id)
         case .gitea:
             giteaClients.removeValue(forKey: id)
         case .nginxProxyManager:
             npmClients.removeValue(forKey: id)
+        case .pangolin:
+            pangolinClients.removeValue(forKey: id)
         case .patchmon:
             patchmonClients.removeValue(forKey: id)
         case .jellystat:
             jellystatClients.removeValue(forKey: id)
         case .plex:
             plexClients.removeValue(forKey: id)
+        case .qbittorrent:
+            qbittorrentClients.removeValue(forKey: id)
+        case .radarr:
+            radarrClients.removeValue(forKey: id)
+        case .sonarr:
+            sonarrClients.removeValue(forKey: id)
+        case .lidarr:
+            lidarrClients.removeValue(forKey: id)
+        case .jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr:
+            genericClients.removeValue(forKey: id)
         }
     }
 }
@@ -265,7 +373,11 @@ final class ServicesStore {
         pingingByInstanceId[instanceId] ?? false
     }
 
-    func saveInstance(_ instance: ServiceInstance, refreshPiHoleAuth: Bool = false) async {
+    func saveInstance(
+        _ instance: ServiceInstance,
+        refreshPiHoleAuth: Bool = false,
+        triggerReachabilityCheck: Bool = true
+    ) async {
         let normalized = normalizedInstance(instance)
         let previous = instancesById[normalized.id]
         instancesById[normalized.id] = normalized
@@ -280,8 +392,10 @@ final class ServicesStore {
         persistState()
         await configureClient(for: normalized, refreshPiHoleAuth: refreshPiHoleAuth)
 
-        reachabilityByInstanceId[normalized.id] = nil
-        Task { await checkReachability(for: normalized.id) }
+        if triggerReachabilityCheck {
+            reachabilityByInstanceId[normalized.id] = nil
+            Task { await checkReachability(for: normalized.id) }
+        }
     }
 
     func deleteInstance(id: UUID) {
@@ -331,6 +445,11 @@ final class ServicesStore {
         return clientManager.adguardClient(id: instance.id)
     }
 
+    func technitiumClient(instanceId: UUID) async -> TechnitiumAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .technitium else { return nil }
+        return clientManager.technitiumClient(id: instance.id)
+    }
+
     func beszelClient(instanceId: UUID) async -> BeszelAPIClient? {
         guard let instance = instancesById[instanceId], instance.type == .beszel else { return nil }
         return clientManager.beszelClient(id: instance.id)
@@ -339,6 +458,16 @@ final class ServicesStore {
     func healthchecksClient(instanceId: UUID) async -> HealthchecksAPIClient? {
         guard let instance = instancesById[instanceId], instance.type == .healthchecks else { return nil }
         return clientManager.healthchecksClient(id: instance.id)
+    }
+
+    func linuxUpdateClient(instanceId: UUID) async -> LinuxUpdateAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .linuxUpdate else { return nil }
+        return clientManager.linuxUpdateClient(id: instance.id)
+    }
+
+    func dockhandClient(instanceId: UUID) async -> DockhandAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .dockhand else { return nil }
+        return clientManager.dockhandClient(id: instance.id)
     }
 
     func giteaClient(instanceId: UUID) async -> GiteaAPIClient? {
@@ -356,6 +485,11 @@ final class ServicesStore {
         return clientManager.patchmonClient(id: instance.id)
     }
 
+    func pangolinClient(instanceId: UUID) async -> PangolinAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .pangolin else { return nil }
+        return clientManager.pangolinClient(id: instance.id)
+    }
+
     func jellystatClient(instanceId: UUID) async -> JellystatAPIClient? {
         guard let instance = instancesById[instanceId], instance.type == .jellystat else { return nil }
         return clientManager.jellystatClient(id: instance.id)
@@ -364,6 +498,34 @@ final class ServicesStore {
     func plexClient(instanceId: UUID) async -> PlexAPIClient? {
         guard let instance = instancesById[instanceId], instance.type == .plex else { return nil }
         return clientManager.plexClient(id: instance.id)
+    }
+
+    func qbittorrentClient(instanceId: UUID) async -> QbittorrentAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .qbittorrent else { return nil }
+        return clientManager.qbittorrentClient(id: instance.id)
+    }
+
+    func radarrClient(instanceId: UUID) async -> RadarrAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .radarr else { return nil }
+        return clientManager.radarrClient(id: instance.id)
+    }
+
+    func sonarrClient(instanceId: UUID) async -> SonarrAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .sonarr else { return nil }
+        return clientManager.sonarrClient(id: instance.id)
+    }
+
+    func lidarrClient(instanceId: UUID) async -> LidarrAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .lidarr else { return nil }
+        return clientManager.lidarrClient(id: instance.id)
+    }
+
+    func genericMediaClient(instanceId: UUID) async -> GenericAPIClient? {
+        guard let instance = instancesById[instanceId],
+              [.jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr].contains(instance.type) else {
+            return nil
+        }
+        return clientManager.genericClient(id: instance.id, type: instance.type)
     }
 
     func checkReachability(for instanceId: UUID) async {
@@ -381,27 +543,45 @@ final class ServicesStore {
             ok = await clientManager.piholeClient(id: instanceId).ping()
         case .adguardHome:
             ok = await clientManager.adguardClient(id: instanceId).ping()
+        case .technitium:
+            ok = await clientManager.technitiumClient(id: instanceId).ping()
         case .beszel:
             ok = await clientManager.beszelClient(id: instanceId).ping()
         case .healthchecks:
             ok = await clientManager.healthchecksClient(id: instanceId).ping()
+        case .linuxUpdate:
+            ok = await clientManager.linuxUpdateClient(id: instanceId).ping()
+        case .dockhand:
+            ok = await clientManager.dockhandClient(id: instanceId).ping()
         case .gitea:
             ok = await clientManager.giteaClient(id: instanceId).ping()
         case .nginxProxyManager:
             ok = await clientManager.npmClient(id: instanceId).ping()
+        case .pangolin:
+            ok = await clientManager.pangolinClient(id: instanceId).ping()
         case .patchmon:
             ok = await clientManager.patchmonClient(id: instanceId).ping()
         case .jellystat:
             ok = await clientManager.jellystatClient(id: instanceId).ping()
         case .plex:
             ok = await clientManager.plexClient(id: instanceId).ping()
+        case .qbittorrent:
+            ok = await clientManager.qbittorrentClient(id: instanceId).ping()
+        case .radarr:
+            ok = await clientManager.radarrClient(id: instanceId).ping()
+        case .sonarr:
+            ok = await clientManager.sonarrClient(id: instanceId).ping()
+        case .lidarr:
+            ok = await clientManager.lidarrClient(id: instanceId).ping()
+        case .jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr:
+            ok = await clientManager.genericClient(id: instanceId, type: instance.type).ping()
         }
 
         reachabilityByInstanceId[instanceId] = ok
     }
 
-    func checkAllReachability() async {
-        if let last = lastReachabilityCheck, Date().timeIntervalSince(last) < 5 {
+    func checkAllReachability(force: Bool = false) async {
+        if !force, let last = lastReachabilityCheck, Date().timeIntervalSince(last) < 5 {
             return
         }
         lastReachabilityCheck = Date()
@@ -465,7 +645,7 @@ final class ServicesStore {
     }
 
     func startPeriodicHealthChecks() {
-        healthCheckTask?.cancel()
+        guard healthCheckTask == nil else { return }
         healthCheckTask = Task { [weak self] in
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(180))
@@ -528,24 +708,12 @@ final class ServicesStore {
             }
         }
 
-        // Beszel/Gitea/NPM: auto-refresh handled by client retry logic — don't delete
-        if current.type == .beszel || current.type == .gitea || current.type == .nginxProxyManager || current.type == .adguardHome || current.type == .patchmon {
-            if let username = current.username, !username.isEmpty,
-               let password = current.password, !password.isEmpty {
-                // Credentials exist — client retry will handle re-auth
-                return
-            }
+        // Keep stored instances and mark them temporarily unreachable when auth expires.
+        // This prevents destructive data loss for services that require re-login.
+        if instancesById[instanceId] != nil {
+            reachabilityByInstanceId[instanceId] = false
+            persistState()
         }
-
-        if current.type == .jellystat, let apiKey = current.apiKey, !apiKey.isEmpty {
-            return
-        }
-
-        if current.type == .plex, let apiKey = current.apiKey, !apiKey.isEmpty {
-            return
-        }
-
-        deleteInstance(id: instanceId)
     }
 
     private func configureClient(for instance: ServiceInstance, refreshPiHoleAuth: Bool) async {
@@ -598,6 +766,25 @@ final class ServicesStore {
             let client = clientManager.adguardClient(id: instance.id)
             await client.configure(url: instance.url, username: instance.username ?? "", password: instance.password ?? "", fallbackUrl: instance.fallbackUrl)
 
+        case .technitium:
+            let client = clientManager.technitiumClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                token: instance.token,
+                fallbackUrl: instance.fallbackUrl,
+                username: instance.username,
+                password: instance.password
+            )
+            let instanceId = instance.id
+            await client.setTokenRefreshCallback { [weak self] newToken in
+                Task { @MainActor in
+                    guard let self, var current = self.instancesById[instanceId] else { return }
+                    current.token = newToken
+                    self.instancesById[instanceId] = current
+                    self.persistState()
+                }
+            }
+
         case .beszel:
             let client = clientManager.beszelClient(id: instance.id)
             await client.configure(url: instance.url, token: instance.token, fallbackUrl: instance.fallbackUrl, email: instance.username, password: instance.password)
@@ -614,6 +801,20 @@ final class ServicesStore {
         case .healthchecks:
             let client = clientManager.healthchecksClient(id: instance.id)
             await client.configure(url: instance.url, apiKey: instance.apiKey ?? "", fallbackUrl: instance.fallbackUrl)
+
+        case .linuxUpdate:
+            let client = clientManager.linuxUpdateClient(id: instance.id)
+            await client.configure(url: instance.url, apiToken: instance.apiKey ?? "", fallbackUrl: instance.fallbackUrl)
+
+        case .dockhand:
+            let client = clientManager.dockhandClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                sessionCookie: instance.token,
+                fallbackUrl: instance.fallbackUrl,
+                username: instance.username,
+                password: instance.password
+            )
 
         case .gitea:
             let client = clientManager.giteaClient(id: instance.id)
@@ -637,6 +838,14 @@ final class ServicesStore {
                     self.persistState()
                 }
             }
+
+        case .pangolin:
+            let client = clientManager.pangolinClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                apiKey: instance.apiKey ?? "",
+                fallbackUrl: instance.fallbackUrl
+            )
 
         case .patchmon:
             let client = clientManager.patchmonClient(id: instance.id)
@@ -662,6 +871,36 @@ final class ServicesStore {
                 token: instance.apiKey ?? "",
                 fallbackUrl: instance.fallbackUrl
             )
+        case .qbittorrent:
+            let client = clientManager.qbittorrentClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                sid: instance.token,
+                fallbackUrl: instance.fallbackUrl,
+                username: instance.username,
+                password: instance.password
+            )
+            let instanceId = instance.id
+            await client.setTokenRefreshCallback { [weak self] newSid in
+                Task { @MainActor in
+                    guard let self, var current = self.instancesById[instanceId] else { return }
+                    current.token = newSid
+                    self.instancesById[instanceId] = current
+                    self.persistState()
+                }
+            }
+        case .radarr:
+            let client = clientManager.radarrClient(id: instance.id)
+            await client.configure(url: instance.url, apiKey: instance.apiKey ?? "", fallbackUrl: instance.fallbackUrl)
+        case .sonarr:
+            let client = clientManager.sonarrClient(id: instance.id)
+            await client.configure(url: instance.url, apiKey: instance.apiKey ?? "", fallbackUrl: instance.fallbackUrl)
+        case .lidarr:
+            let client = clientManager.lidarrClient(id: instance.id)
+            await client.configure(url: instance.url, apiKey: instance.apiKey ?? "", fallbackUrl: instance.fallbackUrl)
+        case .jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr:
+            let client = clientManager.genericClient(id: instance.id, type: instance.type)
+            await client.configure(url: instance.url, fallbackUrl: instance.fallbackUrl, apiKey: instance.apiKey)
         }
     }
 

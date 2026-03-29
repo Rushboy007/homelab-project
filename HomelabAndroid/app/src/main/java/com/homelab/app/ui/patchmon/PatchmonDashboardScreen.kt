@@ -112,19 +112,19 @@ private fun patchmonNeutralBorderTone(isDarkTheme: Boolean): Color =
 private fun patchmonCardColor(
     isDarkTheme: Boolean,
     accent: Color
-): Color = accent.copy(alpha = if (isDarkTheme) 0.10f else 0.035f)
+): Color = accent.copy(alpha = if (isDarkTheme) 0.055f else 0.025f)
     .compositeOver(patchmonNeutralCardColor(isDarkTheme))
 
 private fun patchmonRaisedCardColor(
     isDarkTheme: Boolean,
     accent: Color
-): Color = accent.copy(alpha = if (isDarkTheme) 0.14f else 0.05f)
+): Color = accent.copy(alpha = if (isDarkTheme) 0.08f else 0.03f)
     .compositeOver(patchmonNeutralRaisedCardColor(isDarkTheme))
 
 private fun patchmonBorderTone(
     isDarkTheme: Boolean,
     accent: Color
-): Color = accent.copy(alpha = if (isDarkTheme) 0.30f else 0.12f)
+): Color = accent.copy(alpha = if (isDarkTheme) 0.16f else 0.07f)
     .compositeOver(patchmonNeutralBorderTone(isDarkTheme))
 
 private fun patchmonTrackTone(isDarkTheme: Boolean): Color =
@@ -175,32 +175,19 @@ fun PatchmonDashboardScreen(
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent,
+                    containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
                     navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
                     actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             )
         },
-        containerColor = Color.Transparent
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(pageBrush)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(
-                        Brush.radialGradient(
-                            colors = listOf(pageGlow, Color.Transparent),
-                            center = Offset(160f, 90f),
-                            radius = 560f
-                        )
-                    )
-            )
-
             when (val state = hostsState) {
                 is UiState.Loading -> {
                     PatchmonLoadingScreen(

@@ -204,9 +204,34 @@ class AuthInterceptor @Inject constructor(
                     builder.addHeader("Cookie", "token=${instance.token}")
                 }
             }
+            ServiceType.PANGOLIN -> {
+                if (!hasAuthorization && !instance.apiKey.isNullOrBlank()) {
+                    val token = instance.apiKey.trim().let { raw ->
+                        if (raw.startsWith("bearer ", ignoreCase = true)) raw.substring(7).trim() else raw
+                    }
+                    if (token.isNotBlank()) {
+                        builder.addHeader("Authorization", "Bearer $token")
+                    }
+                }
+            }
             ServiceType.HEALTHCHECKS -> {
                 if (!instance.apiKey.isNullOrBlank()) {
                     builder.addHeader("X-Api-Key", instance.apiKey)
+                }
+            }
+            ServiceType.LINUX_UPDATE -> {
+                if (!hasAuthorization && !instance.apiKey.isNullOrBlank()) {
+                    val token = instance.apiKey.trim().let { raw ->
+                        if (raw.startsWith("bearer ", ignoreCase = true)) raw.substring(7).trim() else raw
+                    }
+                    if (token.isNotBlank()) {
+                        builder.addHeader("Authorization", "Bearer $token")
+                    }
+                }
+            }
+            ServiceType.DOCKHAND -> {
+                if (!hasAuthorization && instance.token.isNotBlank()) {
+                    builder.addHeader("Cookie", instance.token)
                 }
             }
             ServiceType.JELLYSTAT -> {
@@ -228,6 +253,30 @@ class AuthInterceptor @Inject constructor(
             ServiceType.PLEX -> {
                 if (!instance.apiKey.isNullOrBlank()) {
                     builder.addHeader("X-Plex-Token", instance.apiKey)
+                }
+            }
+            ServiceType.RADARR,
+            ServiceType.SONARR,
+            ServiceType.LIDARR,
+            ServiceType.JELLYSEERR,
+            ServiceType.PROWLARR,
+            ServiceType.BAZARR -> {
+                if (!instance.apiKey.isNullOrBlank()) {
+                    builder.addHeader("X-Api-Key", instance.apiKey)
+                }
+            }
+            ServiceType.GLUETUN,
+            ServiceType.FLARESOLVERR -> {
+                if (!instance.apiKey.isNullOrBlank()) {
+                    builder.addHeader("X-Api-Key", instance.apiKey)
+                    if (!hasAuthorization) {
+                        builder.addHeader("Authorization", "Bearer ${instance.apiKey}")
+                    }
+                }
+            }
+            ServiceType.QBITTORRENT -> {
+                if (instance.token.isNotBlank()) {
+                    builder.addHeader("Cookie", "SID=${instance.token}")
                 }
             }
             else -> {}
