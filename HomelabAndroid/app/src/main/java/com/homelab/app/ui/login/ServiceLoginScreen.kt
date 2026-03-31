@@ -428,6 +428,21 @@ fun ServiceLoginScreen(
                     showSecret = showSecret,
                     onToggleSecret = { showSecret = !showSecret }
                 )
+
+                if (serviceType == ServiceType.PANGOLIN) {
+                    OutlinedTextField(
+                        value = username,
+                        onValueChange = { username = it },
+                        label = { Text(stringResource(R.string.pangolin_org_id_hint)) },
+                        leadingIcon = { Icon(Icons.Default.Person, contentDescription = stringResource(R.string.pangolin_org_id_hint)) },
+                        singleLine = true,
+                        keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(imeAction = ImeAction.Done),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 14.dp),
+                        shape = RoundedCornerShape(14.dp)
+                    )
+                }
             } else if (
                 serviceType == ServiceType.GLUETUN ||
                 serviceType == ServiceType.FLARESOLVERR

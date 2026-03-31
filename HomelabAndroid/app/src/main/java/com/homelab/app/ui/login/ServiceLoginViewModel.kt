@@ -240,12 +240,14 @@ class ServiceLoginViewModel @Inject constructor(
                         }
                         ServiceType.PANGOLIN -> {
                             require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
-                            pangolinRepository.authenticate(cleanUrl, trimmedApiKey)
+                            val orgId = trimmedUsername.ifBlank { null }
+                            pangolinRepository.authenticate(cleanUrl, trimmedApiKey, orgId)
                             ServiceInstance(
                                 id = instanceId,
                                 type = serviceType,
                                 label = normalizedLabel,
                                 url = cleanUrl,
+                                username = orgId,
                                 apiKey = trimmedApiKey,
                                 fallbackUrl = cleanFallbackUrl
                             )

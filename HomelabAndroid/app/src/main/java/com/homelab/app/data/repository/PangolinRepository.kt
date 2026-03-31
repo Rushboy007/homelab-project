@@ -34,11 +34,13 @@ class PangolinRepository @Inject constructor(
     private val okHttpClient: OkHttpClient
 ) {
 
-    suspend fun authenticate(url: String, apiKey: String) {
+    suspend fun authenticate(url: String, apiKey: String, orgId: String? = null) {
         withContext(Dispatchers.IO) {
             val token = cleanToken(apiKey)
+            val cleanedOrgId = orgId?.trim().orEmpty()
+            val path = if (cleanedOrgId.isNotEmpty()) "v1/org/$cleanedOrgId/sites?pageSize=1&page=1" else "v1/orgs"
             val request = Request.Builder()
-                .url("${cleanUrl(url)}/v1/orgs")
+                .url("${cleanUrl(url)}/$path")
                 .addHeader("Authorization", "Bearer $token")
                 .build()
 
@@ -50,15 +52,19 @@ class PangolinRepository @Inject constructor(
         }
     }
 
-    suspend fun listOrgs(instanceId: String): List<PangolinOrg> =
-        api.listOrgs(instanceId = instanceId).data.orgs.sortedBy { it.name.lowercase() }
+    suspend fun listOrgs(instanceId: String, scopedOrgId: String? = null): List<PangolinOrg> {
+        val trimmed = scopedOrgId?.trim().orEmpty()
+        if (trimmed.isNotEmpty()) {
+            return listOf(PangolinOrg(orgId = trimmed, name = trimmed, subnet = null, utilitySubnet = null, isBillingOrg = null))
+        }
+        return api.listOrgs(instanceId = instanceId).data.orgs.sortedBy { it.name.lowercase() }
+    }
 
     suspend fun getSnapshot(
         instanceId: String,
         orgId: String,
         orgs: List<PangolinOrg>? = null
     ): PangolinSnapshot = coroutineScope {
-        val orgsDeferred = orgs?.let { null } ?: async { listOrgs(instanceId) }
         val sitesDeferred = async { listAllSites(instanceId, orgId) }
         val siteResourcesDeferred = async { listAllSiteResources(instanceId, orgId) }
         val resourcesDeferred = async { listAllResources(instanceId, orgId) }
@@ -69,7 +75,7 @@ class PangolinRepository @Inject constructor(
         val targetsByResourceId = listTargetsByResource(instanceId, resources)
 
         PangolinSnapshot(
-            orgs = orgs ?: orgsDeferred?.await().orEmpty(),
+            orgs = orgs.orEmpty(),
             sites = sitesDeferred.await(),
             siteResources = siteResourcesDeferred.await(),
             resources = resources,
@@ -79,8 +85,8 @@ class PangolinRepository @Inject constructor(
         )
     }
 
-    suspend fun getAggregateSummary(instanceId: String): Triple<Int, Int, Int> {
-        val orgs = listOrgs(instanceId)
+    suspend fun getAggregateSummary(instanceId: String, scopedOrgId: String? = null): Triple<Int, Int, Int> {
+        val orgs = listOrgs(instanceId, scopedOrgId)
         var totalSites = 0
         var totalResources = 0
         var totalClients = 0

@@ -844,7 +844,8 @@ final class ServicesStore {
             await client.configure(
                 url: instance.url,
                 apiKey: instance.apiKey ?? "",
-                fallbackUrl: instance.fallbackUrl
+                fallbackUrl: instance.fallbackUrl,
+                orgId: instance.username
             )
 
         case .patchmon:

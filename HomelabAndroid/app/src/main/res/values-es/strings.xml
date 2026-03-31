@@ -1240,7 +1240,8 @@
     <string name="linux_update_detail_no_hidden_updates">No hay actualizaciones ocultas.</string>
     <string name="linux_update_detail_no_history">No hay actividad reciente.</string>
     <string name="service_pangolin">Pangolin</string>
-    <string name="login_hint_pangolin">Usa una clave Integration API de Pangolin. Se recomiendan claves limitadas a la organización; una clave root expone todo el plano de control.</string>
+    <string name="login_hint_pangolin">Usa una clave Integration API de Pangolin. Para una clave de ámbito de organización (Org-Scoped Key), introduce también el ID de organización.</string>
+    <string name="pangolin_org_id_hint">ID de organización (opcional)</string>
     <string name="pangolin_sites_clients">sitios / clientes</string>
     <string name="pangolin_overview_subtitle">Resumen de reverse proxy, tunneling y red zero-trust</string>
     <string name="pangolin_organizations">Organizaciones</string>

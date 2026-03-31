@@ -1238,7 +1238,8 @@
     <string name="linux_update_detail_no_hidden_updates">Keine versteckten Updates.</string>
     <string name="linux_update_detail_no_history">Keine letzte Aktivität.</string>
     <string name="service_pangolin">Pangolin</string>
-    <string name="login_hint_pangolin">Verwende einen Pangolin-Integration-API-Schlüssel. Auf Organisationen beschränkte Schlüssel sind empfohlen; ein Root-Schlüssel legt die gesamte Control Plane offen.</string>
+    <string name="login_hint_pangolin">Verwende einen Pangolin-Integration-API-Schlüssel. Bei einem auf eine Organisation begrenzten Schlüssel (Org-Scoped Key) auch die Organisations-ID eintragen.</string>
+    <string name="pangolin_org_id_hint">Organisations-ID (optional)</string>
     <string name="pangolin_sites_clients">Sites / Clients</string>
     <string name="pangolin_overview_subtitle">Übersicht über Reverse Proxy, Tunneling und Zero-Trust-Netzwerk</string>
     <string name="pangolin_organizations">Organisationen</string>

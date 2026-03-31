@@ -223,6 +223,15 @@ struct ServiceLoginView: View {
                     showPassword: showPassword,
                     onSubmit: handleSave
                 )
+
+                if serviceType == .pangolin {
+                    InputField(
+                        icon: "building.2.fill",
+                        placeholder: PangolinStrings.forLanguage(localizer.language).orgIdPlaceholder,
+                        text: $username,
+                        onSubmit: handleSave
+                    )
+                }
             } else if !supportsCredentiallessAuth {
                 if needsUsername {
                     let isEmailField = serviceType == .beszel || serviceType == .nginxProxyManager
@@ -702,14 +711,16 @@ struct ServiceLoginView: View {
             guard let key, !key.isEmpty else {
                 throw APIError.custom(localizer.t.loginErrorCredentials)
             }
+            let orgId = normalizedOptional(username)
             let client = PangolinAPIClient(instanceId: existingInstanceId ?? UUID())
-            try await client.authenticate(url: url, apiKey: key, fallbackUrl: fallbackUrl)
+            try await client.authenticate(url: url, apiKey: key, fallbackUrl: fallbackUrl, orgId: orgId)
             return ServiceInstance(
                 id: existingInstanceId ?? UUID(),
                 type: .pangolin,
                 label: label,
                 url: url,
                 token: "",
+                username: orgId,
                 apiKey: key,
                 fallbackUrl: fallbackUrl
             )

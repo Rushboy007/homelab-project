@@ -219,39 +219,49 @@ actor PangolinAPIClient {
     private var baseURL: String = ""
     private var fallbackURL: String = ""
     private var apiKey: String = ""
+    private var scopedOrgId: String = ""
+
+    var isOrgScoped: Bool { !scopedOrgId.isEmpty }
 
     init(instanceId: UUID) {
         self.engine = BaseNetworkEngine(serviceType: .pangolin, instanceId: instanceId)
     }
 
-    func configure(url: String, apiKey: String, fallbackUrl: String? = nil) {
+    func configure(url: String, apiKey: String, fallbackUrl: String? = nil, orgId: String? = nil) {
         self.baseURL = Self.cleanURL(url)
         self.fallbackURL = Self.cleanURL(fallbackUrl ?? "")
         self.apiKey = Self.cleanToken(apiKey)
+        self.scopedOrgId = orgId?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
     }
 
     func ping() async -> Bool {
         guard !baseURL.isEmpty else { return false }
-        let primary = await engine.pingURL("\(baseURL)/v1/orgs", extraHeaders: authHeaders())
+        let pingPath = isOrgScoped ? "/v1/org/\(scopedOrgId)/sites?pageSize=1&page=1" : "/v1/orgs"
+        let primary = await engine.pingURL("\(baseURL)\(pingPath)", extraHeaders: authHeaders())
         if primary { return true }
         guard !fallbackURL.isEmpty else { return false }
-        return await engine.pingURL("\(fallbackURL)/v1/orgs", extraHeaders: authHeaders())
+        return await engine.pingURL("\(fallbackURL)\(pingPath)", extraHeaders: authHeaders())
     }
 
-    func authenticate(url: String, apiKey: String, fallbackUrl: String? = nil) async throws {
+    func authenticate(url: String, apiKey: String, fallbackUrl: String? = nil, orgId: String? = nil) async throws {
         let token = Self.cleanToken(apiKey)
         guard !Self.cleanURL(url).isEmpty, !token.isEmpty else {
             throw APIError.notConfigured
         }
+        let cleanedOrgId = orgId?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let path = cleanedOrgId.isEmpty ? "/v1/orgs" : "/v1/org/\(cleanedOrgId)/sites?pageSize=1&page=1"
         _ = try await engine.requestData(
             baseURL: Self.cleanURL(url),
             fallbackURL: Self.cleanURL(fallbackUrl ?? ""),
-            path: "/v1/orgs",
+            path: path,
             headers: ["Authorization": "Bearer \(token)"]
         )
     }
 
     func listOrgs() async throws -> [PangolinOrg] {
+        if isOrgScoped {
+            return [PangolinOrg(orgId: scopedOrgId, name: scopedOrgId, subnet: nil, utilitySubnet: nil, isBillingOrg: nil)]
+        }
         let response: PangolinEnvelope<PangolinOrgListData> = try await engine.request(
             baseURL: baseURL,
             fallbackURL: fallbackURL,
@@ -388,7 +398,6 @@ actor PangolinAPIClient {
     }
 
     func fetchSnapshot(orgId: String, orgs preloadedOrgs: [PangolinOrg]? = nil) async throws -> PangolinSnapshot {
-        async let orgsTask = listOrgs()
         async let sitesTask = listSites(orgId: orgId)
         async let siteResourcesTask = listSiteResources(orgId: orgId)
         async let resourcesTask = listResources(orgId: orgId)
@@ -399,7 +408,7 @@ actor PangolinAPIClient {
         if let preloadedOrgs {
             orgs = preloadedOrgs
         } else {
-            orgs = try await orgsTask
+            orgs = try await listOrgs()
         }
         let resources = try await resourcesTask
         let targetsByResourceId = try await fetchTargetsByResource(resources)

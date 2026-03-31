@@ -672,6 +672,7 @@ private struct FlexiblePillRow: View {
 struct PangolinStrings {
     let serviceDescription: String
     let loginHint: String
+    let orgIdPlaceholder: String
     let sitesClientsLabel: String
     let overviewSubtitle: String
     let organizations: String
@@ -787,7 +788,8 @@ extension PangolinStrings {
         case .it:
             return PangolinStrings(
                 serviceDescription: "Reverse proxy, tunneling e networking zero-trust",
-                loginHint: "Usa una Integration API key di Pangolin con accesso alle organizzazioni che vuoi monitorare.",
+                loginHint: "Usa una Integration API key di Pangolin. Per una chiave con accesso a una sola organizzazione (Org-Scoped Key), inserisci anche l'ID Organizzazione.",
+                orgIdPlaceholder: "ID Organizzazione (opzionale)",
                 sitesClientsLabel: "Siti / client",
                 overviewSubtitle: "Panoramica di reverse proxy, tunneling e rete zero-trust",
                 organizations: "Organizzazioni",
@@ -857,7 +859,8 @@ extension PangolinStrings {
         case .fr:
             return PangolinStrings(
                 serviceDescription: "Reverse proxy, tunneling et réseau zero-trust",
-                loginHint: "Utilisez une clé Integration API Pangolin avec accès aux organisations à surveiller.",
+                loginHint: "Utilisez une clé Integration API Pangolin. Pour une clé limitée à une organisation (Org-Scoped Key), indiquez aussi l'ID d'organisation.",
+                orgIdPlaceholder: "ID d'organisation (optionnel)",
                 sitesClientsLabel: "Sites / clients",
                 overviewSubtitle: "Vue d’ensemble du reverse proxy, du tunneling et du réseau zero-trust",
                 organizations: "Organisations",
@@ -927,7 +930,8 @@ extension PangolinStrings {
         case .es:
             return PangolinStrings(
                 serviceDescription: "Reverse proxy, tunneling y red zero-trust",
-                loginHint: "Usa una clave Integration API de Pangolin con acceso a las organizaciones que quieres supervisar.",
+                loginHint: "Usa una clave Integration API de Pangolin. Para una clave de ámbito de organización (Org-Scoped Key), introduce también el ID de organización.",
+                orgIdPlaceholder: "ID de organización (opcional)",
                 sitesClientsLabel: "Sitios / clientes",
                 overviewSubtitle: "Resumen de reverse proxy, tunneling y red zero-trust",
                 organizations: "Organizaciones",
@@ -997,7 +1001,8 @@ extension PangolinStrings {
         case .de:
             return PangolinStrings(
                 serviceDescription: "Reverse Proxy, Tunneling und Zero-Trust-Networking",
-                loginHint: "Verwende einen Pangolin-Integration-API-Schlüssel mit Zugriff auf die Organisationen, die du überwachen willst.",
+                loginHint: "Verwende einen Pangolin-Integration-API-Schlüssel. Bei einem auf eine Organisation begrenzten Schlüssel (Org-Scoped Key) auch die Organisations-ID eintragen.",
+                orgIdPlaceholder: "Organisations-ID (optional)",
                 sitesClientsLabel: "Sites / Clients",
                 overviewSubtitle: "Übersicht über Reverse Proxy, Tunneling und Zero-Trust-Netzwerk",
                 organizations: "Organisationen",
@@ -1067,7 +1072,8 @@ extension PangolinStrings {
         case .en:
             return PangolinStrings(
                 serviceDescription: "Reverse proxy, tunneling and zero-trust networking",
-                loginHint: "Use a Pangolin integration API key with access to the organizations you want to monitor.",
+                loginHint: "Use a Pangolin integration API key. If using an org-scoped key (no root access), also enter your Organization ID.",
+                orgIdPlaceholder: "Organization ID (optional)",
                 sitesClientsLabel: "Sites / clients",
                 overviewSubtitle: "Reverse proxy, tunneling and zero-trust network overview",
                 organizations: "Organizations",

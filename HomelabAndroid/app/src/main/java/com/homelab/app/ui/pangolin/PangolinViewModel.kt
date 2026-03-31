@@ -23,6 +23,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.Job
@@ -75,7 +76,10 @@ class PangolinViewModel @Inject constructor(
         refreshJob = viewModelScope.launch {
             _uiState.value = PangolinUiState.Loading
             try {
-                val orgs = repository.listOrgs(instanceId)
+                val currentInstance = servicesRepository.instancesByType.first()[ServiceType.PANGOLIN]
+                    ?.firstOrNull { it.id == instanceId }
+                val scopedOrgId = currentInstance?.username?.takeIf { it.isNotBlank() }
+                val orgs = repository.listOrgs(instanceId, scopedOrgId)
                 val resolvedOrgId = forceOrgId?.takeIf { candidate -> orgs.any { it.orgId == candidate } }
                     ?: orgs.firstOrNull()?.orgId
                     ?: throw IllegalStateException(context.getString(R.string.pangolin_error_no_orgs))

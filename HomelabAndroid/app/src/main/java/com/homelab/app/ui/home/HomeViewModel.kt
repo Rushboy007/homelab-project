@@ -187,7 +187,7 @@ class HomeViewModel @Inject constructor(
                     val instances = instancesMap[type].orEmpty()
                     for (instance in instances) {
                         try {
-                            val summary = fetchInstanceSummary(type, instance.id)
+                            val summary = fetchInstanceSummary(type, instance)
                             if (summary != null) {
                                 newSummaries[instance.id] = summary
                             }
@@ -213,7 +213,8 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun fetchInstanceSummary(type: ServiceType, instanceId: String): InstanceSummary? {
+    private suspend fun fetchInstanceSummary(type: ServiceType, instance: ServiceInstance): InstanceSummary? {
+        val instanceId = instance.id
         return when (type) {
             ServiceType.PORTAINER -> {
                 val endpoints = portainerRepository.getEndpoints(instanceId)
@@ -283,7 +284,8 @@ class HomeViewModel @Inject constructor(
                 InstanceSummary("${report.proxy}", "/ ${report.total}", "proxy_hosts")
             }
             ServiceType.PANGOLIN -> {
-                val (sites, resources, clients) = pangolinRepository.getAggregateSummary(instanceId)
+                val scopedOrgId = instance.username?.takeIf { it.isNotBlank() }
+                val (sites, resources, clients) = pangolinRepository.getAggregateSummary(instanceId, scopedOrgId)
                 _pangolinSummary.value = PangolinSummary(sites, resources, clients)
                 InstanceSummary("$sites", "/ $clients", "pangolin_sites_clients")
             }
