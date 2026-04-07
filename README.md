@@ -7,9 +7,9 @@
 [![Made with SwiftUI](https://img.shields.io/badge/Made%20with-SwiftUI-blue.svg?logo=swift)](https://developer.apple.com/xcode/swiftui/)
 [![Made with Jetpack Compose](https://img.shields.io/badge/Made%20with-Jetpack%20Compose-green.svg?logo=jetpackcompose)](https://developer.android.com/jetpack/compose)
 
-A premium, fully native dual-platform solution for monitoring and managing your personal Homelab ecosystem. This project features two distinct, purpose-built native applications sharing the same design soul but optimized for their respective platforms.
+Homelab Dashboard is a fully native mobile app for monitoring and managing a self-hosted homelab from one place. The project ships two dedicated apps, one for iOS and one for Android, designed around the same product idea while respecting each platform's native UI patterns.
 
-> **Disclaimer:** This is a **vibe-coding** project built for fun and personal use. It is provided as-is with no guarantees. The author assumes no responsibility for any issues, data loss, or damages resulting from the use of this software.
+> **Disclaimer:** This is a vibe-coding project built for fun and personal use. It is provided as-is with no guarantees. The author assumes no responsibility for any issues, data loss, or damages resulting from the use of this software.
 
 [![Star History Chart](https://api.star-history.com/svg?repos=JohnnWi/homelab-project&type=Date)](https://star-history.com/#JohnnWi/homelab-project&Date)
 
@@ -17,18 +17,60 @@ A premium, fully native dual-platform solution for monitoring and managing your 
 
 ## Highlights
 
-- **23 integrated services** — <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png" width="18" style="vertical-align:middle"> Portainer, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png" width="18" style="vertical-align:middle"> Pi-hole, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png" width="18" style="vertical-align:middle"> Beszel, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png" width="18" style="vertical-align:middle"> Gitea, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png" width="18" style="vertical-align:middle"> Nginx Proxy Manager (+ NPMplus), <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/adguard-home.png" width="18" style="vertical-align:middle"> AdGuard DNS, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png" width="18" style="vertical-align:middle"> Healthcheck, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchman.png" width="18" style="vertical-align:middle"> Patchmon, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png" width="18" style="vertical-align:middle"> Jellystat, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/plex.png" width="18" style="vertical-align:middle"> Plex, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png" width="18" style="vertical-align:middle"> Tailscale, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/linkding.png" width="18" style="vertical-align:middle"> Bookmarks, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/sonarr.png" width="18" style="vertical-align:middle"> Sonarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/radarr.png" width="18" style="vertical-align:middle"> Radarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/lidarr.png" width="18" style="vertical-align:middle"> Lidarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/prowlarr.png" width="18" style="vertical-align:middle"> Prowlarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/qbittorrent.png" width="18" style="vertical-align:middle"> qBittorrent, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/bazarr.png" width="18" style="vertical-align:middle"> Bazarr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/flaresolverr.png" width="18" style="vertical-align:middle"> FlareSolverr, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/technitium.png" width="18" style="vertical-align:middle"> Technitium DNS, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pangolin.png" width="18" style="vertical-align:middle"> Pangolin, <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/dockhand.png" width="18" style="vertical-align:middle"> Dockhand, Linux Update.
-- **Servarr stack** — Complete media automation dashboard: Sonarr + Radarr + Lidarr + Prowlarr + Bazarr + FlareSolverr + qBittorrent + Gluetun, unified in a single view.
-- **Multi-instance support** — Add multiple instances of the same service and switch between them seamlessly.
-- **Alternate app icons** — 6 variants to choose from: Default, Dark, Clear Light, Clear Dark, Tinted Light, Tinted Dark.
-- **Cyberpunk mode** — Toggle a unique cyberpunk visual theme for your service cards.
-- **Multilingual** — English, Italian, French, Spanish, German — auto-detected from your system language.
-- **2 native apps** — Swift 6 + SwiftUI (iOS) and Kotlin + Jetpack Compose (Android).
+- **25 integrated service dashboards** across infrastructure, networking, media automation, observability, and developer tooling.
+- **One app, many instances**: add multiple instances of the same service and switch between them without friction.
+- **Fully native on both platforms**: SwiftUI on iOS, Jetpack Compose on Android.
+- **Practical daily-use features**: encrypted backup and restore, biometric unlock, multilingual UI, alternate icons, and fast in-app update prompts.
+- **Utilities beyond services**: built-in bookmarks plus quick Tailscale launch support for remote access workflows.
 
 ---
 
-## 📱 iOS Version (Swift Native + Liquid Glass)
-Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 technologies. The UI is built around the **Liquid Glass** design system, leveraging frosted glass effects and fluid animations for a high-end feel.
+## Integrated Services
+
+### Core Infrastructure
+
+- **Portainer**: container overview, quick actions, resource usage.
+- **Dockhand**: native container management dashboard.
+- **Beszel**: server monitoring across nodes.
+- **Linux Update**: pending package updates across hosts.
+- **Crafty Controller**: game server management dashboard.
+- **Gitea / Forgejo**: repositories, activity, and source browsing.
+- **Pangolin / Newt**: tunnel and peer visibility.
+- **Healthchecks**: uptime checks and health status.
+- **PatchMon**: software update visibility across your stack.
+- **Wakapi**: coding activity and time tracking stats.
+
+### Networking & DNS
+
+- **Pi-hole**: queries, blocked domains, toggles, timers.
+- **AdGuard Home**: filters, rewrites, blocked services, query activity.
+- **Technitium DNS**: DNS metrics and health.
+- **Nginx Proxy Manager / NPMplus**: proxy hosts, streams, redirects, certificates, access lists.
+
+### Media & Observability
+
+- **Plex**: libraries, sessions, recently added media.
+- **Jellystat**: Jellyfin activity, streams, usage insights.
+
+### Servarr Stack
+
+- **Sonarr**
+- **Radarr**
+- **Lidarr**
+- **Prowlarr**
+- **qBittorrent**
+- **Jellyseerr**
+- **Bazarr**
+- **Gluetun**
+- **FlareSolverr**
+
+The full Servarr stack is available as a unified media automation dashboard, so downloads, health, requests, VPN status, and indexer state can be checked from one place.
+
+---
+
+## iOS App
+
+The iOS version is built with **Swift 6** and **SwiftUI** for **iOS 26+**. The interface uses a polished glass-heavy visual language, native navigation, and system integrations such as alternate icons, biometric unlock, and document-based backup import/export.
 
 <table align="center">
   <tr>
@@ -94,7 +136,7 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
   </tr>
 </table>
 
-**Pi-hole** · **AdGuard DNS** · **Healthcheck**
+**Pi-hole · AdGuard Home · Healthchecks**
 <table>
   <tr>
     <td align="center"><img src="media-docs/foto-ios/IMG_9199.PNG" width="145" /></td>
@@ -105,7 +147,7 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
   </tr>
 </table>
 
-**Gitea / Forgejo** · **Patchmon** · **Jellystat** · **Plex**
+**Gitea / Forgejo · PatchMon · Jellystat · Plex**
 <table>
   <tr>
     <td align="center"><img src="media-docs/foto-ios/IMG_9200.jpg" width="145" /></td>
@@ -119,8 +161,9 @@ Developed with **Swift 6** and **SwiftUI**, utilizing the latest native iOS 26 t
 
 ---
 
-## 🤖 Android Version (Kotlin Native + Material Expressive 3)
-Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressive 3** design language. It focuses on dynamic color integration, haptic-rich interactions, and modern Android architecture.
+## Android App
+
+The Android version is built with **Kotlin** and **Jetpack Compose** for **Android 8.0+**. It uses a modern Material 3 style, dynamic color where available, expressive cards, and native Android architecture patterns.
 
 <table align="center">
   <tr>
@@ -179,7 +222,7 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
   </tr>
 </table>
 
-**Nginx Proxy Manager / NPMplus** · **Pi-hole**
+**Nginx Proxy Manager / NPMplus · Pi-hole**
 <table>
   <tr>
     <td align="center"><img src="media-docs/foto-android/photo_13_2026-03-16_20-24-21.jpg" width="145" /></td>
@@ -189,7 +232,7 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
   </tr>
 </table>
 
-**AdGuard DNS** · **Healthcheck** · **Patchmon** · **Jellystat** · **Plex**
+**AdGuard Home · Healthchecks · PatchMon · Jellystat · Plex**
 <table>
   <tr>
     <td align="center"><img src="media-docs/foto-android/adguard1.jpg" width="110" /></td>
@@ -214,18 +257,7 @@ Built with **Kotlin** and **Jetpack Compose**, following the **Material Expressi
 
 ---
 
-## 👨‍🎓 Project & Author
-This project is a solo endeavor developed by a single **University Student**. It was born from the need for a beautiful, unified way to manage home servers without sacrificing the performance and "feel" of native development.
-
-### ☕ Support the Project
-If you find this dashboard useful, consider supporting my studies with a donation. Every bit helps!
-
-**EVM Wallet (Ethereum, BSC, Polygon, etc.):**
-`0x649641868e6876c2c1f04584a95679e01c1aaf0d`
-
----
-
-## 📲 Install via AltStore / SideStore
+## Install via AltStore / SideStore
 
 You can install the iOS app directly on your iPhone without Xcode using **AltStore** or **SideStore**.
 
@@ -237,92 +269,40 @@ You can install the iOS app directly on your iPhone without Xcode using **AltSto
 3. Go to **Sources** → **Add Source** and paste the URL above.
 4. Find **Homelab** in the source and tap **Install**.
 
-The app will update automatically when new versions are released.
+The app can then be refreshed and updated from the same source.
 
 > **Note:** SideStore can re-sign the app automatically without needing a Mac every 7 days.
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
-### 🍎 Build for iOS
-1. **Open Xcode**: Open `HomelabSwift/Homelab.xcodeproj` in Xcode 26+.
-2. **Signing**: Go to the project settings, select the **Homelab** target, and under **Signing & Capabilities**, select your development team.
-3. **Run**: Connect your iPhone or select a simulator and press `Cmd + R` to build and run.
+### Build for iOS
 
-### 🤖 Build for Android
-1. **Open Android Studio**: Import the `HomelabAndroid` folder.
-2. **Setup**: Let Gradle sync and download all dependencies.
-3. **Run**: Connect your Android device or start an emulator and press `Shift + F10`.
+1. Open `HomelabSwift/Homelab.xcodeproj` in Xcode 26+.
+2. Select your development team under **Signing & Capabilities**.
+3. Build and run on a real device or simulator.
 
----
+### Build for Android
 
-## ✨ Integrated Services
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png" width="20" style="vertical-align:middle"> **Portainer** — Monitor your Docker environments in real-time. Peek into container statuses, CPU/Memory usage, and perform quick actions like Start, Stop, or Restart directly from your mobile device.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pi-hole.png" width="20" style="vertical-align:middle"> **Pi-hole** — Keep your network clean. View real-time query statistics, see your total blocked domains, and toggle ad-blocking on the fly with customizable timers.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png" width="20" style="vertical-align:middle"> **Beszel** — A lightweight, efficient system monitor. Track global CPU, Memory, and Disk usage across all your connected nodes with beautiful percentage-based visualizations.
-
-### 🎬 Servarr Stack
-
-The full media automation suite, unified in a single dashboard view. Monitor your entire *arr stack at a glance — downloads, health, upcoming releases, and torrent activity — alongside Gluetun VPN tunnel status.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/sonarr.png" width="20" style="vertical-align:middle"> **Sonarr** — Track your TV show library. Monitor active downloads, upcoming episodes, series health, and queue status in real time.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/radarr.png" width="20" style="vertical-align:middle"> **Radarr** — Keep tabs on your movie collection. View download queue, upcoming releases, health issues, and missing movies at a glance.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/lidarr.png" width="20" style="vertical-align:middle"> **Lidarr** — Monitor your music library. Track artist downloads, health status, and upcoming album releases.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/prowlarr.png" width="20" style="vertical-align:middle"> **Prowlarr** — Central indexer manager for the entire Servarr stack. View configured indexers, connected apps, and any reported issues.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/qbittorrent.png" width="20" style="vertical-align:middle"> **qBittorrent** — Monitor your torrent client. View active downloads, upload/download speeds, DHT node count, and firewall/NAT status (including Gluetun tunnel detection).
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/bazarr.png" width="20" style="vertical-align:middle"> **Bazarr** — Subtitle manager for Sonarr and Radarr. Track missing subtitles, monitor download status, and view subtitle health across your media library.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/flaresolverr.png" width="20" style="vertical-align:middle"> **FlareSolverr** — Proxy server to bypass Cloudflare and DDoS-GUARD protection for Prowlarr indexers. Monitor service status and version directly from the dashboard.
-
-<details>
-<summary><b>📋 View all 23 services...</b></summary>
-<br>
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png" width="20" style="vertical-align:middle"> **Gitea / Forgejo** — Manage your code natively. Browse repositories, view contribution heatmaps, read code files with full syntax highlighting, and keep track of your latest commits. [Forgejo](https://forgejo.org/) (a community fork of Gitea) is fully supported — just use the Gitea integration with your Forgejo instance URL.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/tailscale.png" width="20" style="vertical-align:middle"> **Tailscale** — Integrated Tailscale support helps you securely reach your homelab from anywhere, with quick launch actions and connection status surfaced directly inside the app experience.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png" width="20" style="vertical-align:middle"> **Nginx Proxy Manager / NPMplus** — Manage your reverse proxy directly from your phone. Fully compatible with both [Nginx Proxy Manager](https://nginxproxymanager.com/) and the [NPMplus](https://github.com/ZoeyVid/NPMplus) fork (with CrowdSec support). Browse proxy hosts, redirection hosts, dead hosts, streams, access lists, and SSL certificates.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/adguard-home.png" width="20" style="vertical-align:middle"> **AdGuard DNS** — Monitor and manage your AdGuard Home DNS server. View real-time query statistics, check filtering status, and control DNS protection directly from your phone.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png" width="20" style="vertical-align:middle"> **Healthcheck** — Monitor the uptime and health of your services. View check statuses, response times, and get notified when services go down — all from a clean native interface.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchman.png" width="20" style="vertical-align:middle"> **Patchmon** — Track software updates and patches across your infrastructure. Monitor version status, pending updates, and keep your homelab systems up to date from one place.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/jellystat.png" width="20" style="vertical-align:middle"> **Jellystat** — Monitor your Jellyfin media server usage. Track active streams, playback statistics, and library activity from a clean native interface.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/plex.png" width="20" style="vertical-align:middle"> **Plex** — Monitor your Plex Media Server. View libraries, recently added media, active sessions, and server status from a native mobile interface.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/technitium.png" width="20" style="vertical-align:middle"> **Technitium DNS** — Monitor your Technitium DNS Server. View query statistics, top blocked/allowed domains, and server health from a clean native interface.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/pangolin.png" width="20" style="vertical-align:middle"> **Pangolin / Newt** — Monitor your Pangolin VPN tunnel. View tunnel status, connected peers, and network health directly from your phone.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/dockhand.png" width="20" style="vertical-align:middle"> **Dockhand** — Manage your containers with Dockhand. View running containers, resource usage, and perform quick actions from a native interface.
-
-🐧 **Linux Update** — Track pending system updates across your Linux hosts. Monitor available packages and keep your infrastructure patched from one unified view.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/bazarr.png" width="20" style="vertical-align:middle"> **Bazarr** — Subtitle manager for Sonarr and Radarr. Track missing subtitles, monitor download status, and view subtitle health across your media library.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/flaresolverr.png" width="20" style="vertical-align:middle"> **FlareSolverr** — Proxy server to bypass Cloudflare and DDoS-GUARD protection for Prowlarr indexers. Monitor service status and version directly from the dashboard.
-
-<img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/linkding.png" width="20" style="vertical-align:middle"> **Bookmarks** — Keep all your most-used homelab links in one place with a native bookmarks feature that supports organization, quick access, and a cleaner daily workflow.
-
-</details>
+1. Import `HomelabAndroid` into Android Studio.
+2. Let Gradle sync and resolve dependencies.
+3. Run on a connected device or emulator.
 
 ---
 
-## 📜 Usage & License
-- ✅ **Authorized**: Personal use, modifications for personal homelab environments, and code contributions/improvements.
-- ❌ **NOT Authorized**: Use of this code in paid applications, apps with subscriptions, or any form of commercial redistribution.
+## Project & Support
 
-The code is free to explore and improve for the community. Build something great for your home!
+This project is a solo effort maintained by a university student. If you find it useful and want to support the project:
+
+**EVM Wallet (Ethereum, BSC, Polygon, etc.)**  
+`0x649641868e6876c2c1f04584a95679e01c1aaf0d`
+
+---
+
+## Usage & License
+
+- ✅ **Authorized**: personal use, modifications for personal homelab environments, and code contributions/improvements.
+- ❌ **Not authorized**: paid applications, subscription-based apps, or commercial redistribution.
+
+The code is free to explore and improve for the community.
