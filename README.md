@@ -15,7 +15,7 @@ Homelab Dashboard is a fully native mobile app for monitoring and managing a sel
 
 ---
 
-## Highlights
+## 🚀 Highlights
 
 - **25 integrated service dashboards** across infrastructure, networking, media automation, observability, and developer tooling.
 - **One app, many instances**: add multiple instances of the same service and switch between them without friction.
@@ -25,7 +25,7 @@ Homelab Dashboard is a fully native mobile app for monitoring and managing a sel
 
 ---
 
-## Integrated Services
+## 🧩 Integrated Services
 
 ### Core Infrastructure
 
@@ -68,7 +68,7 @@ The full Servarr stack is available as a unified media automation dashboard, so 
 
 ---
 
-## iOS App
+## 🍎 iOS App
 
 The iOS version is built with **Swift 6** and **SwiftUI** for **iOS 26+**. The interface uses a polished glass-heavy visual language, native navigation, and system integrations such as alternate icons, biometric unlock, and document-based backup import/export.
 
@@ -161,7 +161,7 @@ The iOS version is built with **Swift 6** and **SwiftUI** for **iOS 26+**. The i
 
 ---
 
-## Android App
+## 🤖 Android App
 
 The Android version is built with **Kotlin** and **Jetpack Compose** for **Android 8.0+**. It uses a modern Material 3 style, dynamic color where available, expressive cards, and native Android architecture patterns.
 
@@ -257,7 +257,7 @@ The Android version is built with **Kotlin** and **Jetpack Compose** for **Andro
 
 ---
 
-## Install via AltStore / SideStore
+## 📲 Install via AltStore / SideStore
 
 You can install the iOS app directly on your iPhone without Xcode using **AltStore** or **SideStore**.
 
@@ -275,7 +275,7 @@ The app can then be refreshed and updated from the same source.
 
 ---
 
-## Getting Started
+## 🛠️ Getting Started
 
 ### Build for iOS
 
@@ -291,7 +291,7 @@ The app can then be refreshed and updated from the same source.
 
 ---
 
-## Project & Support
+## 💖 Project & Support
 
 This project is a solo effort maintained by a university student. If you find it useful and want to support the project:
 
@@ -300,9 +300,8 @@ This project is a solo effort maintained by a university student. If you find it
 
 ---
 
-## Usage & License
+## 📄 License
 
-- ✅ **Authorized**: personal use, modifications for personal homelab environments, and code contributions/improvements.
-- ❌ **Not authorized**: paid applications, subscription-based apps, or commercial redistribution.
+This project is licensed under the **Apache License 2.0**.
 
-The code is free to explore and improve for the community.
+See [LICENSE](LICENSE) for the full text.
