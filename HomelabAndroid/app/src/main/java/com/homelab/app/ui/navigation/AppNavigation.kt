@@ -86,10 +86,12 @@ private fun dashboardRoute(type: ServiceType, instanceId: String): String {
         ServiceType.GITEA -> "gitea/$instanceId/dashboard"
         ServiceType.LINUX_UPDATE -> "linux-update/$instanceId/dashboard"
         ServiceType.DOCKHAND -> "dockhand/$instanceId/dashboard"
+        ServiceType.CRAFTY_CONTROLLER -> "crafty/$instanceId/dashboard"
         ServiceType.NGINX_PROXY_MANAGER -> "nginxpm/$instanceId/dashboard"
         ServiceType.PANGOLIN -> "pangolin/$instanceId/dashboard"
         ServiceType.HEALTHCHECKS -> "healthchecks/$instanceId/dashboard"
         ServiceType.PATCHMON -> "patchmon/$instanceId/dashboard"
+        ServiceType.WAKAPI -> "wakapi/$instanceId/dashboard"
         ServiceType.PLEX -> "plex/$instanceId/dashboard"
         ServiceType.RADARR,
         ServiceType.SONARR,
@@ -789,6 +791,42 @@ fun AppNavigation() {
             ) {
                 com.homelab.app.ui.gitea.GiteaRepoDetailScreen(
                     onNavigateBack = { navController.navigateUp() }
+                )
+            }
+
+            composable(
+                route = "crafty/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.crafty.CraftyDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.CRAFTY_CONTROLLER, newInstanceId)) {
+                                popUpTo("crafty/$instanceId/dashboard") { inclusive = true }
+                            }
+                        }
+                    }
+                )
+            }
+
+            composable(
+                route = "wakapi/{instanceId}/dashboard",
+                arguments = listOf(androidx.navigation.navArgument("instanceId") { type = NavType.StringType })
+            ) { backStackEntry ->
+                val instanceId = backStackEntry.arguments?.getString("instanceId") ?: return@composable
+                com.homelab.app.ui.wakapi.WakapiDashboardScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    onNavigateToInstance = { newInstanceId ->
+                        if (newInstanceId != instanceId) {
+                            navController.navigate(dashboardRoute(ServiceType.WAKAPI, newInstanceId)) {
+                                popUpTo("wakapi/$instanceId/dashboard") { inclusive = true }
+                            }
+                        }
+                    }
                 )
             }
 

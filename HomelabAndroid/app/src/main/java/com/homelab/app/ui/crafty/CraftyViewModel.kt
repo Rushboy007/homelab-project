@@ -1,0 +1,186 @@
+package com.homelab.app.ui.crafty
+
+import android.content.Context
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.homelab.app.data.repository.CraftyDashboardData
+import com.homelab.app.data.repository.CraftyRepository
+import com.homelab.app.data.repository.CraftyServerAction
+import com.homelab.app.data.repository.ServicesRepository
+import com.homelab.app.domain.model.ServiceInstance
+import com.homelab.app.util.ErrorHandler
+import com.homelab.app.util.ServiceType
+import com.homelab.app.util.UiState
+import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import javax.inject.Inject
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+
+@HiltViewModel
+class CraftyViewModel @Inject constructor(
+    private val craftyRepository: CraftyRepository,
+    private val servicesRepository: ServicesRepository,
+    savedStateHandle: SavedStateHandle,
+    @param:ApplicationContext private val context: Context
+) : ViewModel() {
+
+    val instanceId: String = checkNotNull(savedStateHandle["instanceId"])
+
+    private val _uiState = MutableStateFlow<UiState<CraftyDashboardData>>(UiState.Loading)
+    val uiState: StateFlow<UiState<CraftyDashboardData>> = _uiState.asStateFlow()
+
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    private val _actionServerId = MutableStateFlow<Int?>(null)
+    val actionServerId: StateFlow<Int?> = _actionServerId.asStateFlow()
+
+    private val _logsServerId = MutableStateFlow<Int?>(null)
+    val logsServerId: StateFlow<Int?> = _logsServerId.asStateFlow()
+
+    private val _logsState = MutableStateFlow<UiState<List<String>>>(UiState.Idle)
+    val logsState: StateFlow<UiState<List<String>>> = _logsState.asStateFlow()
+
+    private val _commandServerId = MutableStateFlow<Int?>(null)
+    val commandServerId: StateFlow<Int?> = _commandServerId.asStateFlow()
+
+    private val _commandError = MutableStateFlow<String?>(null)
+    val commandError: StateFlow<String?> = _commandError.asStateFlow()
+
+    private val _isSendingCommand = MutableStateFlow(false)
+    val isSendingCommand: StateFlow<Boolean> = _isSendingCommand.asStateFlow()
+
+    private val _messages = MutableSharedFlow<String>()
+    val messages: SharedFlow<String> = _messages.asSharedFlow()
+
+    private var refreshJob: Job? = null
+    private var logsJob: Job? = null
+    private var refreshRequestId: Long = 0L
+
+    val instances: StateFlow<List<ServiceInstance>> = servicesRepository.instancesByType
+        .map { it[ServiceType.CRAFTY_CONTROLLER].orEmpty() }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+
+    init {
+        refresh(forceLoading = true)
+    }
+
+    fun refresh(forceLoading: Boolean = false) {
+        val requestId = ++refreshRequestId
+        refreshJob?.cancel()
+        refreshJob = viewModelScope.launch {
+            if (forceLoading || _uiState.value !is UiState.Success) {
+                _uiState.value = UiState.Loading
+            }
+            _isRefreshing.value = true
+            try {
+                _uiState.value = UiState.Success(craftyRepository.getDashboard(instanceId))
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Exception) {
+                _uiState.value = UiState.Error(
+                    message = ErrorHandler.getMessage(context, error),
+                    retryAction = { refresh(forceLoading = true) }
+                )
+            } finally {
+                if (requestId == refreshRequestId) {
+                    _isRefreshing.value = false
+                }
+            }
+        }
+    }
+
+    fun performAction(serverId: Int, action: CraftyServerAction) {
+        viewModelScope.launch {
+            _actionServerId.value = serverId
+            try {
+                craftyRepository.sendAction(instanceId, serverId, action)
+                refresh(forceLoading = false)
+            } catch (error: Exception) {
+                _messages.emit(ErrorHandler.getMessage(context, error))
+            } finally {
+                _actionServerId.value = null
+            }
+        }
+    }
+
+    fun openLogs(serverId: Int) {
+        _logsServerId.value = serverId
+        loadLogs(forceLoading = true)
+    }
+
+    fun dismissLogs() {
+        logsJob?.cancel()
+        _logsServerId.value = null
+        _logsState.value = UiState.Idle
+    }
+
+    fun loadLogs(forceLoading: Boolean = false) {
+        val serverId = _logsServerId.value ?: return
+        logsJob?.cancel()
+        logsJob = viewModelScope.launch {
+            if (forceLoading || _logsState.value !is UiState.Success) {
+                _logsState.value = UiState.Loading
+            }
+            try {
+                _logsState.value = UiState.Success(craftyRepository.getServerLogs(instanceId, serverId))
+            } catch (cancellation: CancellationException) {
+                throw cancellation
+            } catch (error: Exception) {
+                _logsState.value = UiState.Error(
+                    message = ErrorHandler.getMessage(context, error),
+                    retryAction = { loadLogs(forceLoading = true) }
+                )
+            }
+        }
+    }
+
+    fun openCommand(serverId: Int) {
+        _commandServerId.value = serverId
+        _commandError.value = null
+    }
+
+    fun dismissCommand() {
+        if (_isSendingCommand.value) return
+        _commandServerId.value = null
+        _commandError.value = null
+    }
+
+    fun sendCommand(command: String) {
+        val serverId = _commandServerId.value ?: return
+        val normalizedCommand = command.trim()
+        if (normalizedCommand.isBlank() || _isSendingCommand.value) return
+
+        viewModelScope.launch {
+            _isSendingCommand.value = true
+            _commandError.value = null
+            try {
+                craftyRepository.sendCommand(instanceId, serverId, normalizedCommand)
+                _commandServerId.value = null
+                _messages.emit(context.getString(com.homelab.app.R.string.crafty_command_sent))
+            } catch (error: Exception) {
+                _commandError.value = ErrorHandler.getMessage(context, error)
+            } finally {
+                _isSendingCommand.value = false
+            }
+        }
+    }
+
+    fun setPreferredInstance(newInstanceId: String) {
+        viewModelScope.launch {
+            servicesRepository.setPreferredInstance(ServiceType.CRAFTY_CONTROLLER, newInstanceId)
+        }
+    }
+}

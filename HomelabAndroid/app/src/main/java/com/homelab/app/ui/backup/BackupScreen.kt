@@ -62,6 +62,9 @@ fun BackupScreen(
     val configuredTypeSet = remember(configuredTypes) { configuredTypes.toSet() }
     val homeTypeSet = remember(configuredTypes) { configuredTypes.filter { it.isHomeService }.toSet() }
     val arrTypeSet = remember(configuredTypes) { configuredTypes.filter { it.isArrStack }.toSet() }
+    val exportableTypes = remember {
+        ServiceType.homeTypes.plus(ServiceType.arrStackTypes).distinct()
+    }
     val selectedInstanceCount = remember(instancesByType, selectedExportTypes) {
         instancesByType.entries.sumOf { (type, instances) ->
             if (selectedExportTypes.contains(type)) instances.size else 0
@@ -218,52 +221,54 @@ fun BackupScreen(
                                 modifier = Modifier.padding(12.dp)
                             )
                         }
-                    } else {
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            BackupSelectionChip(
-                                label = stringResource(R.string.backupSelectionAll),
-                                selected = configuredTypeSet.isNotEmpty() && selectedExportTypes.containsAll(configuredTypeSet),
-                                onClick = viewModel::toggleAllExportTypes
-                            )
-                            BackupSelectionChip(
-                                label = stringResource(R.string.backupSelectionHome),
-                                selected = homeTypeSet.isNotEmpty() && selectedExportTypes.containsAll(homeTypeSet),
-                                enabled = homeTypeSet.isNotEmpty(),
-                                onClick = viewModel::toggleHomeExportTypes
-                            )
-                            BackupSelectionChip(
-                                label = stringResource(R.string.backupSelectionArr),
-                                selected = arrTypeSet.isNotEmpty() && selectedExportTypes.containsAll(arrTypeSet),
-                                enabled = arrTypeSet.isNotEmpty(),
-                                onClick = viewModel::toggleArrExportTypes
-                            )
-                        }
+                    }
 
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        FlowRow(
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                            verticalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            configuredTypes.forEach { type ->
-                                BackupSelectionChip(
-                                    selected = selectedExportTypes.contains(type),
-                                    onClick = { viewModel.toggleExportType(type) },
-                                    label = backupServiceDisplayName(type)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = stringResource(R.string.backupSelectionSelectedCount, selectedInstanceCount),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        BackupSelectionChip(
+                            label = stringResource(R.string.backupSelectionAll),
+                            selected = configuredTypeSet.isNotEmpty() && selectedExportTypes.containsAll(configuredTypeSet),
+                            enabled = configuredTypeSet.isNotEmpty(),
+                            onClick = viewModel::toggleAllExportTypes
+                        )
+                        BackupSelectionChip(
+                            label = stringResource(R.string.backupSelectionHome),
+                            selected = homeTypeSet.isNotEmpty() && selectedExportTypes.containsAll(homeTypeSet),
+                            enabled = homeTypeSet.isNotEmpty(),
+                            onClick = viewModel::toggleHomeExportTypes
+                        )
+                        BackupSelectionChip(
+                            label = stringResource(R.string.backupSelectionArr),
+                            selected = arrTypeSet.isNotEmpty() && selectedExportTypes.containsAll(arrTypeSet),
+                            enabled = arrTypeSet.isNotEmpty(),
+                            onClick = viewModel::toggleArrExportTypes
                         )
                     }
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        exportableTypes.forEach { type ->
+                            BackupSelectionChip(
+                                selected = selectedExportTypes.contains(type),
+                                enabled = configuredTypeSet.contains(type),
+                                onClick = { viewModel.toggleExportType(type) },
+                                label = backupServiceDisplayName(type)
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = stringResource(R.string.backupSelectionSelectedCount, selectedInstanceCount),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Spacer(modifier = Modifier.height(12.dp))
 
                     Button(
@@ -659,6 +664,7 @@ private fun backupServiceDisplayName(type: ServiceType): String {
         ServiceType.HEALTHCHECKS -> stringResource(R.string.service_healthchecks)
         ServiceType.LINUX_UPDATE -> stringResource(R.string.service_linux_update)
         ServiceType.DOCKHAND -> stringResource(R.string.service_dockhand)
+        ServiceType.CRAFTY_CONTROLLER -> stringResource(R.string.service_crafty_controller)
         ServiceType.GITEA -> stringResource(R.string.service_gitea)
         ServiceType.NGINX_PROXY_MANAGER -> stringResource(R.string.service_nginx_proxy_manager)
         ServiceType.PANGOLIN -> stringResource(R.string.service_pangolin)
@@ -674,6 +680,7 @@ private fun backupServiceDisplayName(type: ServiceType): String {
         ServiceType.BAZARR -> stringResource(R.string.service_bazarr)
         ServiceType.GLUETUN -> stringResource(R.string.service_gluetun)
         ServiceType.FLARESOLVERR -> stringResource(R.string.service_flaresolverr)
+        ServiceType.WAKAPI -> stringResource(R.string.service_wakapi)
         ServiceType.UNKNOWN -> type.displayName
     }
 }

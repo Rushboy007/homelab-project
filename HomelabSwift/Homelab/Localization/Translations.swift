@@ -84,6 +84,7 @@ struct Translations {
     let serviceBazarr: String
     let serviceGluetun: String
     let serviceFlaresolverr: String
+    let serviceWakapi: String
     let servicePlexDesc: String
     let serviceRadarrDesc: String
     let serviceSonarrDesc: String
@@ -94,6 +95,8 @@ struct Translations {
     let serviceBazarrDesc: String
     let serviceGluetunDesc: String
     let serviceFlaresolverrDesc: String
+    let serviceWakapiDesc: String
+    let serviceCraftyControllerDesc: String
 
     // Login
     let loginTitle: String
@@ -123,6 +126,8 @@ struct Translations {
     let loginHintPlex: String
     let loginHintGluetun: String
     let loginHintFlaresolverr: String
+    let loginHintWakapi: String
+    let loginHintCraftyController: String
     let loginOptional2FA: String
     let loginApiKey: String
     let done: String
@@ -163,6 +168,7 @@ struct Translations {
     let actionStart: String
     let actionStop: String
     let actionRestart: String
+    let actionBackup: String
     let actionPause: String
     let actionResume: String
     let actionKill: String
@@ -881,6 +887,44 @@ struct Translations {
     // Multi-instance
     let badgeDefault: String
     let dashboardInstances: String
+    let craftyServers: String
+    let craftyRunningServers: String
+    let craftyTotalPlayers: String
+    let craftyNoServers: String
+    let craftyPlayers: String
+    let craftyWorld: String
+    let craftyVersion: String
+    let craftyMemory: String
+    let craftyCPU: String
+    let craftyType: String
+    let craftyStatusRunning: String
+    let craftyStatusStopped: String
+    let craftyStatusStarting: String
+    let craftyStatusUpdating: String
+    let craftyStatusCrashed: String
+    let craftyStatusOffline: String
+    let craftyUpdateExecutable: String
+    let craftyCommandPlaceholder: String
+    let craftyCommandHint: String
+    let wakapiCodedToday: String
+    let wakapiTotalTimeCoded: String
+    let wakapiSectionLanguages: String
+    let wakapiSectionProjects: String
+    let wakapiSectionEditors: String
+    let wakapiSectionMachines: String
+    let wakapiSectionOperatingSystems: String
+    let wakapiSectionLabels: String
+    let wakapiSectionCategories: String
+    let wakapiSectionBranches: String
+    let wakapiActiveFilter: String
+    let wakapiClearFilter: String
+    let wakapiIntervalToday: String
+    let wakapiIntervalYesterday: String
+    let wakapiIntervalLast7Days: String
+    let wakapiIntervalLast30Days: String
+    let wakapiIntervalLast6Months: String
+    let wakapiIntervalLastYear: String
+    let wakapiIntervalAllTime: String
     let jellystatWatchTimeHome: String
     let jellystatOverviewSubtitle: String
     let jellystatWatchTime: String

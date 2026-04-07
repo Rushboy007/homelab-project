@@ -404,6 +404,7 @@ internal fun serviceDisplayNameForSettings(type: ServiceType): String {
         ServiceType.HEALTHCHECKS -> stringResource(R.string.service_healthchecks)
         ServiceType.LINUX_UPDATE -> stringResource(R.string.service_linux_update)
         ServiceType.DOCKHAND -> stringResource(R.string.service_dockhand)
+        ServiceType.CRAFTY_CONTROLLER -> stringResource(R.string.service_crafty_controller)
         ServiceType.PATCHMON -> stringResource(R.string.service_patchmon)
         ServiceType.PLEX -> stringResource(R.string.service_plex)
         ServiceType.RADARR -> stringResource(R.string.service_radarr)
@@ -415,6 +416,7 @@ internal fun serviceDisplayNameForSettings(type: ServiceType): String {
         ServiceType.BAZARR -> stringResource(R.string.service_bazarr)
         ServiceType.GLUETUN -> stringResource(R.string.service_gluetun)
         ServiceType.FLARESOLVERR -> stringResource(R.string.service_flaresolverr)
+        ServiceType.WAKAPI -> stringResource(R.string.service_wakapi)
         ServiceType.UNKNOWN -> type.displayName
     }
 }

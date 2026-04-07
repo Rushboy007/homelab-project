@@ -108,6 +108,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.isActive
 
 @OptIn(ExperimentalMaterial3Api::class, kotlinx.coroutines.FlowPreview::class)
@@ -126,7 +127,8 @@ fun HomeScreen(
     val instancesByType by viewModel.instancesByType.collectAsStateWithLifecycle()
     val preferredInstanceIds by viewModel.preferredInstanceIdByType.collectAsStateWithLifecycle()
     val instanceSummaries by viewModel.instanceSummaries.collectAsStateWithLifecycle()
-    val summaryLoading by viewModel.summaryLoading.collectAsStateWithLifecycle()
+    val summaryLoadingIds by viewModel.summaryLoadingIds.collectAsStateWithLifecycle()
+    val refreshingInstanceIds by viewModel.refreshingInstanceIds.collectAsStateWithLifecycle()
 
     var showReorderDialog by rememberSaveable { mutableStateOf(false) }
 
@@ -134,8 +136,7 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
             while (isActive) {
-                viewModel.checkAllReachability()
-                viewModel.fetchSummaryData()
+                viewModel.refreshHome()
                 delay(300_000L)
             }
         }
@@ -152,6 +153,7 @@ fun HomeScreen(
         }
         .distinctUntilChanged()
         .debounce(1500L)
+        .drop(1)
         .collect {
             viewModel.fetchSummaryData()
         }
@@ -165,12 +167,13 @@ fun HomeScreen(
             val r = reachability[instance.id]
             val s = instanceSummaries[instance.id]
             val isPinging = pinging[instance.id] == true
-            val isSumLoading = s == null && summaryLoading
+            val isSumLoading = summaryLoadingIds.contains(instance.id)
+            val isRefreshing = refreshingInstanceIds.contains(instance.id)
             val resolvedReachable = when {
                 s != null -> true
-                r == false && (isSumLoading || isPinging) -> null
                 r == true -> true
                 r == false -> false
+                isSumLoading || isPinging || isRefreshing -> null
                 else -> null
             }
             resolvedReachable == false
@@ -261,7 +264,8 @@ fun HomeScreen(
                             isReachable = reachability[instance.id],
                             isPinging = pinging[instance.id] == true,
                             summary = instanceSummaries[instance.id],
-                            isSummaryLoading = instanceSummaries[instance.id] == null && summaryLoading,
+                            isSummaryLoading = summaryLoadingIds.contains(instance.id),
+                            isRefreshing = refreshingInstanceIds.contains(instance.id),
                             onOpen = { onNavigateToService(type, instance.id) },
                             onRefresh = { viewModel.checkReachability(instance.id, force = true) }
                         )
@@ -304,14 +308,15 @@ private fun InstanceCard(
     isPinging: Boolean,
     summary: HomeViewModel.InstanceSummary?,
     isSummaryLoading: Boolean,
+    isRefreshing: Boolean,
     onOpen: () -> Unit,
     onRefresh: () -> Unit
 ) {
     val resolvedReachable = when {
         summary != null -> true
-        isReachable == false && (isSummaryLoading || isPinging) -> null
         isReachable == true -> true
         isReachable == false -> false
+        isSummaryLoading || isPinging || isRefreshing -> null
         else -> null
     }
     val statusAccent = when (resolvedReachable) {
@@ -343,12 +348,14 @@ private fun InstanceCard(
             "technitium_blocked_queries" -> stringResource(R.string.technitium_blocked_queries)
             "dockhand_running_containers" -> stringResource(R.string.dockhand_running_containers)
             "dockhand_containers" -> stringResource(R.string.dockhand_containers)
+            "crafty_running_servers" -> stringResource(R.string.crafty_running_servers)
             "proxy_hosts" -> stringResource(R.string.npm_proxy_hosts)
             "pangolin_sites_clients" -> stringResource(R.string.pangolin_sites_clients)
             "checks" -> stringResource(R.string.healthchecks_checks)
             "jellystat_watch_time" -> stringResource(R.string.jellystat_watch_time)
             "hosts" -> stringResource(R.string.patchmon_hosts)
             "plex_total_items" -> stringResource(R.string.plex_total_items)
+            "coded_today" -> stringResource(R.string.wakapi_coded_today)
             else -> s.label
         }.lowercase()
     }

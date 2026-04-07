@@ -45,7 +45,10 @@ import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.selected
+import androidx.compose.ui.semantics.semantics
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.homelab.app.ui.components.ServiceIcon
@@ -943,13 +946,14 @@ private fun AppIconOptionCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val accessibilityLabel = stringResource(option.labelRes)
     val cardBorder = if (isSelected) {
-        BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f))
+        BorderStroke(0.75.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.32f))
     } else {
-        BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))
+        BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.22f))
     }
     val cardColor = if (isSelected) {
-        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.28f)
     } else {
         MaterialTheme.colorScheme.surfaceContainer
     }
@@ -960,24 +964,28 @@ private fun AppIconOptionCard(
         shape = RoundedCornerShape(14.dp),
         border = cardBorder,
         color = cardColor,
-                                modifier = modifier
+        modifier = modifier
             .aspectRatio(1f)
+            .semantics(mergeDescendants = true) {
+                contentDescription = accessibilityLabel
+                selected = isSelected
+            }
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                    .padding(6.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically)
             ) {
                 Image(
                     painter = painterResource(option.previewDrawableRes),
-                    contentDescription = stringResource(option.labelRes),
+                    contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier
-                        .size(74.dp)
-                        .clip(RoundedCornerShape(18.dp))
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(16.dp))
                 )
             }
 
@@ -987,15 +995,15 @@ private fun AppIconOptionCard(
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .size(20.dp)
+                        .padding(10.dp)
+                        .size(18.dp)
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Icon(
                             imageVector = Icons.Default.Check,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.size(12.dp)
+                            modifier = Modifier.size(11.dp)
                         )
                     }
                 }

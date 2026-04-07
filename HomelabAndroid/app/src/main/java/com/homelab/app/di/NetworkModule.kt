@@ -12,7 +12,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import java.security.SecureRandom
@@ -70,13 +69,6 @@ object NetworkModule {
 
         builder.addInterceptor(htmlDetectionInterceptor)
 
-        if (BuildConfig.DEBUG) {
-            val loggingInterceptor = HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }
-            builder.addInterceptor(loggingInterceptor)
-        }
-
         return builder
             .sslSocketFactory(sslSocketFactory, trustManager)
             .hostnameVerifier { _, _ -> true }
@@ -117,13 +109,6 @@ object NetworkModule {
         }
 
         builder.addInterceptor(htmlDetectionInterceptor)
-
-        if (BuildConfig.DEBUG) {
-            val loggingInterceptor = HttpLoggingInterceptor().apply {
-                level = HttpLoggingInterceptor.Level.BODY
-            }
-            builder.addInterceptor(loggingInterceptor)
-        }
 
         return builder
             .sslSocketFactory(sslSocketFactory, trustManager)
@@ -213,6 +198,12 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideCraftyApi(retrofit: Retrofit): com.homelab.app.data.remote.api.CraftyApi {
+        return retrofit.create(com.homelab.app.data.remote.api.CraftyApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideTechnitiumApi(retrofit: Retrofit): com.homelab.app.data.remote.api.TechnitiumApi {
         return retrofit.create(com.homelab.app.data.remote.api.TechnitiumApi::class.java)
     }
@@ -239,5 +230,11 @@ object NetworkModule {
     @Singleton
     fun providePlexApi(retrofit: Retrofit): com.homelab.app.data.remote.api.PlexApi {
         return retrofit.create(com.homelab.app.data.remote.api.PlexApi::class.java)
+    }
+
+    @Provides
+    @Singleton
+    fun provideWakapiApi(retrofit: Retrofit): com.homelab.app.data.remote.api.WakapiApi {
+        return retrofit.create(com.homelab.app.data.remote.api.WakapiApi::class.java)
     }
 }

@@ -11,6 +11,7 @@ private final class ServiceClientManager {
     private var healthchecksClients: [UUID: HealthchecksAPIClient] = [:]
     private var linuxUpdateClients: [UUID: LinuxUpdateAPIClient] = [:]
     private var dockhandClients: [UUID: DockhandAPIClient] = [:]
+    private var craftyClients: [UUID: CraftyAPIClient] = [:]
     private var giteaClients: [UUID: GiteaAPIClient] = [:]
     private var npmClients: [UUID: NginxProxyManagerAPIClient] = [:]
     private var pangolinClients: [UUID: PangolinAPIClient] = [:]
@@ -22,6 +23,7 @@ private final class ServiceClientManager {
     private var sonarrClients: [UUID: SonarrAPIClient] = [:]
     private var lidarrClients: [UUID: LidarrAPIClient] = [:]
     private var genericClients: [UUID: GenericAPIClient] = [:]
+    private var wakapiClients: [UUID: WakapiAPIClient] = [:]
 
     func portainerClient(id: UUID) -> PortainerAPIClient {
         if let client = portainerClients[id] {
@@ -92,6 +94,15 @@ private final class ServiceClientManager {
         }
         let client = DockhandAPIClient(instanceId: id)
         dockhandClients[id] = client
+        return client
+    }
+
+    func craftyClient(id: UUID) -> CraftyAPIClient {
+        if let client = craftyClients[id] {
+            return client
+        }
+        let client = CraftyAPIClient(instanceId: id)
+        craftyClients[id] = client
         return client
     }
 
@@ -184,7 +195,15 @@ private final class ServiceClientManager {
         lidarrClients[id] = client
         return client
     }
-    
+    func wakapiClient(id: UUID) -> WakapiAPIClient {
+        if let client = wakapiClients[id] {
+            return client
+        }
+        let client = WakapiAPIClient(instanceId: id)
+        wakapiClients[id] = client
+        return client
+    }
+
     func genericClient(id: UUID, type: ServiceType) -> GenericAPIClient {
         if let client = genericClients[id] {
             return client
@@ -212,6 +231,8 @@ private final class ServiceClientManager {
             linuxUpdateClients.removeValue(forKey: id)
         case .dockhand:
             dockhandClients.removeValue(forKey: id)
+        case .craftyController:
+            craftyClients.removeValue(forKey: id)
         case .gitea:
             giteaClients.removeValue(forKey: id)
         case .nginxProxyManager:
@@ -232,6 +253,8 @@ private final class ServiceClientManager {
             sonarrClients.removeValue(forKey: id)
         case .lidarr:
             lidarrClients.removeValue(forKey: id)
+        case .wakapi:
+            wakapiClients.removeValue(forKey: id)
         case .jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr:
             genericClients.removeValue(forKey: id)
         }
@@ -470,6 +493,11 @@ final class ServicesStore {
         return clientManager.dockhandClient(id: instance.id)
     }
 
+    func craftyClient(instanceId: UUID) async -> CraftyAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .craftyController else { return nil }
+        return clientManager.craftyClient(id: instance.id)
+    }
+
     func giteaClient(instanceId: UUID) async -> GiteaAPIClient? {
         guard let instance = instancesById[instanceId], instance.type == .gitea else { return nil }
         return clientManager.giteaClient(id: instance.id)
@@ -520,6 +548,11 @@ final class ServicesStore {
         return clientManager.lidarrClient(id: instance.id)
     }
 
+    func wakapiClient(instanceId: UUID) async -> WakapiAPIClient? {
+        guard let instance = instancesById[instanceId], instance.type == .wakapi else { return nil }
+        return clientManager.wakapiClient(id: instance.id)
+    }
+
     func genericMediaClient(instanceId: UUID) async -> GenericAPIClient? {
         guard let instance = instancesById[instanceId],
               [.jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr].contains(instance.type) else {
@@ -553,6 +586,8 @@ final class ServicesStore {
             ok = await clientManager.linuxUpdateClient(id: instanceId).ping()
         case .dockhand:
             ok = await clientManager.dockhandClient(id: instanceId).ping()
+        case .craftyController:
+            ok = await clientManager.craftyClient(id: instanceId).ping()
         case .gitea:
             ok = await clientManager.giteaClient(id: instanceId).ping()
         case .nginxProxyManager:
@@ -573,6 +608,8 @@ final class ServicesStore {
             ok = await clientManager.sonarrClient(id: instanceId).ping()
         case .lidarr:
             ok = await clientManager.lidarrClient(id: instanceId).ping()
+        case .wakapi:
+            ok = await clientManager.wakapiClient(id: instanceId).ping()
         case .jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr:
             ok = await clientManager.genericClient(id: instanceId, type: instance.type).ping()
         }
@@ -853,6 +890,16 @@ final class ServicesStore {
                 password: instance.password
             )
 
+        case .craftyController:
+            let client = clientManager.craftyClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                username: instance.username ?? "",
+                password: instance.password ?? "",
+                token: instance.token,
+                fallbackUrl: instance.fallbackUrl
+            )
+
         case .gitea:
             let client = clientManager.giteaClient(id: instance.id)
             await client.configure(url: instance.url, token: instance.token, fallbackUrl: instance.fallbackUrl)
@@ -896,6 +943,14 @@ final class ServicesStore {
 
         case .jellystat:
             let client = clientManager.jellystatClient(id: instance.id)
+            await client.configure(
+                url: instance.url,
+                apiKey: instance.apiKey ?? "",
+                fallbackUrl: instance.fallbackUrl
+            )
+
+        case .wakapi:
+            let client = clientManager.wakapiClient(id: instance.id)
             await client.configure(
                 url: instance.url,
                 apiKey: instance.apiKey ?? "",

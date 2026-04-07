@@ -26,6 +26,10 @@
 		21E7233E678C07EF2FA629B5 /* EditCategoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F887B97554253C51BDFD167F /* EditCategoryView.swift */; };
 		22F17B053E47A71B687C63C5 /* GenericMediaDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8D02DC8E1FAB21C2D68A01A6 /* GenericMediaDashboard.swift */; };
 		24AF53A5125B18B4F58D1A21 /* PatchmonAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = BEA7A42035DBFADEB256C578 /* PatchmonAPIClient.swift */; };
+		A1CFA0010B1CFA0010B1CFA0 /* CraftyAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CFA1010B1CFA0010B1CFA0 /* CraftyAPIClient.swift */; };
+		A1CFA0020B1CFA0020B1CFA0 /* CraftyDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CFA1020B1CFA0020B1CFA0 /* CraftyDashboard.swift */; };
+		A1CFA0030B1CFA0030B1CFA0 /* WakapiAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CFA1030B1CFA0030B1CFA0 /* WakapiAPIClient.swift */; };
+		A1CFA0040B1CFA0040B1CFA0 /* WakapiDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1CFA1040B1CFA0040B1CFA0 /* WakapiDashboard.swift */; };
 		253B46BF21904B59477F2E8E /* GiteaDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3491FAD0D71DDB3C25D9D90 /* GiteaDashboard.swift */; };
 		29C9BD1512C814A8ED65D53A /* NpmDashboard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2CB742A0C436A83F92CC1FED /* NpmDashboard.swift */; };
 		2A10CBCF4DFA744F2BE9BE8B /* AdGuardHomeFiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE1461ABFFED5C380B73195B /* AdGuardHomeFiltersView.swift */; };
@@ -259,6 +263,10 @@
 		AB95F4E19C7D3082B4D6484C /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
 		AD139A00611FED93C43C0833 /* HealthchecksModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthchecksModels.swift; sourceTree = "<group>"; };
 		AE1461ABFFED5C380B73195B /* AdGuardHomeFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdGuardHomeFiltersView.swift; sourceTree = "<group>"; };
+		A1CFA1010B1CFA0010B1CFA0 /* CraftyAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CraftyAPIClient.swift; sourceTree = "<group>"; };
+		A1CFA1020B1CFA0020B1CFA0 /* CraftyDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CraftyDashboard.swift; sourceTree = "<group>"; };
+		A1CFA1030B1CFA0030B1CFA0 /* WakapiAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakapiAPIClient.swift; sourceTree = "<group>"; };
+		A1CFA1040B1CFA0040B1CFA0 /* WakapiDashboard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WakapiDashboard.swift; sourceTree = "<group>"; };
 		B0D364FA7AED9BAC9B522C01 /* JellystatAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JellystatAPIClient.swift; sourceTree = "<group>"; };
 		B0F5CFB96CB606EB9EC34EBB /* AdGuardHomeAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdGuardHomeAPIClient.swift; sourceTree = "<group>"; };
 		B1EBFFF57A15B47F78E81D04 /* Formatters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatters.swift; sourceTree = "<group>"; };
@@ -367,6 +375,38 @@
 				61FF27D860A84E8974681CFE /* QbittorrentModels.swift */,
 			);
 			path = Qbittorrent;
+			sourceTree = "<group>";
+		};
+		A1CFA2010B1CFA0010B1CFA0 /* Crafty */ = {
+			isa = PBXGroup;
+			children = (
+				A1CFA1010B1CFA0010B1CFA0 /* CraftyAPIClient.swift */,
+			);
+			path = Crafty;
+			sourceTree = "<group>";
+		};
+		A1CFA2020B1CFA0020B1CFA0 /* Crafty */ = {
+			isa = PBXGroup;
+			children = (
+				A1CFA1020B1CFA0020B1CFA0 /* CraftyDashboard.swift */,
+			);
+			path = Crafty;
+			sourceTree = "<group>";
+		};
+		A1CFA2030B1CFA0030B1CFA0 /* Wakapi */ = {
+			isa = PBXGroup;
+			children = (
+				A1CFA1030B1CFA0030B1CFA0 /* WakapiAPIClient.swift */,
+			);
+			path = Wakapi;
+			sourceTree = "<group>";
+		};
+		A1CFA2040B1CFA0040B1CFA0 /* Wakapi */ = {
+			isa = PBXGroup;
+			children = (
+				A1CFA1040B1CFA0040B1CFA0 /* WakapiDashboard.swift */,
+			);
+			path = Wakapi;
 			sourceTree = "<group>";
 		};
 		0FF3AB848856515A57C1F122 /* AdGuardHome */ = {
@@ -754,6 +794,7 @@
 				F1265188363BF5B5C00056A5 /* Beszel */,
 				ECAF9E33BDB4EE0FFFF630D0 /* Bookmarks */,
 				5A93214C3BDCB9BEC5FCCD73 /* Components */,
+				A1CFA2020B1CFA0020B1CFA0 /* Crafty */,
 				D544ABDB8DF1FE38D7862D8B /* Dockhand */,
 				48AAFFAA1096205CCB4685B8 /* Gitea */,
 				73413D1CE20FEEB055D5D6DD /* Healthchecks */,
@@ -775,6 +816,7 @@
 				0484D4BF357548D950ABB56C /* Settings */,
 				971DDC6643DF517A71F1E0AA /* Sonarr */,
 				1B3FF86FA121ED2FFB8BC270 /* Technitium */,
+				A1CFA2040B1CFA0040B1CFA0 /* Wakapi */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -851,6 +893,7 @@
 				34351F37F1A0778D6CFC90B3 /* GenericAPIClient.swift */,
 				0FF3AB848856515A57C1F122 /* AdGuardHome */,
 				D5B24EF44902FCBD35F6D145 /* Beszel */,
+				A1CFA2010B1CFA0010B1CFA0 /* Crafty */,
 				289C5939524BACC32CDCCF25 /* Gitea */,
 				06347246AD362987E7E3A1D3 /* Healthchecks */,
 				4DF24834910915FEAB043587 /* Jellystat */,
@@ -866,6 +909,7 @@
 				FCECFC579C82906D02D48580 /* Radarr */,
 				02E6C0863A40CA732CDE1B37 /* Sonarr */,
 				084D2436AFFE34C15D089A1D /* Technitium */,
+				A1CFA2030B1CFA0030B1CFA0 /* Wakapi */,
 			);
 			path = Networking;
 			sourceTree = "<group>";
@@ -1094,6 +1138,8 @@
 				CFFCFA6F071D0F46DECAB36B /* ContainerDetailView.swift in Sources */,
 				A3E3BAB096611E807728CA89 /* ContainerListView.swift in Sources */,
 				9F77F33FFB5F27A3D1A8109E /* ContentView.swift in Sources */,
+				A1CFA0010B1CFA0010B1CFA0 /* CraftyAPIClient.swift in Sources */,
+				A1CFA0020B1CFA0020B1CFA0 /* CraftyDashboard.swift in Sources */,
 				BD697C6B1A9C40EE51C53DDF /* DockhandDashboard.swift in Sources */,
 				05260E0A1A5781AC8EAE7011 /* EditBookmarkView.swift in Sources */,
 				21E7233E678C07EF2FA629B5 /* EditCategoryView.swift in Sources */,
@@ -1192,6 +1238,8 @@
 				8BE00328A6AC68DF3E40F05B /* Translations+Italian.swift in Sources */,
 				3C9BDFAE94048BBD360AF601 /* Translations+Spanish.swift in Sources */,
 				AAA9BC382610A55D8E374C95 /* Translations.swift in Sources */,
+				A1CFA0030B1CFA0030B1CFA0 /* WakapiAPIClient.swift in Sources */,
+				A1CFA0040B1CFA0040B1CFA0 /* WakapiDashboard.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

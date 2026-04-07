@@ -311,6 +311,7 @@ struct HomeView: View {
         case .healthchecks:      HealthchecksDashboard(instanceId: route.instanceId)
         case .linuxUpdate:            LinuxUpdateDashboard(instanceId: route.instanceId)
         case .dockhand:               DockhandDashboard(instanceId: route.instanceId)
+        case .craftyController:       CraftyDashboard(instanceId: route.instanceId)
         case .gitea:             GiteaDashboard(instanceId: route.instanceId)
         case .nginxProxyManager: NpmDashboard(instanceId: route.instanceId)
         case .pangolin:          PangolinDashboard(instanceId: route.instanceId)
@@ -321,6 +322,7 @@ struct HomeView: View {
         case .radarr:            RadarrDashboard(instanceId: route.instanceId)
         case .sonarr:            SonarrDashboard(instanceId: route.instanceId)
         case .lidarr:            LidarrDashboard(instanceId: route.instanceId)
+        case .wakapi:            WakapiDashboard(instanceId: route.instanceId)
         case .jellyseerr, .prowlarr, .bazarr, .gluetun, .flaresolverr:
                                  GenericMediaDashboard(serviceType: route.type, instanceId: route.instanceId)
         }
@@ -398,6 +400,23 @@ struct HomeView: View {
                     subValue: "/ \(overview.totalContainers)",
                     label: "Running containers"
                 )
+            case .craftyController:
+                guard let client = await servicesStore.craftyClient(instanceId: instanceId) else { return nil }
+                let servers = try await client.getServers()
+                let stats = await withTaskGroup(of: CraftyServerStats?.self) { group in
+                    for server in servers {
+                        group.addTask {
+                            try? await client.getServerStats(serverId: server.serverID)
+                        }
+                    }
+                    var collected: [CraftyServerStats] = []
+                    while let next = await group.next() {
+                        if let next { collected.append(next) }
+                    }
+                    return collected
+                }
+                let running = stats.filter { $0.running }.count
+                return ServiceSummaryInfo(value: "\(running)", subValue: "/ \(servers.count)", label: localizer.t.craftyRunningServers)
             case .gitea:
                 guard let client = await servicesStore.giteaClient(instanceId: instanceId) else { return nil }
                 let repos = try await client.getUserRepos(page: 1, limit: 100)
@@ -429,6 +448,15 @@ struct HomeView: View {
                 let libs = try await client.getLibraries()
                 let totalItems = libs.reduce(0) { $0 + $1.itemCount + $1.episodeCount }
                 return ServiceSummaryInfo(value: Formatters.formatNumber(totalItems), label: localizer.t.plexTotalItems)
+            case .wakapi:
+                guard let client = await servicesStore.wakapiClient(instanceId: instanceId) else { return nil }
+                let summary = try await client.getSummary(interval: "today")
+                let hours = summary.grandTotal?.hours ?? 0
+                let mins = summary.grandTotal?.minutes ?? 0
+                let timeStr = hours > 0
+                    ? "\(hours)\(localizer.t.unitHours) \(mins)\(localizer.t.unitMinutes)"
+                    : "\(mins)\(localizer.t.unitMinutes)"
+                return ServiceSummaryInfo(value: timeStr, label: localizer.t.wakapiCodedToday)
             default:
                 return nil
             }

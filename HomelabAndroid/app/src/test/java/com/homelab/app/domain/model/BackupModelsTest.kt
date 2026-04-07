@@ -10,29 +10,7 @@ class BackupModelsTest {
 
     @Test
     fun `backup mapper roundtrip covers home and arr services`() {
-        val covered = listOf(
-            ServiceType.PORTAINER,
-            ServiceType.PIHOLE,
-            ServiceType.ADGUARD_HOME,
-            ServiceType.BESZEL,
-            ServiceType.HEALTHCHECKS,
-            ServiceType.LINUX_UPDATE,
-            ServiceType.PANGOLIN,
-            ServiceType.GITEA,
-            ServiceType.NGINX_PROXY_MANAGER,
-            ServiceType.PATCHMON,
-            ServiceType.JELLYSTAT,
-            ServiceType.PLEX,
-            ServiceType.RADARR,
-            ServiceType.SONARR,
-            ServiceType.LIDARR,
-            ServiceType.QBITTORRENT,
-            ServiceType.JELLYSEERR,
-            ServiceType.PROWLARR,
-            ServiceType.BAZARR,
-            ServiceType.GLUETUN,
-            ServiceType.FLARESOLVERR
-        )
+        val covered = ServiceType.entries.filter { it != ServiceType.UNKNOWN }
 
         covered.forEach { type ->
             val key = BackupServiceTypeMapper.backupKey(type)

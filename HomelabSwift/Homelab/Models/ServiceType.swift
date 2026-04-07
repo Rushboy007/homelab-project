@@ -9,6 +9,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
     case healthchecks
     case linuxUpdate = "linux_update"
     case dockhand
+    case craftyController = "crafty_controller"
     case gitea
     case nginxProxyManager
     case pangolin
@@ -24,6 +25,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
     case bazarr
     case gluetun
     case flaresolverr
+    case wakapi
 
     public var id: String { rawValue }
 
@@ -52,6 +54,8 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
             return .dockhand
         case "pangolin":
             return .pangolin
+        case "crafty", "crafty_controller":
+            return .craftyController
         default:
             return nil
         }
@@ -104,6 +108,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return "Healthchecks"
         case .linuxUpdate:             return "Linux Update"
         case .dockhand:                return "Dockhand"
+        case .craftyController:        return "Crafty Controller"
         case .gitea:              return "Gitea"
         case .nginxProxyManager:  return "Nginx Proxy Manager"
         case .pangolin:           return "Pangolin"
@@ -119,6 +124,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .bazarr:             return "Bazarr"
         case .gluetun:            return "Gluetun"
         case .flaresolverr:       return "FlareSolverr"
+        case .wakapi:             return "Wakapi"
         }
     }
 
@@ -134,6 +140,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return t.serviceHealthchecksDesc
         case .linuxUpdate:             return "Linux Update dashboard"
         case .dockhand:                return "Docker management dashboard"
+        case .craftyController:        return t.serviceCraftyControllerDesc
         case .gitea:              return t.serviceGiteaDesc
         case .nginxProxyManager:  return t.serviceNpmDesc
         case .pangolin:           return PangolinStrings.forLanguage(Localizer.shared.language).serviceDescription
@@ -149,6 +156,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .bazarr:             return t.serviceBazarrDesc
         case .gluetun:            return t.serviceGluetunDesc
         case .flaresolverr:       return t.serviceFlaresolverrDesc
+        case .wakapi:             return t.serviceWakapiDesc
         }
     }
 
@@ -162,6 +170,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return "heart.text.square.fill"
         case .linuxUpdate:             return "chevron.left.forwardslash.chevron.right"
         case .dockhand:                return "shippingbox.circle.fill"
+        case .craftyController:        return "gamecontroller.fill"
         case .gitea:              return "arrow.triangle.branch"
         case .nginxProxyManager:  return "globe"
         case .pangolin:           return "tunnel.fill"
@@ -177,6 +186,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .bazarr:             return "text.bubble.fill"
         case .gluetun:            return "lock.shield.fill"
         case .flaresolverr:       return "flame.fill"
+        case .wakapi:             return "timer"
         }
     }
 
@@ -190,6 +200,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png"
         case .linuxUpdate:             return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/linux-update-dashboard.png"
         case .dockhand:                return "https://dockhand.pro/favicon.ico"
+        case .craftyController:        return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/crafty-controller.png"
         case .gitea:              return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gitea.png"
         case .nginxProxyManager:  return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/nginx-proxy-manager.png"
         case .pangolin:           return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/pangolin.png"
@@ -205,6 +216,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .bazarr:             return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/bazarr.png"
         case .gluetun:            return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gluetun.png"
         case .flaresolverr:       return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/flaresolverr.png"
+        case .wakapi:             return "https://cdn.jsdelivr.net/gh/selfhst/icons/png/wakapi.png"
         }
     }
 
@@ -219,6 +231,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       slug = "healthchecks"
         case .linuxUpdate:             slug = "linux-update"
         case .dockhand:                slug = "dockhand"
+        case .craftyController:        slug = "crafty-controller"
         case .gitea:              slug = "gitea"
         case .nginxProxyManager:  slug = "nginx-proxy-manager"
         case .pangolin:           slug = "pangolin"
@@ -234,6 +247,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .bazarr:             slug = "bazarr"
         case .gluetun:            slug = "gluetun"
         case .flaresolverr:       slug = "flaresolverr"
+        case .wakapi:             slug = "wakapi"
         }
         var orderedCandidates: [String] = []
         let primary = iconUrl.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -262,6 +276,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return "service-healthchecks"
         case .linuxUpdate:             return "service-linux-update"
         case .dockhand:                return "service-dockhand"
+        case .craftyController:        return "service-crafty-controller"
         case .gitea:              return "service-gitea"
         case .nginxProxyManager:  return "service-nginx-proxy-manager"
         case .pangolin:           return "service-pangolin"
@@ -277,6 +292,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .bazarr:             return "service-bazarr"
         case .gluetun:            return "service-gluetun"
         case .flaresolverr:       return "service-flaresolverr"
+        case .wakapi:             return "service-wakapi"
         }
     }
 
@@ -290,6 +306,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .healthchecks:       return ServiceColorSet(primary: Color(hex: "#16A34A"), dark: Color(hex: "#15803D"), bg: Color(hex: "#16A34A").opacity(0.09))
         case .linuxUpdate:             return ServiceColorSet(primary: Color(hex: "#14B8A6"), dark: Color(hex: "#0F766E"), bg: Color(hex: "#14B8A6").opacity(0.09))
         case .dockhand:                return ServiceColorSet(primary: Color(hex: "#1E88E5"), dark: Color(hex: "#1565C0"), bg: Color(hex: "#1E88E5").opacity(0.09))
+        case .craftyController:        return ServiceColorSet(primary: Color(hex: "#2E86FF"), dark: Color(hex: "#1E63C6"), bg: Color(hex: "#2E86FF").opacity(0.09))
         case .gitea:              return ServiceColorSet(primary: Color(hex: "#609926"), dark: Color(hex: "#4A7A1E"), bg: Color(hex: "#609926").opacity(0.09))
         case .nginxProxyManager:  return ServiceColorSet(primary: Color(hex: "#F15B2A"), dark: Color(hex: "#C9481F"), bg: Color(hex: "#F15B2A").opacity(0.09))
         case .pangolin:           return ServiceColorSet(primary: Color(hex: "#FF8A3D"), dark: Color(hex: "#D96A22"), bg: Color(hex: "#FF8A3D").opacity(0.10))
@@ -305,6 +322,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .bazarr:             return ServiceColorSet(primary: Color(hex: "#2563EB"), dark: Color(hex: "#1D4ED8"), bg: Color(hex: "#2563EB").opacity(0.09))
         case .gluetun:            return ServiceColorSet(primary: Color(hex: "#06B6D4"), dark: Color(hex: "#0891B2"), bg: Color(hex: "#06B6D4").opacity(0.09))
         case .flaresolverr:       return ServiceColorSet(primary: Color(hex: "#FF4500"), dark: Color(hex: "#CC3700"), bg: Color(hex: "#FF4500").opacity(0.09))
+        case .wakapi:             return ServiceColorSet(primary: Color(hex: "#2563EB"), dark: Color(hex: "#1D4ED8"), bg: Color(hex: "#2563EB").opacity(0.09))
         }
     }
 }

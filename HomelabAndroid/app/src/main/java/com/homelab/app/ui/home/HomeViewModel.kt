@@ -7,6 +7,7 @@ import com.homelab.app.data.repository.BeszelRepository
 import com.homelab.app.data.repository.DockhandRepository
 import com.homelab.app.data.repository.GiteaRepository
 import com.homelab.app.data.repository.LinuxUpdateRepository
+import com.homelab.app.data.repository.CraftyRepository
 import com.homelab.app.data.repository.JellystatRepository
 import com.homelab.app.data.repository.LocalPreferencesRepository
 import com.homelab.app.data.repository.NginxProxyManagerRepository
@@ -27,10 +28,15 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlin.math.floor
 
 @HiltViewModel
@@ -45,11 +51,13 @@ class HomeViewModel @Inject constructor(
     private val linuxUpdateRepository: LinuxUpdateRepository,
     private val technitiumRepository: TechnitiumRepository,
     private val dockhandRepository: DockhandRepository,
+    private val craftyRepository: CraftyRepository,
     private val nginxProxyManagerRepository: NginxProxyManagerRepository,
     private val healthchecksRepository: HealthchecksRepository,
     private val patchmonRepository: PatchmonRepository,
     private val plexRepository: PlexRepository,
     private val pangolinRepository: PangolinRepository,
+    private val wakapiRepository: com.homelab.app.data.repository.WakapiRepository,
     private val localPreferencesRepository: LocalPreferencesRepository
 ) : ViewModel() {
 
@@ -62,11 +70,13 @@ class HomeViewModel @Inject constructor(
     data class LinuxUpdateSummary(val upToDate: Int, val total: Int)
     data class TechnitiumSummary(val blocked: Int, val total: Int)
     data class DockhandSummary(val running: Int, val total: Int)
+    data class CraftySummary(val running: Int, val total: Int)
     data class NpmSummary(val proxyHosts: Int, val total: Int)
     data class PangolinSummary(val sites: Int, val resources: Int, val clients: Int)
     data class HealthchecksSummary(val up: Int, val total: Int)
     data class PatchmonSummary(val active: Int, val total: Int)
     data class PlexSummary(val sessions: Int, val totalItems: Int)
+    data class WakapiSummary(val totalCoding: String)
 
     /** Summary info for a single instance card. */
     data class InstanceSummary(val value: String, val subValue: String?, val label: String)
@@ -138,6 +148,9 @@ class HomeViewModel @Inject constructor(
     private val _dockhandSummary = MutableStateFlow<DockhandSummary?>(null)
     val dockhandSummary: StateFlow<DockhandSummary?> = _dockhandSummary
 
+    private val _craftySummary = MutableStateFlow<CraftySummary?>(null)
+    val craftySummary: StateFlow<CraftySummary?> = _craftySummary
+
     private val _npmSummary = MutableStateFlow<NpmSummary?>(null)
     val npmSummary: StateFlow<NpmSummary?> = _npmSummary
 
@@ -153,14 +166,21 @@ class HomeViewModel @Inject constructor(
     private val _plexSummary = MutableStateFlow<PlexSummary?>(null)
     val plexSummary: StateFlow<PlexSummary?> = _plexSummary
 
+    private val _wakapiSummary = MutableStateFlow<WakapiSummary?>(null)
+    val wakapiSummary: StateFlow<WakapiSummary?> = _wakapiSummary
+
     /** Per-instance summary data, keyed by instance ID. */
     private val _instanceSummaries = MutableStateFlow<Map<String, InstanceSummary>>(emptyMap())
     val instanceSummaries: StateFlow<Map<String, InstanceSummary>> = _instanceSummaries
 
-    private val _summaryLoading = MutableStateFlow(false)
-    val summaryLoading: StateFlow<Boolean> = _summaryLoading
+    private val _summaryLoadingIds = MutableStateFlow<Set<String>>(emptySet())
+    val summaryLoadingIds: StateFlow<Set<String>> = _summaryLoadingIds
+
+    private val _refreshingInstanceIds = MutableStateFlow<Set<String>>(emptySet())
+    val refreshingInstanceIds: StateFlow<Set<String>> = _refreshingInstanceIds
 
     private var summaryJob: Job? = null
+    private var homeRefreshJob: Job? = null
 
     fun checkReachability(instanceId: String, force: Boolean = false) {
         viewModelScope.launch {
@@ -177,39 +197,99 @@ class HomeViewModel @Inject constructor(
     fun fetchSummaryData() {
         if (summaryJob?.isActive == true) return
         Log.d("HomeViewModel", "Fetching summary data...")
-        val instancesMap = instancesByType.value
         summaryJob = viewModelScope.launch {
-            _summaryLoading.value = true
             try {
-                val newSummaries = mutableMapOf<String, InstanceSummary>()
+                fetchSummaryDataInternal(instancesByType.value)
+            } finally {
+                summaryJob = null
+            }
+        }
+    }
 
-                for (type in ServiceType.homeTypes) {
-                    val instances = instancesMap[type].orEmpty()
-                    for (instance in instances) {
-                        try {
-                            val summary = fetchInstanceSummary(type, instance)
-                            if (summary != null) {
-                                newSummaries[instance.id] = summary
-                            }
-                        } catch (error: Exception) {
-                            Log.e("HomeViewModel", "${type.name} summary error for ${instance.id}: ${error.message}")
+    fun refreshHome() {
+        if (homeRefreshJob?.isActive == true) return
+
+        homeRefreshJob = viewModelScope.launch {
+            val instancesList: List<ServiceInstance> = servicesRepository.allInstances.firstOrNull().orEmpty()
+            val instancesMap: Map<ServiceType, List<ServiceInstance>> = ServiceType.homeTypes.associateWith { type ->
+                instancesList.filter { instance -> instance.type == type }
+            }
+
+            val targetIds = ServiceType.homeTypes
+                .flatMap { type -> instancesMap[type].orEmpty() }
+                .filter { it.id !in reachability.value } // Only show spinner for truly unknown statuses
+                .map { it.id }
+                .toSet()
+
+            if (targetIds.isNotEmpty()) {
+                _refreshingInstanceIds.value = _refreshingInstanceIds.value + targetIds
+            }
+
+            try {
+                coroutineScope {
+                    launch { servicesRepository.checkAllReachability() }
+                    launch {
+                        val currentSummaryJob = summaryJob
+                        if (currentSummaryJob?.isActive == true) {
+                            currentSummaryJob.join()
+                        } else {
+                            fetchSummaryDataInternal(instancesMap)
                         }
                     }
                 }
-
-                _instanceSummaries.value = newSummaries
-
-                // Also update legacy per-type summaries from preferred instances
-                val preferredIds = preferredInstanceIdByType.value
-                for (type in ServiceType.homeTypes) {
-                    val prefId = preferredIds[type] ?: instancesMap[type]?.firstOrNull()?.id ?: continue
-                    val summary = newSummaries[prefId]
-                    updateLegacySummary(type, prefId, instancesMap)
-                }
             } finally {
-                _summaryLoading.value = false
-                summaryJob = null
+                _refreshingInstanceIds.value = _refreshingInstanceIds.value - targetIds
+                homeRefreshJob = null
             }
+        }
+    }
+
+    private suspend fun fetchSummaryDataInternal(instancesMap: Map<ServiceType, List<ServiceInstance>>) {
+        val targetInstances = ServiceType.homeTypes
+            .flatMap { type -> instancesMap[type].orEmpty().map { instance -> type to instance } }
+        val targetIds = targetInstances.map { (_, instance) -> instance.id }.toSet()
+        val coldStartIds = targetInstances
+            .mapNotNull { (_, instance) ->
+                instance.id.takeIf { id -> _instanceSummaries.value[id] == null }
+            }
+            .toSet()
+        if (coldStartIds.isNotEmpty()) {
+            _summaryLoadingIds.value = _summaryLoadingIds.value + coldStartIds
+        }
+
+        try {
+            val summaryResults = coroutineScope {
+                targetInstances.map { (type, instance) ->
+                    async {
+                        try {
+                            withTimeoutOrNull(10_000L) {
+                                runCatching {
+                                    fetchInstanceSummary(type, instance)?.also {
+                                        servicesRepository.markInstanceReachable(instance.id)
+                                    }
+                                }.onFailure { error ->
+                                    Log.e("HomeViewModel", "${type.name} summary error for ${instance.id}: ${error.message}")
+                                }.getOrNull()?.let { instance.id to it }
+                            }
+                        } finally {
+                            _summaryLoadingIds.value = _summaryLoadingIds.value - instance.id
+                        }
+                    }
+                }
+                    .awaitAll()
+                    .filterNotNull()
+            }
+
+            val newSummaries = summaryResults.toMap()
+            _instanceSummaries.value = newSummaries
+
+            val preferredIds = preferredInstanceIdByType.value
+            for (type in ServiceType.homeTypes) {
+                val prefId = preferredIds[type] ?: instancesMap[type]?.firstOrNull()?.id ?: continue
+                updateLegacySummary(type, prefId, instancesMap)
+            }
+        } finally {
+            _summaryLoadingIds.value = _summaryLoadingIds.value - targetIds
         }
     }
 
@@ -278,6 +358,15 @@ class HomeViewModel @Inject constructor(
                 )
                 InstanceSummary("${data.stats.runningContainers}", "/ ${data.stats.totalContainers}", "dockhand_containers")
             }
+            ServiceType.CRAFTY_CONTROLLER -> {
+                val servers = craftyRepository.getServers(instanceId)
+                val stats = servers.mapNotNull { server ->
+                    runCatching { craftyRepository.getServerStats(instanceId, server.serverId) }.getOrNull()
+                }
+                val running = stats.count { it.running }
+                _craftySummary.value = CraftySummary(running = running, total = servers.size)
+                InstanceSummary("$running", "/ ${servers.size}", "crafty_running_servers")
+            }
             ServiceType.NGINX_PROXY_MANAGER -> {
                 val report = nginxProxyManagerRepository.getHostReport(instanceId)
                 _npmSummary.value = NpmSummary(report.proxy, report.total)
@@ -300,6 +389,17 @@ class HomeViewModel @Inject constructor(
                 val active = hosts.count { it.status.equals("active", ignoreCase = true) }
                 _patchmonSummary.value = PatchmonSummary(active, hosts.size)
                 InstanceSummary("$active", "/ ${hosts.size}", "hosts")
+            }
+            ServiceType.WAKAPI -> {
+                val summary = try {
+                    wakapiRepository.getSummary(instanceId)
+                } catch (e: Exception) {
+                    null
+                } ?: return null
+                val grandTotal = summary.grandTotal
+                val time = grandTotal?.text ?: "${grandTotal?.hours ?: 0}h ${grandTotal?.minutes ?: 0}m"
+                _wakapiSummary.value = WakapiSummary(time)
+                InstanceSummary(time, null, "coded_today")
             }
             ServiceType.PLEX -> {
                 val dashboard = plexRepository.getDashboard(instanceId)

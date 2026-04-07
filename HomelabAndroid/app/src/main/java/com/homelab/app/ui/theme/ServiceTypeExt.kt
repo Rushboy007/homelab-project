@@ -43,6 +43,7 @@ val ServiceType.primaryColor: Color
         ServiceType.HEALTHCHECKS -> Color(0xFF16A34A)
         ServiceType.LINUX_UPDATE -> Color(0xFF14B8A6)
         ServiceType.DOCKHAND -> Color(0xFF4A90A4)
+        ServiceType.CRAFTY_CONTROLLER -> Color(0xFF2E86FF)
         ServiceType.PATCHMON -> Color(0xFF0EA5E9)
         ServiceType.RADARR -> Color(0xFFFFC230)
         ServiceType.SONARR -> Color(0xFF89C5CF)
@@ -53,6 +54,7 @@ val ServiceType.primaryColor: Color
         ServiceType.BAZARR -> Color(0xFF2563EB)
         ServiceType.GLUETUN -> Color(0xFF06B6D4)
         ServiceType.FLARESOLVERR -> Color(0xFFFF4500)
+        ServiceType.WAKAPI -> Color(0xFF2563EB)
         ServiceType.UNKNOWN -> if (isThemeDark()) Color.LightGray else Color.Gray
     }
 
@@ -72,6 +74,7 @@ val ServiceType.backgroundColor: Color
         ServiceType.HEALTHCHECKS -> Color(0xFF16A34A).copy(alpha = 0.12f)
         ServiceType.LINUX_UPDATE -> Color(0xFF14B8A6).copy(alpha = 0.12f)
         ServiceType.DOCKHAND -> Color(0xFF4A90A4).copy(alpha = 0.10f)
+        ServiceType.CRAFTY_CONTROLLER -> Color(0xFF2E86FF).copy(alpha = 0.12f)
         ServiceType.PATCHMON -> Color(0xFF0EA5E9).copy(alpha = 0.12f)
         ServiceType.RADARR -> Color(0xFFFFC230).copy(alpha = 0.12f)
         ServiceType.SONARR -> Color(0xFF89C5CF).copy(alpha = 0.12f)
@@ -82,6 +85,7 @@ val ServiceType.backgroundColor: Color
         ServiceType.BAZARR -> Color(0xFF2563EB).copy(alpha = 0.12f)
         ServiceType.GLUETUN -> Color(0xFF06B6D4).copy(alpha = 0.12f)
         ServiceType.FLARESOLVERR -> Color(0xFFFF4500).copy(alpha = 0.12f)
+        ServiceType.WAKAPI -> Color(0xFF2563EB).copy(alpha = 0.12f)
         ServiceType.UNKNOWN -> if (isThemeDark()) Color(0xFF334155) else Color(0xFFF1F5F9)
     }
 
@@ -100,6 +104,7 @@ val ServiceType.iconUrl: String
         ServiceType.HEALTHCHECKS -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/healthchecks.png"
         ServiceType.LINUX_UPDATE -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/linux-update-dashboard.png"
         ServiceType.DOCKHAND -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/dockhand.png"
+        ServiceType.CRAFTY_CONTROLLER -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/crafty-controller.png"
         ServiceType.PATCHMON -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/patchmon.png"
         ServiceType.RADARR -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/radarr.png"
         ServiceType.SONARR -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/sonarr.png"
@@ -110,6 +115,7 @@ val ServiceType.iconUrl: String
         ServiceType.BAZARR -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/bazarr.png"
         ServiceType.GLUETUN -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/gluetun.png"
         ServiceType.FLARESOLVERR -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/flaresolverr.png"
+        ServiceType.WAKAPI -> "https://cdn.jsdelivr.net/gh/selfhst/icons/png/wakapi.png"
         ServiceType.UNKNOWN -> ""
     }
 
@@ -161,6 +167,7 @@ val ServiceType.fallbackIcon: ImageVector
         ServiceType.HEALTHCHECKS -> Icons.Default.CheckCircle
         ServiceType.LINUX_UPDATE -> Icons.Default.Source
         ServiceType.DOCKHAND -> Icons.Default.Hub
+        ServiceType.CRAFTY_CONTROLLER -> Icons.Default.Dns
         ServiceType.PATCHMON -> Icons.Default.Storage
         ServiceType.RADARR -> Icons.Default.Movie
         ServiceType.SONARR -> Icons.Default.Tv
@@ -171,5 +178,6 @@ val ServiceType.fallbackIcon: ImageVector
         ServiceType.BAZARR -> Icons.Default.Subtitles
         ServiceType.GLUETUN -> Icons.Default.VpnLock
         ServiceType.FLARESOLVERR -> Icons.Default.LocalFireDepartment
+        ServiceType.WAKAPI -> Icons.Default.CheckCircle // Usually Android fallback doesn't matter too much if there is a primary icon, we can use Watch or similar, but CheckCircle is fine if missing others. Need an imported icon. Icons.Default.Storage
         ServiceType.UNKNOWN -> Icons.Default.Widgets
     }

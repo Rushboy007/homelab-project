@@ -45,6 +45,8 @@ class SseClient @Inject constructor(
                 ServiceType.BAZARR -> "Bazarr"
                 ServiceType.GLUETUN -> "Gluetun"
                 ServiceType.FLARESOLVERR -> "Flaresolverr"
+                ServiceType.WAKAPI -> "Wakapi"
+                ServiceType.CRAFTY_CONTROLLER -> "Crafty Controller"
                 ServiceType.UNKNOWN -> "Unknown"
             })
             .build()

@@ -236,6 +236,11 @@ class AuthInterceptor @Inject constructor(
                     builder.addHeader("Cookie", instance.token)
                 }
             }
+            ServiceType.CRAFTY_CONTROLLER -> {
+                if (!hasAuthorization && instance.token.isNotBlank()) {
+                    builder.addHeader("Authorization", "Bearer ${instance.token}")
+                }
+            }
             ServiceType.JELLYSTAT -> {
                 if (!instance.apiKey.isNullOrBlank()) {
                     builder.addHeader("X-API-Token", instance.apiKey)
@@ -279,6 +284,15 @@ class AuthInterceptor @Inject constructor(
             ServiceType.QBITTORRENT -> {
                 if (instance.token.isNotBlank()) {
                     builder.addHeader("Cookie", "SID=${instance.token}")
+                }
+            }
+            ServiceType.WAKAPI -> {
+                if (!hasAuthorization) {
+                    val apiKey = instance.apiKey.orEmpty()
+                    if (apiKey.isNotBlank()) {
+                        val encoded = java.util.Base64.getEncoder().encodeToString(apiKey.toByteArray(Charsets.UTF_8))
+                        builder.addHeader("Authorization", "Basic $encoded")
+                    }
                 }
             }
             else -> {}

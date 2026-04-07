@@ -51,6 +51,7 @@ object BackupServiceTypeMapper {
             ServiceType.HEALTHCHECKS -> "healthchecks"
             ServiceType.LINUX_UPDATE -> "linux_update"
             ServiceType.DOCKHAND -> "dockhand"
+            ServiceType.CRAFTY_CONTROLLER -> "crafty_controller"
             ServiceType.GITEA -> "gitea"
             ServiceType.NGINX_PROXY_MANAGER -> "nginx_proxy_manager"
             ServiceType.PANGOLIN -> "pangolin"
@@ -66,6 +67,7 @@ object BackupServiceTypeMapper {
             ServiceType.BAZARR -> "bazarr"
             ServiceType.GLUETUN -> "gluetun"
             ServiceType.FLARESOLVERR -> "flaresolverr"
+            ServiceType.WAKAPI -> "wakapi"
             ServiceType.UNKNOWN -> "unknown"
         }
     }
@@ -97,6 +99,8 @@ object BackupServiceTypeMapper {
             "bazarr" -> ServiceType.BAZARR
             "gluetun" -> ServiceType.GLUETUN
             "flaresolverr" -> ServiceType.FLARESOLVERR
+            "wakapi" -> ServiceType.WAKAPI
+            "crafty_controller", "crafty" -> ServiceType.CRAFTY_CONTROLLER
             else -> null
         }
     }

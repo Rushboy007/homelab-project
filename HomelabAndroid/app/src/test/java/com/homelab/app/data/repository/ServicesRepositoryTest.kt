@@ -104,6 +104,46 @@ class ServicesRepositoryTest {
         assertEquals("/api/v3/system/status", captured.first().url.encodedPath)
     }
 
+    @Test
+    fun `bulk reachability refresh is throttled when called twice back to back`() = runTest {
+        val dao = ReachabilityFakeDao()
+        val state = ReachabilitySettingsState(migrated = MutableStateFlow(true))
+        val instanceRepository = ServiceInstancesRepository(dao, settingsManager(state))
+        val captured = mutableListOf<Request>()
+        val repository = ServicesRepository(
+            serviceInstancesRepository = instanceRepository,
+            okHttpClient = OkHttpClient.Builder()
+                .addInterceptor(Interceptor { chain ->
+                    val request = chain.request()
+                    captured += request
+                    Response.Builder()
+                        .request(request)
+                        .protocol(Protocol.HTTP_1_1)
+                        .code(200)
+                        .message("OK")
+                        .body("{}".toResponseBody("application/json".toMediaType()))
+                        .build()
+                })
+                .build(),
+            globalEventBus = GlobalEventBus()
+        )
+        val instance = ServiceInstance(
+            id = "instance-linux",
+            type = ServiceType.LINUX_UPDATE,
+            label = "Updates",
+            url = "https://updates.example.com",
+            token = "token"
+        )
+
+        instanceRepository.saveInstance(instance)
+
+        repository.checkAllReachability()
+        repository.checkAllReachability()
+
+        assertEquals(1, captured.size)
+        assertEquals("/api/dashboard/stats", captured.first().url.encodedPath)
+    }
+
     private fun settingsManager(state: ReachabilitySettingsState): SettingsManager {
         return mockk(relaxed = true) {
             every { serviceInstancesMigrated } returns state.migrated

@@ -43,6 +43,7 @@ enum BackupServiceTypeMapper {
         case .healthchecks:      return "healthchecks"
         case .linuxUpdate:            return "linux_update"
         case .dockhand:               return "dockhand"
+        case .craftyController:       return "crafty_controller"
         case .gitea:             return "gitea"
         case .nginxProxyManager: return "nginx_proxy_manager"
         case .pangolin:          return "pangolin"
@@ -58,6 +59,7 @@ enum BackupServiceTypeMapper {
         case .bazarr:            return "bazarr"
         case .gluetun:           return "gluetun"
         case .flaresolverr:      return "flaresolverr"
+        case .wakapi:            return "wakapi"
         }
     }
 
@@ -78,6 +80,9 @@ enum BackupServiceTypeMapper {
              "linuxupdate",
              "linux-update":          return .linuxUpdate
         case "dockhand":              return .dockhand
+        case "crafty_controller",
+             "crafty-controller",
+             "crafty":                return .craftyController
         case "gitea":                return .gitea
         case "nginx_proxy_manager",
              "nginxproxymanager":     return .nginxProxyManager
@@ -94,6 +99,7 @@ enum BackupServiceTypeMapper {
         case "bazarr":               return .bazarr
         case "gluetun":              return .gluetun
         case "flaresolverr":         return .flaresolverr
+        case "wakapi":               return .wakapi
         default:                     return nil
         }
     }

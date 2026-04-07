@@ -2,6 +2,17 @@ import XCTest
 @testable import Homelab
 
 final class BackupModelsTests: XCTestCase {
+    func testBackupMapperRoundTripCoversEverySupportedService() {
+        ServiceType.allCases.forEach { type in
+            let key = BackupServiceTypeMapper.backupKey(for: type)
+            XCTAssertEqual(
+                BackupServiceTypeMapper.serviceType(from: key),
+                type,
+                "Missing backup round-trip for \(type.rawValue)"
+            )
+        }
+    }
+
     func testPangolinBackupMapperRoundTrip() {
         XCTAssertEqual(BackupServiceTypeMapper.backupKey(for: .pangolin), "pangolin")
         XCTAssertEqual(BackupServiceTypeMapper.serviceType(from: "pangolin"), .pangolin)

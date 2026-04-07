@@ -19,6 +19,7 @@ enum class ServiceType(val displayName: String) {
     HEALTHCHECKS("Healthchecks"),
     LINUX_UPDATE("Linux Update"),
     DOCKHAND("Dockhand"),
+    CRAFTY_CONTROLLER("Crafty Controller"),
     PATCHMON("PatchMon"),
     RADARR("Radarr"),
     SONARR("Sonarr"),
@@ -29,6 +30,7 @@ enum class ServiceType(val displayName: String) {
     BAZARR("Bazarr"),
     GLUETUN("Gluetun"),
     FLARESOLVERR("FlareSolverr"),
+    WAKAPI("Wakapi"),
     UNKNOWN("Unknown");
 
     companion object {
@@ -57,6 +59,8 @@ enum class ServiceType(val displayName: String) {
                 "TECHNITIUMDNS" -> TECHNITIUM
                 "PANGOLIN" -> PANGOLIN
                 "DOCKHAND" -> DOCKHAND
+                "CRAFTY",
+                "CRAFTY_CONTROLLER" -> CRAFTY_CONTROLLER
                 else -> entries.firstOrNull { it.name == normalized } ?: UNKNOWN
             }
         }

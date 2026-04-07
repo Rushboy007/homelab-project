@@ -231,7 +231,7 @@ struct SettingsView: View {
                             settingsStore.setAppIcon(iconOption)
                             HapticManager.light()
                         } label: {
-                            VStack(spacing: 8) {
+                            VStack(spacing: 0) {
                                 ZStack(alignment: .topTrailing) {
                                     appIconPreview(for: iconOption)
                                         .frame(width: 56, height: 56)
@@ -243,12 +243,6 @@ struct SettingsView: View {
                                             .offset(x: 4, y: -4)
                                     }
                                 }
-
-                                Text(label(for: iconOption))
-                                    .font(.caption2.weight(selected ? .bold : .semibold))
-                                    .foregroundStyle(selected ? AppTheme.accent : .primary)
-                                    .multilineTextAlignment(.center)
-                                    .lineLimit(2)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.horizontal, 6)
@@ -266,6 +260,8 @@ struct SettingsView: View {
                             )
                         }
                         .buttonStyle(.plain)
+                        .accessibilityLabel(label(for: iconOption))
+                        .accessibilityAddTraits(selected ? .isSelected : [])
                     }
                 }
                 .padding(10)
@@ -1273,4 +1269,3 @@ struct DebugLogsView: View {
         }
     }
 }
-

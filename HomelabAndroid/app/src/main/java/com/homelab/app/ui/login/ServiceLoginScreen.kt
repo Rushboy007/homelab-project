@@ -193,6 +193,7 @@ fun ServiceLoginScreen(
                 ServiceType.PANGOLIN -> stringResource(R.string.login_hint_pangolin)
                 ServiceType.LINUX_UPDATE -> stringResource(R.string.login_hint_linux_update)
                 ServiceType.DOCKHAND -> stringResource(R.string.login_hint_dockhand)
+                ServiceType.CRAFTY_CONTROLLER -> stringResource(R.string.login_hint_crafty_controller)
                 ServiceType.JELLYSTAT -> stringResource(R.string.login_hint_jellystat)
                 ServiceType.PATCHMON -> stringResource(R.string.login_hint_patchmon)
                 ServiceType.PLEX -> stringResource(R.string.login_hint_plex)
@@ -419,7 +420,8 @@ fun ServiceLoginScreen(
                 serviceType == ServiceType.LIDARR ||
                 serviceType == ServiceType.JELLYSEERR ||
                 serviceType == ServiceType.PROWLARR ||
-                serviceType == ServiceType.BAZARR
+                serviceType == ServiceType.BAZARR ||
+                serviceType == ServiceType.WAKAPI
             ) {
                 SecretField(
                     value = apiKey,

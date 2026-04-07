@@ -51,6 +51,10 @@ struct BackupView: View {
         }
     }
 
+    private var exportableTypes: [ServiceType] {
+        settingsStore.serviceOrder
+    }
+
     private var configuredTypeSet: Set<ServiceType> {
         Set(configuredTypes)
     }
@@ -278,46 +282,47 @@ struct BackupView: View {
                             RoundedRectangle(cornerRadius: 10, style: .continuous)
                                 .fill(Color(.tertiarySystemFill).opacity(0.7))
                         )
-                } else {
-                    FlowLayout(spacing: 8) {
-                        selectionChip(
-                            title: localizer.t.backupSelectionAll,
-                            selected: !configuredTypeSet.isEmpty && configuredTypeSet.isSubset(of: selectedExportTypes),
-                            enabled: !configuredTypeSet.isEmpty
-                        ) {
-                            toggleAllExportTypes()
-                        }
-                        selectionChip(
-                            title: localizer.t.backupSelectionHome,
-                            selected: !configuredHomeTypeSet.isEmpty && configuredHomeTypeSet.isSubset(of: selectedExportTypes),
-                            enabled: !configuredHomeTypeSet.isEmpty
-                        ) {
-                            toggleHomeExportTypes()
-                        }
-                        selectionChip(
-                            title: localizer.t.backupSelectionArr,
-                            selected: !configuredArrTypeSet.isEmpty && configuredArrTypeSet.isSubset(of: selectedExportTypes),
-                            enabled: !configuredArrTypeSet.isEmpty
-                        ) {
-                            toggleArrExportTypes()
-                        }
-                    }
-
-                    FlowLayout(spacing: 8) {
-                        ForEach(configuredTypes, id: \.self) { type in
-                            selectionChip(
-                                title: localizedServiceName(for: type),
-                                selected: selectedExportTypes.contains(type)
-                            ) {
-                                toggleExportType(type)
-                            }
-                        }
-                    }
-
-                    Text(String(format: localizer.t.backupSelectionSelectedCount, selectedServiceCount))
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
                 }
+
+                FlowLayout(spacing: 8) {
+                    selectionChip(
+                        title: localizer.t.backupSelectionAll,
+                        selected: !configuredTypeSet.isEmpty && configuredTypeSet.isSubset(of: selectedExportTypes),
+                        enabled: !configuredTypeSet.isEmpty
+                    ) {
+                        toggleAllExportTypes()
+                    }
+                    selectionChip(
+                        title: localizer.t.backupSelectionHome,
+                        selected: !configuredHomeTypeSet.isEmpty && configuredHomeTypeSet.isSubset(of: selectedExportTypes),
+                        enabled: !configuredHomeTypeSet.isEmpty
+                    ) {
+                        toggleHomeExportTypes()
+                    }
+                    selectionChip(
+                        title: localizer.t.backupSelectionArr,
+                        selected: !configuredArrTypeSet.isEmpty && configuredArrTypeSet.isSubset(of: selectedExportTypes),
+                        enabled: !configuredArrTypeSet.isEmpty
+                    ) {
+                        toggleArrExportTypes()
+                    }
+                }
+
+                FlowLayout(spacing: 8) {
+                    ForEach(exportableTypes, id: \.self) { type in
+                        selectionChip(
+                            title: localizedServiceName(for: type),
+                            selected: selectedExportTypes.contains(type),
+                            enabled: configuredTypeSet.contains(type)
+                        ) {
+                            toggleExportType(type)
+                        }
+                    }
+                }
+
+                Text(String(format: localizer.t.backupSelectionSelectedCount, selectedServiceCount))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
 
                 Button {
                     exportPassword = ""
@@ -453,6 +458,7 @@ struct BackupView: View {
         case .healthchecks: return localizer.t.serviceHealthchecks
         case .linuxUpdate: return ServiceType.linuxUpdate.displayName
         case .dockhand: return ServiceType.dockhand.displayName
+        case .craftyController: return ServiceType.craftyController.displayName
         case .gitea: return localizer.t.serviceGitea
         case .nginxProxyManager: return localizer.t.serviceNpm
         case .pangolin: return ServiceType.pangolin.displayName
@@ -468,6 +474,7 @@ struct BackupView: View {
         case .bazarr: return localizer.t.serviceBazarr
         case .gluetun: return localizer.t.serviceGluetun
         case .flaresolverr: return localizer.t.serviceFlaresolverr
+        case .wakapi: return localizer.t.serviceWakapi
         }
     }
 

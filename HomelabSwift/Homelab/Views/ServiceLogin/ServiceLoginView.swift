@@ -35,6 +35,7 @@ struct ServiceLoginView: View {
             || serviceType == .technitium
             || serviceType == .patchmon
             || serviceType == .qbittorrent
+            || serviceType == .craftyController
             || serviceType == .dockhand
     }
 
@@ -51,6 +52,7 @@ struct ServiceLoginView: View {
             || serviceType == .jellyseerr
             || serviceType == .prowlarr
             || serviceType == .bazarr
+            || serviceType == .wakapi
     }
 
     private var supportsCredentiallessAuth: Bool {
@@ -301,6 +303,7 @@ struct ServiceLoginView: View {
         case .technitium:        return localizer.t.loginHintTechnitium
         case .linuxUpdate:       return localizer.t.loginHintLinuxUpdate
         case .dockhand:          return localizer.t.loginHintDockhand
+        case .craftyController:  return localizer.t.loginHintCraftyController
         case .gitea:             return localizer.t.loginHintGitea2FA
         case .nginxProxyManager: return localizer.t.loginHintNpm
         case .pangolin:          return PangolinStrings.forLanguage(localizer.language).loginHint
@@ -312,6 +315,7 @@ struct ServiceLoginView: View {
                                  return localizer.t.loginHintGluetun
         case .flaresolverr:
                                  return localizer.t.loginHintFlaresolverr
+        case .wakapi:            return localizer.t.loginHintWakapi
         case .qbittorrent, .radarr, .sonarr, .lidarr, .jellyseerr, .prowlarr, .bazarr:
                                  return nil
         default: return nil
@@ -450,6 +454,24 @@ struct ServiceLoginView: View {
                 fallbackUrl: fallbackUrl
             )
 
+        case .wakapi:
+            let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
+            guard let key, !key.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            let client = WakapiAPIClient(instanceId: existingInstanceId ?? UUID())
+            try await client.authenticate(url: url, apiKey: key, fallbackUrl: fallbackUrl)
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .wakapi,
+                label: label,
+                url: url,
+                token: "",
+                username: existingInstance?.username,
+                apiKey: key,
+                fallbackUrl: fallbackUrl
+            )
+
         case .linuxUpdate:
             let key = normalizedOptional(apiKey) ?? existingInstance?.apiKey
             guard let key, !key.isEmpty else {
@@ -540,6 +562,43 @@ struct ServiceLoginView: View {
                 label: label,
                 url: url,
                 token: sessionCookie,
+                username: identity,
+                fallbackUrl: fallbackUrl,
+                password: resolvedPassword
+            )
+
+        case .craftyController:
+            let identity = normalizedOptional(username) ?? existingInstance?.username
+            let secret = normalizedOptional(password)
+            guard let identity, !identity.isEmpty else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+            if existingInstance != nil && url != existingInstance?.url && secret == nil {
+                throw APIError.custom(localizer.t.loginErrorPasswordRequired)
+            }
+
+            let resolvedPassword: String
+            if let secret, !secret.isEmpty {
+                resolvedPassword = secret
+            } else if let existing = existingInstance?.password, !existing.isEmpty {
+                resolvedPassword = existing
+            } else {
+                throw APIError.custom(localizer.t.loginErrorCredentials)
+            }
+
+            let client = CraftyAPIClient(instanceId: existingInstanceId ?? UUID())
+            let token = try await client.authenticate(
+                url: url,
+                username: identity,
+                password: resolvedPassword,
+                fallbackUrl: fallbackUrl
+            )
+            return ServiceInstance(
+                id: existingInstanceId ?? UUID(),
+                type: .craftyController,
+                label: label,
+                url: url,
+                token: token,
                 username: identity,
                 fallbackUrl: fallbackUrl,
                 password: resolvedPassword

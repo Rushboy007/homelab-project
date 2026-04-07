@@ -214,9 +214,5 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch(Dispatchers.Default) {
             servicesRepository.checkTailscale()
         }
-        // Refresh all services reachability on app resume
-        lifecycleScope.launch {
-            servicesRepository.checkAllReachability()
-        }
     }
 }

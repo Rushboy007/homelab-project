@@ -9,6 +9,7 @@ import com.homelab.app.data.repository.BeszelRepository
 import com.homelab.app.data.repository.DockhandRepository
 import com.homelab.app.data.repository.GiteaRepository
 import com.homelab.app.data.repository.LinuxUpdateRepository
+import com.homelab.app.data.repository.CraftyRepository
 import com.homelab.app.data.repository.HealthchecksRepository
 import com.homelab.app.data.repository.JellystatRepository
 import com.homelab.app.data.repository.MediaArrRepository
@@ -22,6 +23,7 @@ import com.homelab.app.data.repository.PortainerRepository
 import com.homelab.app.data.repository.ServiceInstancesRepository
 import com.homelab.app.data.repository.ServicesRepository
 import com.homelab.app.data.repository.TechnitiumRepository
+import com.homelab.app.data.repository.WakapiRepository
 import com.homelab.app.domain.model.PiHoleAuthMode
 import com.homelab.app.domain.model.ServiceInstance
 import com.homelab.app.util.ErrorHandler
@@ -46,6 +48,7 @@ class ServiceLoginViewModel @Inject constructor(
     private val beszelRepository: BeszelRepository,
     private val giteaRepository: GiteaRepository,
     private val linuxUpdateRepository: LinuxUpdateRepository,
+    private val craftyRepository: CraftyRepository,
     private val technitiumRepository: TechnitiumRepository,
     private val dockhandRepository: DockhandRepository,
     private val nginxProxyManagerRepository: NginxProxyManagerRepository,
@@ -54,7 +57,8 @@ class ServiceLoginViewModel @Inject constructor(
     private val patchmonRepository: PatchmonRepository,
     private val pangolinRepository: PangolinRepository,
     private val plexRepository: PlexRepository,
-    private val mediaArrRepository: MediaArrRepository
+    private val mediaArrRepository: MediaArrRepository,
+    private val wakapiRepository: WakapiRepository
 ) : ViewModel() {
 
     private val existingInstanceId: String? = savedStateHandle["instanceId"]
@@ -322,6 +326,33 @@ class ServiceLoginViewModel @Inject constructor(
                                 fallbackUrl = cleanFallbackUrl
                             )
                         }
+                        ServiceType.CRAFTY_CONTROLLER -> {
+                            require(trimmedUsername.isNotBlank()) { context.getString(R.string.login_error_username_required) }
+                            val authPassword = trimmedPassword.ifBlank {
+                                if (existing != null && existing.url == cleanUrl && existing.username == trimmedUsername) {
+                                    return@ifBlank existing.password.orEmpty()
+                                }
+                                throw IllegalArgumentException(context.getString(R.string.login_error_password_required))
+                            }
+                            require(authPassword.isNotBlank()) { context.getString(R.string.login_error_password_required) }
+
+                            val token = craftyRepository.authenticate(
+                                url = cleanUrl,
+                                username = trimmedUsername,
+                                password = authPassword,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                token = token,
+                                username = trimmedUsername,
+                                password = authPassword,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
                         ServiceType.JELLYSTAT -> {
                             require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
                             jellystatRepository.authenticate(cleanUrl, trimmedApiKey)
@@ -357,6 +388,22 @@ class ServiceLoginViewModel @Inject constructor(
                         ServiceType.PLEX -> {
                             require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
                             plexRepository.authenticate(cleanUrl, trimmedApiKey)
+                            ServiceInstance(
+                                id = instanceId,
+                                type = serviceType,
+                                label = normalizedLabel,
+                                url = cleanUrl,
+                                apiKey = trimmedApiKey,
+                                fallbackUrl = cleanFallbackUrl
+                            )
+                        }
+                        ServiceType.WAKAPI -> {
+                            require(trimmedApiKey.isNotBlank()) { context.getString(R.string.login_error_api_key_required) }
+                            wakapiRepository.authenticate(
+                                url = cleanUrl,
+                                apiKey = trimmedApiKey,
+                                fallbackUrl = cleanFallbackUrl
+                            )
                             ServiceInstance(
                                 id = instanceId,
                                 type = serviceType,
