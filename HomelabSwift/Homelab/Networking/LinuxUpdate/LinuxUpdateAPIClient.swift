@@ -647,9 +647,23 @@ actor DockhandAPIClient {
     func ping() async -> Bool {
         guard !baseURL.isEmpty else { return false }
         let headers = authHeaders()
-        if await engine.pingURL("\(baseURL)/api/dashboard/stats", extraHeaders: headers) { return true }
+        let candidatePaths = ["/api/dashboard/stats", "/api/environments", "/api/containers"]
+
+        for path in candidatePaths {
+            if await engine.pingURL("\(baseURL)\(path)", extraHeaders: headers) {
+                return true
+            }
+        }
+
         guard !fallbackURL.isEmpty else { return false }
-        return await engine.pingURL("\(fallbackURL)/api/dashboard/stats", extraHeaders: headers)
+
+        for path in candidatePaths {
+            if await engine.pingURL("\(fallbackURL)\(path)", extraHeaders: headers) {
+                return true
+            }
+        }
+
+        return false
     }
 
     func authenticate(

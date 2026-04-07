@@ -90,6 +90,11 @@ struct ServiceDashboardLayout<T, Content: View>: View {
         .onChange(of: stateChangeToken) { _, _ in
             AppLogger.shared.stateTransition(service: serviceType.displayName, state: state)
         }
+        .task(id: stateChangeToken) {
+            if case .loaded = state {
+                servicesStore.markInstanceReachable(instanceId)
+            }
+        }
     }
 
     // MARK: - Loading

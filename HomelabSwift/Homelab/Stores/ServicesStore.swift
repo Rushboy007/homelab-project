@@ -396,6 +396,12 @@ final class ServicesStore {
         pingingByInstanceId[instanceId] ?? false
     }
 
+    func markInstanceReachable(_ instanceId: UUID) {
+        guard instancesById[instanceId] != nil else { return }
+        pingingByInstanceId[instanceId] = false
+        reachabilityByInstanceId[instanceId] = true
+    }
+
     func saveInstance(
         _ instance: ServiceInstance,
         refreshPiHoleAuth: Bool = false,
