@@ -99,6 +99,7 @@
     <string name="crafty_command_hint">Utilisez la commande console du serveur sans slash initial.</string>
     <string name="crafty_command_send">Envoyer la commande</string>
     <string name="crafty_command_sent">Commande envoyée</string>
+    <string name="crafty_action_sent">Action envoyée</string>
     <string name="service_adguard_home">AdGuard Home</string>
     <string name="service_healthchecks">Healthchecks</string>
     <string name="service_healthchecks_desc">Surveillance des cron jobs</string>

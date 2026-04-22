@@ -80,7 +80,7 @@ actor CraftyAPIClient {
         return response.data
     }
 
-    func getServerStats(serverId: Int) async throws -> CraftyServerStats {
+    func getServerStats(serverId: String) async throws -> CraftyServerStats {
         let response: CraftyEnvelope<CraftyServerStats> = try await engine.request(
             baseURL: baseURL,
             fallbackURL: fallbackURL,
@@ -90,7 +90,7 @@ actor CraftyAPIClient {
         return response.data
     }
 
-    func getServerLogs(serverId: Int, file: Bool = false, raw: Bool = false) async throws -> [String] {
+    func getServerLogs(serverId: String, file: Bool = false, raw: Bool = false) async throws -> [String] {
         let response: CraftyEnvelope<[String]> = try await engine.request(
             baseURL: baseURL,
             fallbackURL: fallbackURL,
@@ -100,7 +100,7 @@ actor CraftyAPIClient {
         return response.data
     }
 
-    func sendCommand(serverId: Int, command: String) async throws {
+    func sendCommand(serverId: String, command: String) async throws {
         let trimmed = command
             .trimmingCharacters(in: .whitespacesAndNewlines)
             .replacingOccurrences(of: #"^/+"#, with: "", options: .regularExpression)
@@ -109,7 +109,7 @@ actor CraftyAPIClient {
         var headers = authHeaders()
         headers["Content-Type"] = "text/plain"
 
-        try await engine.requestVoid(
+        let response: CraftyStatusResponse = try await engine.request(
             baseURL: baseURL,
             fallbackURL: fallbackURL,
             path: "/api/v2/servers/\(serverId)/stdin",
@@ -117,16 +117,18 @@ actor CraftyAPIClient {
             headers: headers,
             body: Data(trimmed.utf8)
         )
+        try response.requireSuccess()
     }
 
-    func sendAction(serverId: Int, action: CraftyAction) async throws {
-        try await engine.requestVoid(
+    func sendAction(serverId: String, action: CraftyAction) async throws {
+        let response: CraftyStatusResponse = try await engine.request(
             baseURL: baseURL,
             fallbackURL: fallbackURL,
             path: "/api/v2/servers/\(serverId)/action/\(action.rawValue)",
             method: "POST",
             headers: authHeaders()
         )
+        try response.requireSuccess()
     }
 
     private func authHeaders() -> [String: String] {
@@ -146,6 +148,24 @@ struct CraftyEnvelope<T: Codable>: Codable {
     let data: T
 }
 
+private struct CraftyStatusResponse: Codable {
+    let status: String
+    let error: String?
+    let errorData: String?
+
+    enum CodingKeys: String, CodingKey {
+        case status
+        case error
+        case errorData = "error_data"
+    }
+
+    func requireSuccess() throws {
+        guard status.compare("ok", options: .caseInsensitive) == .orderedSame else {
+            throw APIError.custom(errorData ?? error ?? "Crafty action failed")
+        }
+    }
+}
+
 struct CraftyLoginRequest: Codable {
     let username: String
     let password: String
@@ -162,13 +182,13 @@ struct CraftyLoginData: Codable {
 }
 
 struct CraftyServer: Codable, Identifiable, Hashable {
-    let serverID: Int
+    let serverID: String
     let serverUUID: String?
     let serverName: String
     let type: String?
     let serverPort: Int?
 
-    var id: Int { serverID }
+    var id: String { serverID }
 
     enum CodingKeys: String, CodingKey {
         case serverID = "server_id"

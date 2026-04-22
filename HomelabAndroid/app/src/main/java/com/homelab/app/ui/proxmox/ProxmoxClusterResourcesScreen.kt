@@ -11,6 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,8 +35,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import kotlinx.coroutines.launch
 
 private fun proxmoxCardColor(isDarkTheme: Boolean, accent: Color): Color =
-    accent.copy(alpha = if (isDarkTheme) 0.018f else 0.020f)
-        .copy(alpha = if (isDarkTheme) 0.85f else 0.95f)
+    accent.copy(alpha = if (isDarkTheme) 0.07f else 0.08f)
 
 private fun resourceTypeColor(resource: ProxmoxClusterResource): Color {
     return when {
@@ -53,7 +53,7 @@ private fun resourceIcon(resource: ProxmoxClusterResource): androidx.compose.ui.
         resource.isQemu -> Icons.Default.Computer
         resource.isLXC -> Icons.Default.Storage
         resource.isStorage -> Icons.Default.SdStorage
-        else -> Icons.Default.HelpOutline
+        else -> Icons.AutoMirrored.Filled.HelpOutline
     }
 }
 
@@ -170,7 +170,7 @@ fun ProxmoxClusterResourcesScreen(
                                                     "VM" -> Icons.Default.Computer
                                                     "Container" -> Icons.Default.Storage
                                                     "Storage" -> Icons.Default.SdStorage
-                                                    else -> Icons.Default.HelpOutline
+                                                    else -> Icons.AutoMirrored.Filled.HelpOutline
                                                 },
                                                 contentDescription = null,
                                                 tint = typeColor,
@@ -226,8 +226,7 @@ private fun ClusterResourceCard(
     onNavigateToNode: (String) -> Unit,
     onNavigateToGuest: (String, Int, Boolean) -> Unit
 ) {
-    val cardColor = color.copy(alpha = if (isDark) 0.018f else 0.020f)
-        .copy(alpha = if (isDark) 0.85f else 0.95f)
+    val cardColor = color.copy(alpha = if (isDark) 0.07f else 0.08f)
 
     val onClick: (() -> Unit)? = when {
         resource.isNode && resource.node != null -> { { onNavigateToNode(resource.node!!) } }

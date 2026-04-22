@@ -2,6 +2,7 @@ package com.homelab.app.data.repository
 
 import com.homelab.app.data.remote.api.CraftyApi
 import com.homelab.app.data.remote.TlsClientSelector
+import com.homelab.app.data.remote.dto.crafty.CraftyActionResponse
 import com.homelab.app.data.remote.dto.crafty.CraftyLoginData
 import com.homelab.app.data.remote.dto.crafty.CraftyLoginRequest
 import com.homelab.app.data.remote.dto.crafty.CraftyResponse
@@ -15,6 +16,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -88,7 +90,7 @@ class CraftyRepository @Inject constructor(
         }
     }
 
-    suspend fun getServerStats(instanceId: String, serverId: Int): CraftyServerStats {
+    suspend fun getServerStats(instanceId: String, serverId: String): CraftyServerStats {
         return try {
             api.getServerStats(instanceId, serverId).data
         } catch (error: Exception) {
@@ -96,7 +98,7 @@ class CraftyRepository @Inject constructor(
         }
     }
 
-    suspend fun getServerLogs(instanceId: String, serverId: Int): List<String> {
+    suspend fun getServerLogs(instanceId: String, serverId: String): List<String> {
         return try {
             api.getServerLogs(instanceId = instanceId, serverId = serverId).data
         } catch (error: Exception) {
@@ -118,15 +120,17 @@ class CraftyRepository @Inject constructor(
         CraftyDashboardData(enriched)
     }
 
-    suspend fun sendAction(instanceId: String, serverId: Int, action: CraftyServerAction) {
+    suspend fun sendAction(instanceId: String, serverId: String, action: CraftyServerAction) {
         try {
             api.sendAction(instanceId = instanceId, serverId = serverId, action = action.apiValue)
+                .requireSuccess()
         } catch (error: Exception) {
+            if (error is IllegalStateException) throw error
             throw handleException(error)
         }
     }
 
-    suspend fun sendCommand(instanceId: String, serverId: Int, command: String) {
+    suspend fun sendCommand(instanceId: String, serverId: String, command: String) {
         val normalizedCommand = command.trim().removePrefix("/")
         require(normalizedCommand.isNotBlank()) { "Command cannot be blank" }
 
@@ -135,9 +139,16 @@ class CraftyRepository @Inject constructor(
                 instanceId = instanceId,
                 serverId = serverId,
                 command = normalizedCommand.toRequestBody("text/plain".toMediaType())
-            )
+            ).requireSuccess()
         } catch (error: Exception) {
+            if (error is IllegalStateException) throw error
             throw handleException(error)
+        }
+    }
+
+    private fun CraftyActionResponse.requireSuccess() {
+        if (!status.equals("ok", ignoreCase = true)) {
+            throw IllegalStateException(errorData ?: error ?: "Crafty action failed")
         }
     }
 
@@ -150,6 +161,7 @@ class CraftyRepository @Inject constructor(
                     CraftyApiException(CraftyApiException.Kind.SERVER_ERROR, error)
                 }
             }
+            is SerializationException -> CraftyApiException(CraftyApiException.Kind.SERVER_ERROR, error)
             is IOException -> CraftyApiException(CraftyApiException.Kind.CONNECTION_ERROR, error)
             is CraftyApiException -> error
             else -> CraftyApiException(CraftyApiException.Kind.SERVER_ERROR, error)

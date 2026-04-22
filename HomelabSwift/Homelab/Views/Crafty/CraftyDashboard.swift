@@ -4,7 +4,7 @@ private struct CraftyServerRow: Identifiable, Hashable {
     let server: CraftyServer
     let stats: CraftyServerStats?
 
-    var id: Int { server.id }
+    var id: String { server.id }
 }
 
 private struct CraftyDashboardData: Equatable {
@@ -37,8 +37,9 @@ struct CraftyDashboard: View {
     @State private var selectedInstanceId: UUID
     @State private var dashboard: CraftyDashboardData?
     @State private var state: LoadableState<Void> = .idle
-    @State private var actionServerId: Int?
+    @State private var actionServerId: String?
     @State private var activeSheet: CraftySheetRoute?
+    @State private var actionErrorMessage: String?
 
     private let craftyColor = ServiceType.craftyController.colors.primary
     private let actionGrid = [GridItem(.adaptive(minimum: 132), spacing: 8)]
@@ -85,6 +86,13 @@ struct CraftyDashboard: View {
             case .command(let server):
                 CraftyCommandSheet(instanceId: selectedInstanceId, server: server)
             }
+        }
+        .alert(localizer.t.error, isPresented: actionErrorPresented) {
+            Button(localizer.t.close, role: .cancel) {
+                actionErrorMessage = nil
+            }
+        } message: {
+            Text(actionErrorMessage ?? "")
         }
     }
 
@@ -164,6 +172,9 @@ struct CraftyDashboard: View {
     private func serverCard(_ row: CraftyServerRow) -> some View {
         let stats = row.stats
         let accent = statusColor(for: stats)
+        let isTransientState = stats?.waitingStart == true || stats?.updating == true || stats?.downloading == true
+        let isActionRunning = actionServerId == row.server.serverID
+        let actionsEnabled = !isActionRunning && !isTransientState
 
         return VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top) {
@@ -181,6 +192,12 @@ struct CraftyDashboard: View {
                     .padding(.horizontal, 10)
                     .padding(.vertical, 6)
                     .background(accent.opacity(0.12), in: Capsule())
+
+                if isActionRunning {
+                    ProgressView()
+                        .controlSize(.small)
+                        .padding(.top, 4)
+                }
             }
 
             LazyVGrid(columns: twoColumnGrid, spacing: 12) {
@@ -197,19 +214,19 @@ struct CraftyDashboard: View {
             }
 
             LazyVGrid(columns: actionGrid, spacing: 8) {
-                actionButton(title: localizer.t.actionStart, icon: "play.fill", enabled: actionServerId == nil && stats?.running != true, primary: true) {
+                actionButton(title: localizer.t.actionStart, icon: "play.fill", enabled: actionsEnabled && stats?.running != true, primary: true) {
                     await performAction(.start, serverId: row.server.serverID)
                 }
-                actionButton(title: localizer.t.actionStop, icon: "stop.fill", enabled: actionServerId == nil && stats?.running == true) {
+                actionButton(title: localizer.t.actionStop, icon: "stop.fill", enabled: actionsEnabled && stats?.running == true) {
                     await performAction(.stop, serverId: row.server.serverID)
                 }
-                actionButton(title: localizer.t.actionRestart, icon: "arrow.clockwise", enabled: actionServerId == nil && stats?.running == true) {
+                actionButton(title: localizer.t.actionRestart, icon: "arrow.clockwise", enabled: actionsEnabled && stats?.running == true) {
                     await performAction(.restart, serverId: row.server.serverID)
                 }
-                actionButton(title: localizer.t.actionBackup, icon: "externaldrive.badge.timemachine", enabled: actionServerId == nil) {
+                actionButton(title: localizer.t.actionBackup, icon: "externaldrive.badge.timemachine", enabled: actionsEnabled) {
                     await performAction(.backup, serverId: row.server.serverID)
                 }
-                actionButton(title: localizer.t.craftyUpdateExecutable, icon: "arrow.down.circle", enabled: actionServerId == nil) {
+                actionButton(title: localizer.t.craftyUpdateExecutable, icon: "arrow.down.circle", enabled: actionsEnabled) {
                     await performAction(.updateExecutable, serverId: row.server.serverID)
                 }
                 actionButton(title: localizer.t.detailLogs, icon: "doc.text.magnifyingglass", enabled: true) {
@@ -218,7 +235,7 @@ struct CraftyDashboard: View {
                 actionButton(title: localizer.t.detailCommand, icon: "terminal", enabled: true) {
                     activeSheet = .command(row.server)
                 }
-                actionButton(title: localizer.t.actionKill, icon: "exclamationmark.octagon.fill", enabled: actionServerId == nil && stats?.running == true, destructive: true) {
+                actionButton(title: localizer.t.actionKill, icon: "exclamationmark.octagon.fill", enabled: actionsEnabled && stats?.running == true, destructive: true) {
                     await performAction(.kill, serverId: row.server.serverID)
                 }
             }
@@ -338,16 +355,57 @@ struct CraftyDashboard: View {
         }
     }
 
-    private func performAction(_ action: CraftyAction, serverId: Int) async {
+    private func performAction(_ action: CraftyAction, serverId: String) async {
         do {
             actionServerId = serverId
+            actionErrorMessage = nil
             guard let client = await servicesStore.craftyClient(instanceId: selectedInstanceId) else { return }
             try await client.sendAction(serverId: serverId, action: action)
-            await fetchDashboard()
+            HapticManager.success()
+            await syncServerAfterAction(serverId: serverId, action: action)
         } catch {
-            state = .error(.custom(error.localizedDescription))
+            HapticManager.error()
+            actionErrorMessage = error.localizedDescription
         }
         actionServerId = nil
+    }
+
+    private func syncServerAfterAction(serverId: String, action: CraftyAction) async {
+        let attempts: Int
+        switch action {
+        case .backup, .updateExecutable:
+            attempts = 4
+        case .start, .stop, .restart, .kill:
+            attempts = 6
+        }
+
+        for attempt in 0..<attempts {
+            if attempt > 0 {
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+            }
+
+            guard let client = await servicesStore.craftyClient(instanceId: selectedInstanceId) else { return }
+            guard let stats = try? await client.getServerStats(serverId: serverId) else { continue }
+            updateDashboard(serverId: serverId, stats: stats)
+        }
+    }
+
+    private func updateDashboard(serverId: String, stats: CraftyServerStats) {
+        guard let dashboard else { return }
+        let rows = dashboard.rows.map { row in
+            if row.server.serverID == serverId {
+                return CraftyServerRow(server: row.server, stats: stats)
+            }
+            return row
+        }
+        self.dashboard = CraftyDashboardData(rows: rows)
+    }
+
+    private var actionErrorPresented: Binding<Bool> {
+        Binding(
+            get: { actionErrorMessage != nil },
+            set: { if !$0 { actionErrorMessage = nil } }
+        )
     }
 }
 

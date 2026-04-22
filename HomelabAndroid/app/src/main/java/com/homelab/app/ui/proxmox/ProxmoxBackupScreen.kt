@@ -133,8 +133,7 @@ private fun BackupJobCard(
     isDark: Boolean,
     onRunNow: () -> Unit
 ) {
-    val cardColor = color.copy(alpha = if (isDark) 0.018f else 0.020f)
-        .copy(alpha = if (isDark) 0.85f else 0.95f)
+    val cardColor = color.copy(alpha = if (isDark) 0.07f else 0.08f)
 
     Card(
         modifier = Modifier.fillMaxWidth(),

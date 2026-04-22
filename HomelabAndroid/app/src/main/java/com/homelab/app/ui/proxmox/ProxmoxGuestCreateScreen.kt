@@ -30,8 +30,7 @@ import com.homelab.app.util.ServiceType
 import com.homelab.app.util.UiState
 
 private fun createCardColor(isDarkTheme: Boolean, accent: Color): Color =
-    accent.copy(alpha = if (isDarkTheme) 0.018f else 0.020f)
-        .copy(alpha = if (isDarkTheme) 0.85f else 0.95f)
+    accent.copy(alpha = if (isDarkTheme) 0.07f else 0.08f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

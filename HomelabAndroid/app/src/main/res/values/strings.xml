@@ -111,6 +111,7 @@
     <string name="crafty_command_hint">Use the server console command without a leading slash.</string>
     <string name="crafty_command_send">Send command</string>
     <string name="crafty_command_sent">Command sent</string>
+    <string name="crafty_action_sent">Action sent</string>
     <string name="service_linux_update">Linux Update</string>
     <string name="service_linux_update_desc">Linux Update dashboard</string>
     <string name="service_dockhand">Dockhand</string>

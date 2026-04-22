@@ -23,7 +23,7 @@ data class CraftyLoginData(
 
 @Serializable
 data class CraftyServer(
-    @SerialName("server_id") val serverId: Int,
+    @SerialName("server_id") val serverId: String,
     @SerialName("server_uuid") val serverUuid: String? = null,
     @SerialName("server_name") val serverName: String,
     val type: String? = null,
@@ -49,5 +49,7 @@ data class CraftyServerStats(
 
 @Serializable
 data class CraftyActionResponse(
-    val status: String
+    val status: String = "",
+    val error: String? = null,
+    @SerialName("error_data") val errorData: String? = null
 )

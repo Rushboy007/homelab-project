@@ -3,7 +3,9 @@ package com.homelab.app.util
 import android.content.Context
 import com.homelab.app.R
 import com.homelab.app.data.remote.HtmlResponseException
+import com.homelab.app.data.repository.CraftyApiException
 import com.homelab.app.data.repository.PatchmonApiException
+import com.homelab.app.data.repository.WakapiApiException
 import kotlinx.serialization.SerializationException
 import retrofit2.HttpException
 import java.io.IOException
@@ -45,6 +47,20 @@ object ErrorHandler {
                     PatchmonApiException.Kind.RATE_LIMITED -> context.getString(R.string.patchmon_error_rate_limited)
                     PatchmonApiException.Kind.SERVER_ERROR -> context.getString(R.string.patchmon_error_server)
                     PatchmonApiException.Kind.CONNECTION_ERROR -> context.getString(R.string.patchmon_error_connection)
+                }
+            }
+            is CraftyApiException -> {
+                when (error.kind) {
+                    CraftyApiException.Kind.INVALID_CREDENTIALS -> context.getString(R.string.error_invalid_credentials)
+                    CraftyApiException.Kind.SERVER_ERROR -> context.getString(R.string.error_server)
+                    CraftyApiException.Kind.CONNECTION_ERROR -> context.getString(R.string.error_network)
+                }
+            }
+            is WakapiApiException -> {
+                when (error.kind) {
+                    WakapiApiException.Kind.INVALID_CREDENTIALS -> context.getString(R.string.error_invalid_credentials)
+                    WakapiApiException.Kind.SERVER_ERROR -> context.getString(R.string.error_server)
+                    WakapiApiException.Kind.CONNECTION_ERROR -> context.getString(R.string.error_network)
                 }
             }
             is IllegalStateException -> {

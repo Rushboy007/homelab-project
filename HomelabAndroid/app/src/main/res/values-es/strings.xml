@@ -99,6 +99,7 @@
     <string name="crafty_command_hint">Usa el comando de consola del servidor sin barra inicial.</string>
     <string name="crafty_command_send">Enviar comando</string>
     <string name="crafty_command_sent">Comando enviado</string>
+    <string name="crafty_action_sent">Acción enviada</string>
     <string name="service_adguard_home">AdGuard Home</string>
     <string name="service_healthchecks">Healthchecks</string>
     <string name="service_healthchecks_desc">Monitoreo de cron jobs</string>

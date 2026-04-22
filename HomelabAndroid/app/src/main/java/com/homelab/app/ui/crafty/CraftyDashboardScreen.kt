@@ -216,7 +216,7 @@ fun CraftyDashboardScreen(
 
     if (commandServerId != null) {
         CraftyCommandSheet(
-            serverId = commandServerId ?: -1,
+            serverId = commandServerId.orEmpty(),
             serverName = commandServerName,
             isSending = isSendingCommand,
             errorMessage = commandError,
@@ -231,11 +231,11 @@ private fun CraftyContent(
     data: CraftyDashboardData,
     instances: List<com.homelab.app.domain.model.ServiceInstance>,
     activeInstanceId: String,
-    actionServerId: Int?,
+    actionServerId: String?,
     onInstanceSelected: (com.homelab.app.domain.model.ServiceInstance) -> Unit,
-    onAction: (Int, CraftyServerAction) -> Unit,
-    onOpenLogs: (Int) -> Unit,
-    onOpenCommand: (Int) -> Unit
+    onAction: (String, CraftyServerAction) -> Unit,
+    onOpenLogs: (String) -> Unit,
+    onOpenCommand: (String) -> Unit
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -343,11 +343,13 @@ private fun OverviewMetric(
 private fun CraftyServerCard(
     entry: CraftyServerWithStats,
     isActionRunning: Boolean,
-    onAction: (Int, CraftyServerAction) -> Unit,
+    onAction: (String, CraftyServerAction) -> Unit,
     onOpenLogs: () -> Unit,
     onOpenCommand: () -> Unit
 ) {
     val stats = entry.stats
+    val isTransientState = stats?.waitingStart == true || stats?.updating == true || stats?.downloading == true
+    val actionsEnabled = !isActionRunning && !isTransientState
     val accent = when {
         stats == null -> MaterialTheme.colorScheme.outline
         stats.crashed -> MaterialTheme.colorScheme.error
@@ -389,6 +391,15 @@ private fun CraftyServerCard(
                         disabledLabelColor = accent
                     )
                 )
+
+                if (isActionRunning) {
+                    CircularProgressIndicator(
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .size(18.dp),
+                        strokeWidth = 2.dp
+                    )
+                }
             }
 
             Row(
@@ -443,32 +454,32 @@ private fun CraftyServerCard(
                 CraftyActionButton(
                     label = stringResource(R.string.crafty_action_start),
                     icon = Icons.Default.PlayArrow,
-                    enabled = !isActionRunning && stats?.running != true,
+                    enabled = actionsEnabled && stats?.running != true,
                     primary = true,
                     onClick = { onAction(entry.server.serverId, CraftyServerAction.START) }
                 )
                 CraftyActionButton(
                     label = stringResource(R.string.crafty_action_stop),
                     icon = Icons.Default.Stop,
-                    enabled = !isActionRunning && stats?.running == true,
+                    enabled = actionsEnabled && stats?.running == true,
                     onClick = { onAction(entry.server.serverId, CraftyServerAction.STOP) }
                 )
                 CraftyActionButton(
                     label = stringResource(R.string.crafty_action_restart),
                     icon = Icons.Default.Refresh,
-                    enabled = !isActionRunning && stats?.running == true,
+                    enabled = actionsEnabled && stats?.running == true,
                     onClick = { onAction(entry.server.serverId, CraftyServerAction.RESTART) }
                 )
                 CraftyActionButton(
                     label = stringResource(R.string.crafty_action_update),
                     icon = Icons.Default.SettingsApplications,
-                    enabled = !isActionRunning,
+                    enabled = actionsEnabled,
                     onClick = { onAction(entry.server.serverId, CraftyServerAction.UPDATE) }
                 )
                 CraftyActionButton(
                     label = stringResource(R.string.crafty_action_backup),
                     icon = Icons.Default.TurnedInNot,
-                    enabled = !isActionRunning,
+                    enabled = actionsEnabled,
                     onClick = { onAction(entry.server.serverId, CraftyServerAction.BACKUP) }
                 )
                 CraftyActionButton(
@@ -486,7 +497,7 @@ private fun CraftyServerCard(
                 CraftyActionButton(
                     label = stringResource(R.string.crafty_action_kill),
                     icon = Icons.Default.Warning,
-                    enabled = !isActionRunning && stats?.running == true,
+                    enabled = actionsEnabled && stats?.running == true,
                     destructive = true,
                     onClick = { onAction(entry.server.serverId, CraftyServerAction.KILL) }
                 )
@@ -658,7 +669,7 @@ private fun CraftyLogsSheet(
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun CraftyCommandSheet(
-    serverId: Int,
+    serverId: String,
     serverName: String,
     isSending: Boolean,
     errorMessage: String?,

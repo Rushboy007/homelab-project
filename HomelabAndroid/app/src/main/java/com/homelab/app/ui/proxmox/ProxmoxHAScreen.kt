@@ -38,8 +38,7 @@ import com.homelab.app.ui.proxmox.components.ProxmoxEmptyState
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 
 private fun proxmoxCardColor(isDarkTheme: Boolean, accent: Color): Color =
-    accent.copy(alpha = if (isDarkTheme) 0.018f else 0.020f)
-        .copy(alpha = if (isDarkTheme) 0.85f else 0.95f)
+    accent.copy(alpha = if (isDarkTheme) 0.07f else 0.08f)
 
 private fun stateColor(state: String?): Color {
     return when (state?.lowercase()) {
@@ -114,7 +113,7 @@ fun ProxmoxHAScreen(
         ) {
             Column(modifier = Modifier.fillMaxSize()) {
             // Tab Row
-            TabRow(
+            PrimaryTabRow(
                 selectedTabIndex = selectedTab,
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = serviceColor
@@ -200,8 +199,7 @@ private fun HAResourceCard(
     color: Color,
     isDark: Boolean
 ) {
-    val cardColor = color.copy(alpha = if (isDark) 0.018f else 0.020f)
-        .copy(alpha = if (isDark) 0.85f else 0.95f)
+    val cardColor = color.copy(alpha = if (isDark) 0.07f else 0.08f)
 
     val resourceStateColor = stateColor(resource.state)
 
@@ -255,7 +253,7 @@ private fun HAResourceCard(
         }
 
         if (!resource.comment.isNullOrBlank() || resource.max_relocate != null || resource.max_restart != null) {
-            Divider(Modifier.padding(horizontal = 14.dp), color = Color.Gray.copy(alpha = 0.15f))
+            HorizontalDivider(Modifier.padding(horizontal = 14.dp), color = Color.Gray.copy(alpha = 0.15f))
             Row(
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -332,8 +330,7 @@ private fun HAGroupCard(
     color: Color,
     isDark: Boolean
 ) {
-    val cardColor = color.copy(alpha = if (isDark) 0.018f else 0.020f)
-        .copy(alpha = if (isDark) 0.85f else 0.95f)
+    val cardColor = color.copy(alpha = if (isDark) 0.07f else 0.08f)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -472,8 +469,7 @@ private fun ReplicationJobCard(
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope
 ) {
-    val cardColor = color.copy(alpha = if (isDark) 0.018f else 0.020f)
-        .copy(alpha = if (isDark) 0.85f else 0.95f)
+    val cardColor = color.copy(alpha = if (isDark) 0.07f else 0.08f)
 
     Card(
         modifier = Modifier.fillMaxWidth(),

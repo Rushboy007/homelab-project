@@ -36,8 +36,7 @@ import java.util.Locale
 import kotlinx.coroutines.launch
 
 private fun journalCardColor(isDarkTheme: Boolean, accent: Color): Color =
-    accent.copy(alpha = if (isDarkTheme) 0.018f else 0.020f)
-        .copy(alpha = if (isDarkTheme) 0.85f else 0.95f)
+    accent.copy(alpha = if (isDarkTheme) 0.07f else 0.08f)
 
 private val journalTimeFormat = java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault())
 

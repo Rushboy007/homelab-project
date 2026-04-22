@@ -335,7 +335,7 @@ public enum ServiceType: String, CaseIterable, Identifiable, Codable, Hashable, 
         case .gluetun:            return ServiceColorSet(primary: Color(hex: "#06B6D4"), dark: Color(hex: "#0891B2"), bg: Color(hex: "#06B6D4").opacity(0.09))
         case .flaresolverr:       return ServiceColorSet(primary: Color(hex: "#FF4500"), dark: Color(hex: "#CC3700"), bg: Color(hex: "#FF4500").opacity(0.09))
         case .wakapi:             return ServiceColorSet(primary: Color(hex: "#2563EB"), dark: Color(hex: "#1D4ED8"), bg: Color(hex: "#2563EB").opacity(0.09))
-        case .proxmox:            return ServiceColorSet(primary: Color(hex: "#E57000"), dark: Color(hex: "#C45F00"), bg: Color(hex: "#E57000").opacity(0.09))
+        case .proxmox:            return ServiceColorSet(primary: Color(hex: "#D97706"), dark: Color(hex: "#B45309"), bg: Color(hex: "#D97706").opacity(0.06))
         }
     }
 }

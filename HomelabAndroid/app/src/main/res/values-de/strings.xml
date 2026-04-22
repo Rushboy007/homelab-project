@@ -99,6 +99,7 @@
     <string name="crafty_command_hint">Verwenden Sie den Server-Konsolenbefehl ohne führenden Schrägstrich.</string>
     <string name="crafty_command_send">Befehl senden</string>
     <string name="crafty_command_sent">Befehl gesendet</string>
+    <string name="crafty_action_sent">Aktion gesendet</string>
     <string name="service_adguard_home">AdGuard Home</string>
     <string name="service_healthchecks">Healthchecks</string>
     <string name="service_healthchecks_desc">Überwachung von Cron-Jobs</string>

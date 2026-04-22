@@ -106,6 +106,7 @@
     <string name="crafty_command_hint">Usa il comando console del server senza slash iniziale.</string>
     <string name="crafty_command_send">Invia comando</string>
     <string name="crafty_command_sent">Comando inviato</string>
+    <string name="crafty_action_sent">Azione inviata</string>
     <string name="service_linux_update">Linux Update</string>
     <string name="service_linux_update_desc">Dashboard Linux Update</string>
     <string name="service_adguard_home">AdGuard Home</string>

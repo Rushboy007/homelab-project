@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.CallSplit
+import androidx.compose.material.icons.automirrored.filled.Comment
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -34,8 +36,7 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import kotlinx.coroutines.launch
 
 private fun proxmoxCardColor(isDarkTheme: Boolean, accent: Color): Color =
-    accent.copy(alpha = if (isDarkTheme) 0.018f else 0.020f)
-        .copy(alpha = if (isDarkTheme) 0.85f else 0.95f)
+    accent.copy(alpha = if (isDarkTheme) 0.07f else 0.08f)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -149,7 +150,7 @@ private fun NetworkInterfaceCard(
         "bridge" -> Triple(Icons.Default.DeviceHub, "Bridge", Color(0xFF00BCD4))
         "bond" -> Triple(Icons.Default.Link, "Bond", Color(0xFFFF9800))
         "eth" -> Triple(Icons.Default.Lan, "Ethernet", Color(0xFF4CAF50))
-        "alias" -> Triple(Icons.Default.CallSplit, "Alias", Color(0xFF9C27B0))
+        "alias" -> Triple(Icons.AutoMirrored.Filled.CallSplit, "Alias", Color(0xFF9C27B0))
         else -> Triple(Icons.Default.Router, iface.type ?: "Unknown", Color.Gray)
     }
 
@@ -216,10 +217,10 @@ private fun NetworkInterfaceCard(
             // Comments
             if (!iface.comments.isNullOrBlank()) {
                 Spacer(Modifier.height(6.dp))
-                Divider(color = Color.Gray.copy(alpha = 0.15f), modifier = Modifier.padding(vertical = 4.dp))
+                HorizontalDivider(color = Color.Gray.copy(alpha = 0.15f), modifier = Modifier.padding(vertical = 4.dp))
                 Row(verticalAlignment = Alignment.Top) {
                     Icon(
-                        Icons.Default.Comment,
+                        Icons.AutoMirrored.Filled.Comment,
                         contentDescription = null,
                         tint = Color.Gray,
                         modifier = Modifier.size(14.dp).align(Alignment.CenterVertically)

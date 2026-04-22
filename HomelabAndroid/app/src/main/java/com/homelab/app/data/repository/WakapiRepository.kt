@@ -11,6 +11,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerializationException
 import okhttp3.Request
 import retrofit2.HttpException
 
@@ -188,6 +189,7 @@ class WakapiRepository @Inject constructor(
                     WakapiApiException(WakapiApiException.Kind.SERVER_ERROR, error)
                 }
             }
+            is SerializationException -> WakapiApiException(WakapiApiException.Kind.SERVER_ERROR, error)
             is IOException -> WakapiApiException(WakapiApiException.Kind.CONNECTION_ERROR, error)
             is WakapiApiException -> error
             else -> WakapiApiException(WakapiApiException.Kind.SERVER_ERROR, error)

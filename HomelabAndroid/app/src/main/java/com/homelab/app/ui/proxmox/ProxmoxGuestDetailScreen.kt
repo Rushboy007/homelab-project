@@ -39,8 +39,7 @@ import com.homelab.app.ui.common.ErrorScreen
 import kotlinx.coroutines.launch
 
 private fun proxmoxCardColor(isDarkTheme: Boolean, accent: Color): Color =
-    accent.copy(alpha = if (isDarkTheme) 0.018f else 0.020f)
-        .copy(alpha = if (isDarkTheme) 0.85f else 0.95f)
+    accent.copy(alpha = if (isDarkTheme) 0.07f else 0.08f)
 
 private enum class GuestTab(val label: String, val icon: androidx.compose.ui.graphics.vector.ImageVector) {
     OVERVIEW("Overview", Icons.Default.Info),

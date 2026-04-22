@@ -17,6 +17,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -44,17 +45,17 @@ class CraftyViewModel @Inject constructor(
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
-    private val _actionServerId = MutableStateFlow<Int?>(null)
-    val actionServerId: StateFlow<Int?> = _actionServerId.asStateFlow()
+    private val _actionServerId = MutableStateFlow<String?>(null)
+    val actionServerId: StateFlow<String?> = _actionServerId.asStateFlow()
 
-    private val _logsServerId = MutableStateFlow<Int?>(null)
-    val logsServerId: StateFlow<Int?> = _logsServerId.asStateFlow()
+    private val _logsServerId = MutableStateFlow<String?>(null)
+    val logsServerId: StateFlow<String?> = _logsServerId.asStateFlow()
 
     private val _logsState = MutableStateFlow<UiState<List<String>>>(UiState.Idle)
     val logsState: StateFlow<UiState<List<String>>> = _logsState.asStateFlow()
 
-    private val _commandServerId = MutableStateFlow<Int?>(null)
-    val commandServerId: StateFlow<Int?> = _commandServerId.asStateFlow()
+    private val _commandServerId = MutableStateFlow<String?>(null)
+    val commandServerId: StateFlow<String?> = _commandServerId.asStateFlow()
 
     private val _commandError = MutableStateFlow<String?>(null)
     val commandError: StateFlow<String?> = _commandError.asStateFlow()
@@ -102,12 +103,13 @@ class CraftyViewModel @Inject constructor(
         }
     }
 
-    fun performAction(serverId: Int, action: CraftyServerAction) {
+    fun performAction(serverId: String, action: CraftyServerAction) {
         viewModelScope.launch {
             _actionServerId.value = serverId
             try {
                 craftyRepository.sendAction(instanceId, serverId, action)
-                refresh(forceLoading = false)
+                _messages.emit(context.getString(com.homelab.app.R.string.crafty_action_sent))
+                syncServerAfterAction(serverId, action)
             } catch (error: Exception) {
                 _messages.emit(ErrorHandler.getMessage(context, error))
             } finally {
@@ -116,7 +118,7 @@ class CraftyViewModel @Inject constructor(
         }
     }
 
-    fun openLogs(serverId: Int) {
+    fun openLogs(serverId: String) {
         _logsServerId.value = serverId
         loadLogs(forceLoading = true)
     }
@@ -147,7 +149,7 @@ class CraftyViewModel @Inject constructor(
         }
     }
 
-    fun openCommand(serverId: Int) {
+    fun openCommand(serverId: String) {
         _commandServerId.value = serverId
         _commandError.value = null
     }
@@ -181,6 +183,27 @@ class CraftyViewModel @Inject constructor(
     fun setPreferredInstance(newInstanceId: String) {
         viewModelScope.launch {
             servicesRepository.setPreferredInstance(ServiceType.CRAFTY_CONTROLLER, newInstanceId)
+        }
+    }
+
+    private suspend fun syncServerAfterAction(serverId: String, action: CraftyServerAction) {
+        val attempts = when (action) {
+            CraftyServerAction.BACKUP, CraftyServerAction.UPDATE -> 4
+            CraftyServerAction.START, CraftyServerAction.STOP, CraftyServerAction.RESTART, CraftyServerAction.KILL -> 6
+        }
+
+        repeat(attempts) { attempt ->
+            if (attempt > 0) delay(1_000)
+
+            val latestStats = runCatching {
+                craftyRepository.getServerStats(instanceId, serverId)
+            }.getOrNull() ?: return@repeat
+
+            val currentData = (_uiState.value as? UiState.Success)?.data ?: return@repeat
+            val updatedServers = currentData.servers.map { entry ->
+                if (entry.server.serverId == serverId) entry.copy(stats = latestStats) else entry
+            }
+            _uiState.value = UiState.Success(currentData.copy(servers = updatedServers))
         }
     }
 }

@@ -1,5 +1,6 @@
 # macOS
 .DS_Store
+Icon?
 Thumbs.db
 *.pem
 *.orig
