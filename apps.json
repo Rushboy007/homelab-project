@@ -27,6 +27,15 @@
       ],
       "versions": [
         {
+          "version": "1.2.1",
+          "buildVersion": "28",
+          "date": "2026-04-22",
+          "localizedDescription": "- Fixed Crafty Controller integration issues\\n- Fixed Proxmox dashboard and navigation issues\\n- Improved error handling and stability across affected services",
+          "downloadURL": "https://github.com/JohnnWi/homelab-project/releases/download/v1.2.1/Homelab.ipa",
+          "size": 29734469,
+          "minOSVersion": "26.0"
+        },
+        {
           "version": "1.2.0",
           "buildVersion": "27",
           "date": "2026-04-17",
@@ -234,6 +243,16 @@
     }
   ],
   "news": [
+    {
+      "title": "v1.2.1 — - Fixed Crafty Controller integration issues\\n- Fixed Proxmox dashboard and navigation issues\\n- Improved error handling and stability across affected services",
+      "identifier": "release-1.2.1",
+      "caption": "- Fixed Crafty Controller integration issues\\n- Fixed Proxmox dashboard and navigation issues\\n- Improved error handling and stability across affected services",
+      "date": "2026-04-22",
+      "tintColor": "#4A90D9",
+      "notify": true,
+      "url": "https://github.com/JohnnWi/homelab-project/releases/tag/v1.2.1",
+      "appID": "homelab.foreverhomelab"
+    },
     {
       "title": "v1.2.0 — - Added Proxmox support across iOS and Android\\n- Fixed more than 50 bugs across the app\\n- Improved reliability, compatibility, and service integrations",
       "identifier": "release-1.2.0",

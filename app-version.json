@@ -1,6 +1,6 @@
 {
-  "latest": "1.2.0",
-  "ios_url": "https://github.com/JohnnWi/homelab-project/releases/download/v1.2.0/Homelab.ipa",
-  "android_url": "https://github.com/JohnnWi/homelab-project/releases/download/v1.2.0/Homelab.apk",
-  "changelog": "- Added Proxmox support across iOS and Android\\n- Fixed more than 50 bugs across the app\\n- Improved reliability, compatibility, and service integrations"
+  "latest": "1.2.1",
+  "ios_url": "https://github.com/JohnnWi/homelab-project/releases/download/v1.2.1/Homelab.ipa",
+  "android_url": "https://github.com/JohnnWi/homelab-project/releases/download/v1.2.1/Homelab.apk",
+  "changelog": "- Fixed Crafty Controller integration issues\\n- Fixed Proxmox dashboard and navigation issues\\n- Improved error handling and stability across affected services"
 }
