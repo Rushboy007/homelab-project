@@ -32,7 +32,7 @@ Homelab Dashboard is a fully native mobile app for monitoring and managing a sel
 - <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/portainer.png" width="18" style="vertical-align:middle"> **Portainer**: container overview, quick actions, resource usage.
 - <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/proxmox.png" width="18" style="vertical-align:middle"> **Proxmox VE**: nodes, guests, storage, networking, backups, and cluster operations.
 - <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/dockhand.png" width="18" style="vertical-align:middle"> **Dockhand**: native container management dashboard.
-- **DockMon**: Docker host and container monitoring with logs, restart, and update actions.
+- <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/dockmon.png" width="18" style="vertical-align:middle"> **DockMon**: Docker host and container monitoring with logs, restart, and update actions.
 - <img src="HomelabSwift/Homelab/Assets.xcassets/service-komodo.imageset/komodo.png" width="18" style="vertical-align:middle"> **Komodo**: resource, deployment, stack, and server monitoring.
 - <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/beszel.png" width="18" style="vertical-align:middle"> **Beszel**: server monitoring across nodes.
 - <img src="https://cdn.jsdelivr.net/gh/selfhst/icons/png/linux-update-dashboard.png" width="18" style="vertical-align:middle"> **Linux Update**: pending package updates across hosts.
